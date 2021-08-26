@@ -3,6 +3,15 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <fmt/format.h>
+#include <boost/asio.hpp>
+#include <boost/asio/system_timer.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
+#include "datetime.hpp"
+#include "repeated_task.hpp"
+#include "file_task_log.hpp"
 
 namespace hhctrl::core::scheduler
 {
@@ -12,94 +21,43 @@ struct overload : Ts...
   using Ts::operator()...;
 };
 
-using Timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
-using TaskHandler_t = std::function<void()>;
-
-class Task
-{
-public:
-  virtual ~Task() = default;
-  virtual void activate() = 0;
-  virtual void execute() = 0;
-  virtual void serialize() = 0;
-};
-
-class RepeatedTask : public Task
-{
-public:
-  template<class T, class... TArgs>
-  RepeatedTask(
-    Timepoint_t from,
-    Timepoint_t to,
-    std::chrono::hh_mm_ss<T> triggers_at,
-    TArgs&&... args
-  )
-    : handler_{std::forward<TArgs...>(args...)}
-  {}
-
-  void activate() override
-  {
-
-  }
-
-  void execute() override
-  {
-  }
-
-  void serialize() override
-  {
-  }
-
-private:
-  TaskHandler_t handler_;
-};
-
-struct RepeatedTaskRestore {};
-struct OneShotTaskRestore{};
-
-struct Restore
-{
-  virtual ~Restore() = default;
-  virtual void restore(const RepeatedTaskRestore&) = 0;
-  virtual void restore(const OneShotTaskRestore&) = 0;
-};
-
-template<class T>
-struct GenericRestore : Restore
-{
-  template<class... TArgs>
-  GenericRestore(TArgs&&... args)
-    : handler{std::forward<TArgs...>(args...)}
-  {}
-
-  void restore(const RepeatedTaskRestore& arg) override
-  {
-    handler(arg);
-  }
-  void restore(const OneShotTaskRestore& arg) override
-  {
-    handler(arg);
-  }
-
-  T handler;
-};
-
 class Scheduler
 {
-private:
-  using Restore_t = std::pair<std::string, std::unique_ptr<Restore>>;
 public:
-  Scheduler();
+  explicit Scheduler(boost::asio::io_context& io);
   void add_task(std::string id, std::unique_ptr<Task> action);
 
-  template<class... T>
-  auto use_restore(std::string id, T&&...)
+  template<class THandler>
+  void repeat_at(std::string name, const std::string& expiry, THandler&& handler)
   {
-    using RestoreHandler_t = overload<T...>;
+    auto id = id_gen_();
 
-    add_restore(std::pair(std::move(id), std::make_unique<GenericRestore<RestoreHandler_t>>(RestoreHandler_t{})));
+    add_task(std::make_unique<scheduler::RepeatedTask>(
+      io_,
+      id,
+      std::move(name),
+      utils::datetime::parse_time(expiry),
+      [this, id = std::move(id), handle = std::forward<THandler>(handler)]()
+      {
+        handle();
+        task_completed(id);
+      }
+    ));
   }
 private:
-  void add_restore(Restore_t restore);
+  void add_task(std::unique_ptr<Task>);
+  void task_completed(const boost::uuids::uuid&);
+  void schedule(std::unique_ptr<Task>);
+  void add_to_log_if_not_exist(const Task&);
+  bool is_task_active(const Task&);
+  bool was_task_executed(const Task&);
+
+
+private:
+  boost::asio::io_context& io_;
+  FileTaskLog task_log_;
+  boost::uuids::random_generator_mt19937 id_gen_;
+  std::vector<std::unique_ptr<Task>> active_tasks_;
+
 };
 }

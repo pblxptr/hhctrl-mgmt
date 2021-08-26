@@ -5,38 +5,38 @@
 #include "sysfs_hatch.hpp"
 #include "sheduler.hpp"
 #include "datetime.hpp"
+#include <spdlog/spdlog.h>
+#include "date/date.h"
+#include "date/tz.h"
 
 namespace fs = std::filesystem;
 
-template<class... Ts>
-struct overload : Ts...
-{
-  using Ts::operator()...;
-};
-
 int main()
 {
-  namespace scheduler = hhctrl::core::scheduler;
+  using namespace date;
+  using namespace std::chrono;
 
-  auto hatch = hhctrl::hw::SysfsHatch{"~/sysfs/class/hatch2sr"};
-  auto sheduler = scheduler::Scheduler{};
+  auto t = make_zoned(current_zone(), floor<seconds>(system_clock::now()));
 
-  sheduler.add_task("hatch2-isr-open", std::make_unique<scheduler::RepeatedTask>(
-    utils::datetime::parse_date("25-03-2021"),
-    utils::datetime::parse_date("25-06-2021"),
-    utils::datetime::get_time(utils::datetime::parse_time("06:10:35")),
-    [&hatch]() { hatch.open(); })
-  );
+  // namespace scheduler = hhctrl::core::scheduler;
 
-  sheduler.add_task("hatch2-isr-close", std::make_unique<scheduler::RepeatedTask>(
-    utils::datetime::parse_date("25-03-2021"),
-    utils::datetime::parse_date("25-06-2021"),
-    utils::datetime::get_time(utils::datetime::parse_time("22:00:35")),
-    [&hatch]() { hatch.close(); })
-  );
+  // auto io = boost::asio::io_context{};
+  // boost::asio::io_context::work work{io};
 
-  // sheduler.use_restore("hatch2-isr", []()
-  // {
+  // spdlog::set_level(spdlog::level::debug);
 
-  // });
+  // using namespace std::chrono;
+
+
+  // auto sheduler = scheduler::Scheduler{io};
+
+  // sheduler.repeat_at("hatch2-isr-open", "13:57:15",
+  //   []() { fmt::print("Hatch open\n");}
+  // );
+
+  // sheduler.repeat_at("hatch2-isr-close", "13:58:15",
+  //   []() { fmt::print("Hatch close\n");}
+  // );
+
+  // io.run();
 }
