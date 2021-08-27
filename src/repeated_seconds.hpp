@@ -8,20 +8,20 @@
 
 namespace hhctrl::core::scheduler
 {
-class RepeatedTask : public Task
+template<class TInterval>
+class RepeatedInterval : public Task
 {
 public:
   template<class THandler>
-  RepeatedTask(
+  RepeatedInterval(
     boost::asio::io_context& io,
     std::string name,
-    Timepoint_t expiry,
-    std::chrono::days interval,
+    TInterval interval,
     THandler&& handler
   )
     : name_{std::move(name)}
-    , timer_{io, std::move(expiry)}
-    , repeat_interval_(std::move(interval))
+    , timer_{io, repeat_interval}
+    , repeat_interval(std::move(interval))
     , handler_{std::forward<THandler>(handler)}
   {}
 
@@ -33,7 +33,7 @@ public:
   void set_expiry(const Timepoint_t& expiry) override
   {
     timer_.expires_at(expiry);
-  }
+    }
 
   void install() override
   {
@@ -49,7 +49,7 @@ public:
 
   void reconfigure() override
   {
-    timer_.expires_at(timer_.expiry() + repeat_interval_);
+    timer_.expires_at(timer_.expiry() + repeat_interval);
   }
 
   bool is_reinstallable() const override
@@ -70,7 +70,7 @@ public:
 private:
   Id_t id_;
   std::string name_;
-  std::chrono::days repeat_interval_;
+  TInterval repeat_interval;
   TaskHandler_t handler_;
   boost::asio::system_timer timer_;
 };

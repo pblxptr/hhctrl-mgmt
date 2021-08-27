@@ -101,7 +101,7 @@ void FileTaskLog::load()
 
   while (std::getline(file, line)) {
     auto entry = deserialize(line);
-    spdlog::debug(fmt::format(" - name:{} tp:{}", entry.name(), utils::datetime::to_string_utc(entry.timepoint())));
+    spdlog::debug(fmt::format(" - name:{} tp:{}", entry.name(), utils::datetime::to_string(entry.timepoint())));
 
     entries.push_back(std::move(entry));
   }

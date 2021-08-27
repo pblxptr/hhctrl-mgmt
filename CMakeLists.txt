@@ -21,8 +21,9 @@ ExternalProject_Add(curl
   GIT_TAG           master
   SOURCE_DIR        ${CMAKE_SOURCE_DIR}/lib/curl
   BUILD_IN_SOURCE   true
-  CONFIGURE_COMMAND autoreconf -fi ${CURL_PATH}/configure.ac && ./configure --disable-shared --enable-static --without-ssl --without-brotli
-  BUILD_COMMAND     "make"
+  UPDATE_COMMAND ""
+  CONFIGURE_COMMAND autoreconf -fi ${CURL_PATH}/configure.ac && ./configure --disable-shared --enable-static --without-ssl --without-brotli --without-zlib
+  BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
 )

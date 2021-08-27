@@ -42,10 +42,10 @@ void Scheduler::add_task(std::unique_ptr<Task> task)
   schedule(std::move(task));
 }
 
-void Scheduler::task_completed(const boost::uuids::uuid& id)
+void Scheduler::task_completed(const std::string& name)
 {
   const auto task = std::find_if(active_tasks_.begin(), active_tasks_.end(),
-    [&id](const auto& t) { return t->id() == id;}
+    [&name](const auto& t) { return t->name() == name;}
   );
 
   if ((*task)->is_reinstallable()) {

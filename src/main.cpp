@@ -3,11 +3,11 @@
 #include <fstream>
 #include <filesystem>
 #include "sysfs_hatch.hpp"
-#include "sheduler.hpp"
 #include "datetime.hpp"
 #include <spdlog/spdlog.h>
 #include "date/date.h"
 #include "date/tz.h"
+#include "scheduler2.hpp"
 
 namespace fs = std::filesystem;
 
@@ -16,21 +16,31 @@ int main()
   using namespace date;
   using namespace std::chrono;
 
-  auto t = make_zoned(current_zone(), floor<seconds>(system_clock::now()));
+  // auto t = make_zoned(current_zone(), floor<seconds>(system_clock::now()));
 
-  // namespace scheduler = hhctrl::core::scheduler;
+  auto io = boost::asio::io_context{};
+  boost::asio::io_context::work work{io};
 
-  // auto io = boost::asio::io_context{};
-  // boost::asio::io_context::work work{io};
+  spdlog::set_level(spdlog::level::debug);
 
-  // spdlog::set_level(spdlog::level::debug);
+  auto scheduler = hhctrl::core::scheduler2::Scheduler{io};
+  scheduler.every(std::chrono::seconds(30), []() { spdlog::info("TaskHandler: every 30 seconds task");});
+  scheduler.every(std::chrono::minutes(1), []() { spdlog::info("TaskHandler: every 1 minute task");});
+  scheduler.every(std::chrono::days(1), []() { spdlog::info("TaskHandler: every 1 days task");});
 
-  // using namespace std::chrono;
 
+
+
+  io.run();
 
   // auto sheduler = scheduler::Scheduler{io};
 
-  // sheduler.repeat_at("hatch2-isr-open", "13:57:15",
+  // sheduler.every("hatch2-isr-open", scheduler::days(1), scheduler::at_time("13:57:15"),
+  //   []() { fmt::print("Hatch open\n");}
+  // );
+
+
+  // sheduler.every("hatch2-isr-open-every-seconds", scheduler::seconds(10),
   //   []() { fmt::print("Hatch open\n");}
   // );
 
@@ -39,4 +49,6 @@ int main()
   // );
 
   // io.run();
+
+  return 0;
 }

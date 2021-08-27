@@ -4,78 +4,43 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <fmt/format.h>
-
-
+#include "date/date.h"
+#include "date/tz.h"
+namespace {
+  using namespace std::literals;
+}
 namespace utils::datetime {
-  template<class TSource>
-  auto parse(TSource&& src, std::string_view fmt)
-  {
-    auto timet = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto timetm = *std::gmtime(&timet);
-    timetm.tm_isdst = -1;
-    auto ss = std::istringstream {std::forward<TSource>(src)};
-    ss >> std::get_time(&timetm, fmt.data());
+constexpr auto DATE_FMT = "%Y-%m-%d"sv;
+constexpr auto TIME_FMT = "%H:%M:%S"sv;
+constexpr auto DATETIME_FMT = "%Y-%m-%d %H:%M:%S"sv;
 
-    return std::chrono::system_clock::from_time_t(std::mktime(&timetm));
-  }
+template<class T, class TTimepoint>
+auto parse_time(T&& time, TTimepoint&& base_timepoint = std::chrono::system_clock::now())
+{
+  using namespace date;
+  using namespace std::literals;
 
-  template<class TSource>
-  auto parse_time(TSource&& src)
-  {
-    return parse(std::forward<TSource>(src), "%H:%M:%S");
-  }
+  auto datetime = fmt::format("{} {}", date::format(DATE_FMT.data(), std::forward<TTimepoint>(base_timepoint)), std::forward<T>(time));
+  auto utc_tp = std::chrono::system_clock::time_point{};
 
-  template<class TSource>
-  auto parse_datetime(TSource&& src)
-  {
-    return parse(std::forward<TSource>(src), "%d-%m-%Y %H:%M:%S");
-  }
+  auto in = std::istringstream{datetime};
+  in >> date::parse(DATETIME_FMT.data(), utc_tp);
 
-  template<class TSource>
-  auto from_timestamp(TSource&& since_epoch)
-  {
-    auto epoch = std::chrono::time_point<std::chrono::high_resolution_clock>();
-    return epoch + since_epoch;
-  }
+  return utc_tp;
+}
 
-  template<class TTimepoint>
-  auto get_date(TTimepoint&& tp)
-  {
-    return std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::forward<TTimepoint>(tp))};
-  }
+template<class TSource>
+auto from_timestamp(TSource&& since_epoch)
+{
+  auto epoch = std::chrono::time_point<std::chrono::high_resolution_clock>();
+  return epoch + since_epoch;
+}
 
-  template<class TTimepoint>
-  auto get_time(TTimepoint&& tp)
-  {
-    const std::time_t tm = std::chrono::system_clock::to_time_t(tp);
-
-    const auto dp = std::chrono::floor<std::chrono::days>(std::forward<TTimepoint>(tp));
-    return std::chrono::hh_mm_ss{tp - dp};
-  }
-
-  template<class TTimepoint>
-  auto to_string_utc(const TTimepoint& tp)
-  {
-    const auto date = utils::datetime::get_date(tp);
-    const auto time = utils::datetime::get_time(tp);
-
-    auto serialize = [](const auto x)
-    {
-      if (x < 10) {
-        return fmt::format("0{}", x);
-      } else {
-        return fmt::format("{}", x);
-      }
-    };
-
-    return fmt::format("{}-{}-{} {}:{}:{}",
-      serialize(static_cast<unsigned>(date.day())),
-      serialize(static_cast<unsigned>(date.month())),
-      serialize(static_cast<int>(date.year())),
-      serialize(time.hours().count()),
-      serialize(time.minutes().count()),
-      serialize(time.seconds().count())
-    );
-  }
+template<class TTimepoint>
+auto to_string(const TTimepoint& tp)
+{
+  return date::format(DATETIME_FMT.data(), tp);
+}
 }

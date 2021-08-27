@@ -16,7 +16,6 @@ class Task
 {
 public:
   virtual ~Task() = default;
-  virtual const Id_t& id() const = 0; //Todo: Consider creating base class instead of interface
   virtual const std::string& name() const = 0;
   virtual void install() = 0;
   virtual void set_expiry(const Timepoint_t&) = 0;

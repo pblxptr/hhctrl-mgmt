@@ -3,10 +3,15 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SOURCES
+  # main.cpp
+  # sysfs_hatch.cpp
+  # scheduler.cpp
+  # file_task_log.cpp
+  # tz.cpp
   main.cpp
-  sysfs_hatch.cpp
-  scheduler.cpp
-  file_task_log.cpp
+  # sysfs_hatch.cpp
+  scheduler2.cpp
+  # file_task_log.cpp
   tz.cpp
 )
 find_package(fmt)

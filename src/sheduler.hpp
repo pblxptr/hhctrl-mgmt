@@ -11,15 +11,14 @@
 
 #include "datetime.hpp"
 #include "repeated_task.hpp"
+#include "repeated_seconds.hpp"
 #include "file_task_log.hpp"
 
 namespace hhctrl::core::scheduler
 {
-template<class... Ts>
-struct overload : Ts...
-{
-  using Ts::operator()...;
-};
+  using seconds = std::chrono::seconds;
+  using days = std::chrono::days;
+  using at_time = std::string;
 
 class Scheduler
 {
@@ -27,26 +26,51 @@ public:
   explicit Scheduler(boost::asio::io_context& io);
   void add_task(std::string id, std::unique_ptr<Task> action);
 
-  template<class THandler>
-  void repeat_at(std::string name, const std::string& expiry, THandler&& handler)
+  template<class... TArgs>
+  void every(TArgs&&... args)
   {
-    auto id = id_gen_();
+    do_every(std::forward<TArgs>(args)...);
+  }
 
+  template<class TInverval, class THandler>
+  void do_every(const TInverval& interval, THandler&& handler)
+  {
+
+  }
+
+  template<class THandler>
+  void do_every(std::string name, days interval, at_time expiry, THandler&& handler)
+  {
     add_task(std::make_unique<scheduler::RepeatedTask>(
       io_,
-      id,
-      std::move(name),
-      utils::datetime::parse_time(expiry),
-      [this, id = std::move(id), handle = std::forward<THandler>(handler)]()
+      name,
+      utils::datetime::parse_time(std::move(expiry)),
+      std::move(interval),
+      [this, name = name, handle = std::forward<THandler>(handler)]()
       {
         handle();
-        task_completed(id);
+        task_completed(name);
       }
     ));
   }
+  template<class TInverval, class THandler>
+  void every(std::string name, const TInverval& interval, THandler&& handler)
+  {
+    add_task(std::make_unique<scheduler::RepeatedInterval<TInverval>>(
+      io_,
+      name,
+      interval,
+      [this, name = name, handle = std::forward<THandler>(handler)]()
+      {
+        handle();
+        task_completed(name);
+      }
+    ));
+  }
+
 private:
   void add_task(std::unique_ptr<Task>);
-  void task_completed(const boost::uuids::uuid&);
+  void task_completed(const std::string&);
   void schedule(std::unique_ptr<Task>);
   void add_to_log_if_not_exist(const Task&);
   bool is_task_active(const Task&);
