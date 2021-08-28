@@ -26,12 +26,6 @@ void tag_invoke(json::value_from_tag, json::value& jv, const TaskEntity& task)
 }
 
 //Deserialize
-template<class T>
-void extract(const json::object& obj, T& t, json::string_view key)
-{
-  t = value_to<T>(obj.at(key));
-}
-
 TaskEntity tag_invoke(json::value_to_tag<TaskEntity>, const json::value& jv)
 {
   auto string_gen = boost::uuids::string_generator{};

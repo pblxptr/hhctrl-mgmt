@@ -10,7 +10,6 @@ namespace hhctrl::hw {
     Faulty,
     Undefined
   };
-  
   class HatchDriver
   {
   public:

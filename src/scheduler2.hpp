@@ -6,7 +6,8 @@
 #include <boost/uuid/detail/sha1.hpp>
 #include <boost/uuid/name_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-namespace hhctrl::core::scheduler2
+#include "task_store.hpp"
+namespace hhctrl::core::scheduler
 {
 
 inline std::string duration_to_str(const std::chrono::days& days)
@@ -108,11 +109,10 @@ private:
   THandler handler_;
 };
 
-
 class Scheduler
 {
 public:
-  explicit Scheduler(boost::asio::io_context& io);
+  explicit Scheduler(boost::asio::io_context&, std::unique_ptr<TaskStore>);
 
   template<class TDuration, class THandler>
   void every(TDuration&& duration, THandler&& handler)
@@ -129,6 +129,7 @@ private:
   void add_task(std::unique_ptr<Task>);
 private:
   boost::asio::io_context& io_;
+  std::unique_ptr<TaskStore> tasks_store_;
   std::vector<std::unique_ptr<Task>> active_tasks_;
 };
 }

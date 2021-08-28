@@ -12,14 +12,10 @@
 #include "datetime.hpp"
 #include "repeated_task.hpp"
 #include "repeated_seconds.hpp"
-#include "file_task_log.hpp"
+#include "task_store.hpp"
 
 namespace hhctrl::core::scheduler
 {
-  using seconds = std::chrono::seconds;
-  using days = std::chrono::days;
-  using at_time = std::string;
-
 class Scheduler
 {
 public:
