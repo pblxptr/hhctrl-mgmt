@@ -35,11 +35,11 @@ namespace {
   }
 
   template<class TDuration>
-  auto generate_id(const std::string& module_name, const TDuration& duration)
+  auto generate_id(const std::string& str, const TDuration& duration)
   {
     auto gen = boost::uuids::name_generator_sha1{boost::uuids::ns::oid()};
     auto ss = std::stringstream{};
-    ss << module_name << duration_to_str(duration);
+    ss << str << duration_to_str(duration);
 
     return gen(ss.str());
   }
