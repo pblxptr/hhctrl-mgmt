@@ -18,9 +18,10 @@ namespace hhctrl::core::scheduler
 //Serialize
 void tag_invoke(json::value_from_tag, json::value& jv, const TaskEntity& task)
 {
+  using std::to_string;
   jv = {
-    { "id", task.id },
-    { "module_name", task.module_name },
+    { "id", to_string(task.id) },
+    { "owner", task.owner },
     { "timestamp", task.timestamp }
   };
 }
@@ -32,8 +33,8 @@ TaskEntity tag_invoke(json::value_to_tag<TaskEntity>, const json::value& jv)
   const json::object& obj = jv.as_object();
   return TaskEntity {
       string_gen(json::value_to<std::string>( obj.at("id"))),
-      json::value_to<std::string>(obj.at("module_name" )),
-      json::value_to<std::uint64_t>(obj.at( "timestamp"))
+      json::value_to<std::string>(obj.at("owner" )),
+      json::value_to<std::int64_t>(obj.at( "timestamp"))
   };
 }
 
@@ -60,6 +61,8 @@ void FileTaskStore::add(TaskEntity entity)
   }
 
   cached_tasks_.push_back(std::move(entity));
+  store();
+  load();
 }
 
 void FileTaskStore::remove(const TaskEntity::Id_t& id)
@@ -73,6 +76,8 @@ void FileTaskStore::remove(const TaskEntity::Id_t& id)
   }
 
   cached_tasks_.erase(e);
+  store();
+  load();
 }
 
 std::optional<TaskEntity> FileTaskStore::find(const TaskEntity::Id_t& id) const //TODO: Consider returning different type

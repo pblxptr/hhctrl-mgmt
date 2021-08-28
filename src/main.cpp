@@ -38,7 +38,6 @@ int main()
   auto scheduler = hhctrl::core::scheduler::Scheduler{io,
     std::make_unique<hhctrl::core::scheduler::FileTaskStore>("./tasks.json")
   };
-
   scheduler.every(std::chrono::seconds(30), []() { spdlog::info("TaskHandler: every 30 seconds task");});
   scheduler.every(std::chrono::minutes(1), []() { spdlog::info("TaskHandler: every 1 minute task");});
   scheduler.every(std::chrono::days(1), []() { spdlog::info("TaskHandler: every 1 days task");});

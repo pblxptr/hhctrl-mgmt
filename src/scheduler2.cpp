@@ -12,7 +12,11 @@ namespace hhctrl::core::scheduler
   void Scheduler::add_task(std::unique_ptr<Task> task)
   {
     task->install();
-
+    tasks_store_->add(TaskEntity{
+      task->id(),
+      "asd",
+      task->expiry().time_since_epoch().count()
+    });
     active_tasks_.push_back(std::move(task));
   }
 }

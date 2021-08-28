@@ -11,8 +11,8 @@ namespace hhctrl::core::scheduler
     using Id_t = boost::uuids::uuid;
 
     Id_t id;
-    std::string module_name;
-    uint64_t timestamp;
+    std::string owner;
+    std::int64_t timestamp;
   };
 
   class TaskStore

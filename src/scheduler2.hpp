@@ -7,52 +7,55 @@
 #include <boost/uuid/name_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include "task_store.hpp"
+
+namespace {
+  inline std::string duration_to_str(const std::chrono::days& days)
+  {
+    return fmt::format("days_{}", days.count());
+  }
+
+  inline std::string duration_to_str(const std::chrono::hours& hours)
+  {
+    return fmt::format("hours_{}", hours.count());
+  }
+
+  inline std::string duration_to_str(const std::chrono::minutes& minutes)
+  {
+    return fmt::format("minutes_{}", minutes.count());
+  }
+
+  inline std::string duration_to_str(const std::chrono::seconds& seconds)
+  {
+    return fmt::format("seconds_{}", seconds.count());
+  }
+
+  inline std::string duration_to_str(const std::chrono::milliseconds& milliseconds)
+  {
+    return fmt::format("milliseconds_{}", milliseconds.count());
+  }
+
+  template<class TDuration>
+  auto generate_id(const std::string& module_name, const TDuration& duration)
+  {
+    auto gen = boost::uuids::name_generator_sha1{boost::uuids::ns::oid()};
+    auto ss = std::stringstream{};
+    ss << module_name << duration_to_str(duration);
+
+    return gen(ss.str());
+  }
+}
 namespace hhctrl::core::scheduler
 {
-
-inline std::string duration_to_str(const std::chrono::days& days)
-{
-  return fmt::format("days_{}", days.count());
-}
-
-inline std::string duration_to_str(const std::chrono::hours& hours)
-{
-  return fmt::format("hours_{}", hours.count());
-}
-
-inline std::string duration_to_str(const std::chrono::minutes& minutes)
-{
-  return fmt::format("minutes_{}", minutes.count());
-}
-
-inline std::string duration_to_str(const std::chrono::seconds& seconds)
-{
-  return fmt::format("seconds_{}", seconds.count());
-}
-
-inline std::string duration_to_str(const std::chrono::milliseconds& milliseconds)
-{
-  return fmt::format("milliseconds_{}", milliseconds.count());
-}
-
-template<class TDuration>
-auto generate_id(const std::string& module_name, const TDuration& duration)
-{
-  auto gen = boost::uuids::name_generator_sha1{boost::uuids::ns::oid()};
-  auto ss = std::stringstream{};
-  ss << module_name << duration_to_str(duration);
-
-  return gen(ss.str());
-}
-
 class Task
 {
 public:
   using Id_t = boost::uuids::uuid;
+  using Timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
 
   ~Task() = default;
   virtual const Id_t& id() const = 0;
   virtual void install() = 0;
+  virtual Timepoint_t expiry() const = 0;
   virtual std::string to_string() const = 0;
 };
 
@@ -78,6 +81,11 @@ public:
   const Id_t& id() const override
   {
     return id_;
+  }
+
+  Timepoint_t expiry() const override
+  {
+    return timer_.expiry();
   }
 
   void install() override
