@@ -65,19 +65,11 @@ void FileTaskStore::add(TaskEntity entity)
   load();
 }
 
-void FileTaskStore::remove(const TaskEntity::Id_t& id)
+bool FileTaskStore::exist(const TaskEntity::Id_t& id) const
 {
-  auto e = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&id](const auto& x) {
+  return std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&id](const auto& x) {
     return id == x.id;
-  });
-
-  if (e == cached_tasks_.end()) {
-    throw std::runtime_error("Task does not exist");
-  }
-
-  cached_tasks_.erase(e);
-  store();
-  load();
+  }) != cached_tasks_.end();
 }
 
 std::optional<TaskEntity> FileTaskStore::find(const TaskEntity::Id_t& id) const //TODO: Consider returning different type
@@ -91,6 +83,21 @@ std::optional<TaskEntity> FileTaskStore::find(const TaskEntity::Id_t& id) const 
   } else {
     return {*e};
   }
+}
+
+void FileTaskStore::remove(const TaskEntity::Id_t& id)
+{
+  auto e = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&id](const auto& x) {
+    return id == x.id;
+  });
+
+  if (e == cached_tasks_.end()) {
+    throw std::runtime_error("Task does not exist");
+  }
+
+  cached_tasks_.erase(e);
+  store();
+  load();
 }
 
 void FileTaskStore::load()

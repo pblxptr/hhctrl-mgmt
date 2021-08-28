@@ -11,6 +11,7 @@ namespace hhctrl::core::scheduler
   public:
     explicit FileTaskStore(std::string);
     void add(TaskEntity) override;
+    bool exist(const TaskEntity::Id_t&) const override;
     std::optional<TaskEntity> find(const TaskEntity::Id_t&) const override;
     void remove(const TaskEntity::Id_t&) override;
   private:
