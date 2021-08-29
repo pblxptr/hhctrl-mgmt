@@ -16,6 +16,8 @@ constexpr auto DATE_FMT = "%Y-%m-%d"sv;
 constexpr auto TIME_FMT = "%H:%M:%S"sv;
 constexpr auto DATETIME_FMT = "%Y-%m-%d %H:%M:%S"sv;
 
+using Precision_t = std::chrono::milliseconds;
+
 template<class T, class TTimepoint>
 auto parse_time(T&& time, TTimepoint&& base_timepoint = std::chrono::system_clock::now())
 {
@@ -34,8 +36,13 @@ auto parse_time(T&& time, TTimepoint&& base_timepoint = std::chrono::system_cloc
 template<class TSource>
 auto from_timestamp(TSource&& since_epoch)
 {
-  auto epoch = std::chrono::time_point<std::chrono::high_resolution_clock>();
-  return epoch + since_epoch;
+  return std::chrono::time_point<std::chrono::system_clock>(Precision_t(since_epoch));
+}
+
+template<class TSource>
+auto to_timestamp(TSource&& src)
+{
+  return std::chrono::time_point_cast<Precision_t>(std::forward<TSource>(src)).time_since_epoch().count();
 }
 
 template<class TTimepoint>

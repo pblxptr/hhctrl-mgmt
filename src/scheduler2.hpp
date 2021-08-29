@@ -56,6 +56,7 @@ public:
   virtual const Id_t& id() const = 0;
   virtual void install() = 0;
   virtual Timepoint_t expiry() const = 0;
+  virtual void set_expiry(Timepoint_t) = 0;
   virtual std::string to_string() const = 0;
 };
 
@@ -86,6 +87,15 @@ public:
   Timepoint_t expiry() const override
   {
     return timer_.expiry();
+  }
+
+  void set_expiry(Timepoint_t tp) override
+  {
+    spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
+      utils::datetime::to_string(timer_.expiry()),
+      utils::datetime::to_string(tp)
+    ));
+    timer_.expires_at(std::move(tp));
   }
 
   void install() override

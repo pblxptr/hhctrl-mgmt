@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+namespace datetime = utils::datetime;
+
 namespace hhctrl::core::scheduler
 {
   Scheduler::Scheduler(boost::asio::io_context& io, std::unique_ptr<TaskStore> tasks_store)
@@ -9,14 +11,22 @@ namespace hhctrl::core::scheduler
     , tasks_store_{std::move(tasks_store)}
   {}
 
-  void Scheduler::add_task(std::unique_ptr<Task> task)
+  void Scheduler::add_task(std::unique_ptr<Task> new_task)
   {
-    task->install();
+    const bool task_exist = tasks_store_->exist(new_task->id());
+    if (task_exist) {
+      const auto existing_task = tasks_store_->find(new_task->id()).value();
+      const auto saved_expiry = datetime::from_timestamp(existing_task.timestamp);
+      new_task->set_expiry(saved_expiry);
+      tasks_store_->remove(new_task->id());
+    }
+
     tasks_store_->add(TaskEntity{
-      task->id(),
+      new_task->id(),
       "asd",
-      task->expiry().time_since_epoch().count()
+      std::chrono::time_point_cast<std::chrono::milliseconds>(new_task->expiry()).time_since_epoch().count()
     });
-    active_tasks_.push_back(std::move(task));
+    new_task->install();
+    active_tasks_.push_back(std::move(new_task));
   }
 }
