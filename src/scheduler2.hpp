@@ -9,37 +9,54 @@
 #include "task_store.hpp"
 
 namespace {
-  inline std::string duration_to_str(const std::chrono::days& days)
+  template<class T> requires std::is_same_v<std::decay_t<T>, std::chrono::days>
+  inline std::string duration_to_str(T&& arg)
   {
-    return fmt::format("days_{}", days.count());
+    return fmt::format("days_{}", std::forward<T>(arg).count());
   }
 
-  inline std::string duration_to_str(const std::chrono::hours& hours)
+  template<class T> requires std::is_same_v<std::decay_t<T>, std::chrono::hours>
+  inline std::string duration_to_str(T&& arg)
   {
-    return fmt::format("hours_{}", hours.count());
+    return fmt::format("hours_{}", std::forward<T>(arg).count());
   }
 
-  inline std::string duration_to_str(const std::chrono::minutes& minutes)
+  template<class T> requires std::is_same_v<std::decay_t<T>, std::chrono::minutes>
+  inline std::string duration_to_str(T&& arg)
   {
-    return fmt::format("minutes_{}", minutes.count());
+    return fmt::format("minutes_{}", std::forward<T>(arg).count());
   }
 
-  inline std::string duration_to_str(const std::chrono::seconds& seconds)
+  template<class T> requires std::is_same_v<std::decay_t<T>, std::chrono::seconds>
+  inline std::string duration_to_str(T&& arg)
   {
-    return fmt::format("seconds_{}", seconds.count());
+    return fmt::format("seconds_{}", std::forward<T>(arg).count());
   }
 
-  inline std::string duration_to_str(const std::chrono::milliseconds& milliseconds)
+  template<class T> requires std::is_same_v<std::decay_t<T>, std::chrono::milliseconds>
+  inline std::string duration_to_str(T&& arg)
   {
-    return fmt::format("milliseconds_{}", milliseconds.count());
+    return fmt::format("milliseconds_{}", std::forward<T>(arg).count());
   }
 
-  template<class TDuration>
-  auto generate_id(const std::string& str, const TDuration& duration)
+template<class TDuration> requires
+  std::is_same_v<std::decay_t<TDuration>, std::chrono::duration<
+    typename std::decay_t<TDuration>::rep,
+    typename std::decay_t<TDuration>::period>
+  >
+  inline std::stringstream& operator<< (std::stringstream& ss, TDuration&& duration)
+  {
+    ss << duration_to_str(std::forward<TDuration>(duration));
+    return ss;
+  }
+
+  template<class... TArgs>
+  auto generate_id(TArgs&&... args)
   {
     auto gen = boost::uuids::name_generator_sha1{boost::uuids::ns::oid()};
     auto ss = std::stringstream{};
-    ss << str << duration_to_str(duration);
+
+    ((ss << std::forward<TArgs>(args)), ...);
 
     return gen(ss.str());
   }
@@ -54,7 +71,8 @@ public:
 
   ~Task() = default;
   virtual const Id_t& id() const = 0;
-  virtual void install() = 0;
+  virtual const std::string& owner() const = 0;
+  virtual void activate() = 0;
   virtual Timepoint_t expiry() const = 0;
   virtual void set_expiry(Timepoint_t) = 0;
   virtual std::string to_string() const = 0;
@@ -67,11 +85,13 @@ public:
   template<class TDurationArg, class THandlerArg>
   GenericRepeatedTask(
     boost::uuids::uuid id,
+    std::string owner,
     boost::asio::io_context& io,
     TDurationArg&& interval,
     THandlerArg&& handler
   )
   : id_{std::move(id)}
+  , owner_{std::move(owner)}
   , timer_{io}
   , interval_{std::forward<TDurationArg>(interval)}
   , handler_{std::forward<THandlerArg>(handler)}
@@ -82,6 +102,11 @@ public:
   const Id_t& id() const override
   {
     return id_;
+  }
+
+  const std::string& owner() const override
+  {
+    return owner_;
   }
 
   Timepoint_t expiry() const override
@@ -98,7 +123,7 @@ public:
     timer_.expires_at(std::move(tp));
   }
 
-  void install() override
+  void activate() override
   {
     spdlog::debug("Installing task: {}", to_string());
 
@@ -109,7 +134,7 @@ public:
       }
       handler_();
       timer_.expires_from_now(interval_);
-      install();
+      activate();
     });
   }
 
@@ -122,6 +147,7 @@ public:
 
 private:
   boost::uuids::uuid id_;
+  std::string owner_;
   boost::asio::system_timer timer_;
   TDuration interval_;
   THandler handler_;
@@ -135,8 +161,18 @@ public:
   template<class TDuration, class THandler>
   void every(TDuration&& duration, THandler&& handler)
   {
+    every("anonymous",
+      std::forward<TDuration>(duration),
+      std::forward<THandler>(handler)
+    );
+  }
+
+  template<class TOwner, class TDuration, class THandler>
+  void every(TOwner&& owner, TDuration&& duration, THandler&& handler)
+  {
     add_task(std::make_unique<GenericRepeatedTask<TDuration, THandler>>(
-      generate_id("anonymous", duration),
+      generate_id(owner, duration),
+      std::forward<TOwner>(owner),
       io_,
       std::forward<TDuration>(duration),
       std::forward<THandler>(handler)
@@ -145,6 +181,9 @@ public:
 
 private:
   void add_task(std::unique_ptr<Task>);
+  void add_task_to_store(const Task&);
+  void activate_task(std::unique_ptr<Task>);
+  bool is_task_active(const Task&) const;
 private:
   boost::asio::io_context& io_;
   std::unique_ptr<TaskStore> tasks_store_;

@@ -42,6 +42,7 @@ int main()
   // scheduler.every(std::chrono::minutes(1), []() { spdlog::info("TaskHandler: every 1 minute task");});
   // scheduler.every(std::chrono::days(1), []() { spdlog::info("TaskHandler: every 1 days task");});
   scheduler.every(std::chrono::days(2), []() { spdlog::info("TaskHandler: every 1 days task");});
+  scheduler.every(std::chrono::days(2), []() { spdlog::info("TaskHandler: every 1 days task");});
 
   io.run();
 

@@ -13,7 +13,10 @@ namespace hhctrl::core::scheduler
 
   void Scheduler::add_task(std::unique_ptr<Task> new_task)
   {
-    const bool task_exist = tasks_store_->exist(new_task->id());
+    if (is_task_active(*new_task)) {
+      throw std::runtime_error("Cannot add the task. The same task has been already configured.");
+    }
+    const bool task_exist = tasks_store_->exist(new_task->id()); //TODO: Consider, whether existing task should be removed, updated or so?
     if (task_exist) {
       const auto existing_task = tasks_store_->find(new_task->id()).value();
       const auto saved_expiry = datetime::from_timestamp(existing_task.timestamp);
@@ -21,12 +24,29 @@ namespace hhctrl::core::scheduler
       tasks_store_->remove(new_task->id());
     }
 
+    add_task_to_store(*new_task);
+    activate_task(std::move(new_task));
+  }
+
+  void Scheduler::add_task_to_store(const Task& task)
+  {
     tasks_store_->add(TaskEntity{
-      new_task->id(),
-      "asd",
-      std::chrono::time_point_cast<std::chrono::milliseconds>(new_task->expiry()).time_since_epoch().count()
-    });
-    new_task->install();
-    active_tasks_.push_back(std::move(new_task));
+    task.id(),
+    task.owner(),
+    std::chrono::time_point_cast<std::chrono::milliseconds>(task.expiry()).time_since_epoch().count()
+  });
+  }
+
+  void Scheduler::activate_task(std::unique_ptr<Task> task)
+  {
+    task->activate();
+    active_tasks_.push_back(std::move(task));
+  }
+
+  bool Scheduler::is_task_active(const Task& task) const
+  {
+    return std::find_if(active_tasks_.begin(), active_tasks_.end(), [&task](const auto& t){
+      return task.id() == t->id();
+    }) != active_tasks_.end();
   }
 }
