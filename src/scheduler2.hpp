@@ -7,7 +7,7 @@
 #include <boost/uuid/name_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include "task_store.hpp"
-
+#include "generic_repeated_task.hpp"
 namespace {
   template<class T> requires std::is_same_v<std::decay_t<T>, std::chrono::days>
   inline std::string duration_to_str(T&& arg)
@@ -63,96 +63,12 @@ template<class TDuration> requires
 }
 namespace hhctrl::core::scheduler
 {
-class Task
-{
-public:
-  using Id_t = boost::uuids::uuid;
-  using Timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
 
-  ~Task() = default;
-  virtual const Id_t& id() const = 0;
-  virtual const std::string& owner() const = 0;
-  virtual void activate() = 0;
-  virtual Timepoint_t expiry() const = 0;
-  virtual void set_expiry(Timepoint_t) = 0;
-  virtual std::string to_string() const = 0;
+using at_time = std::string;
+struct days_at {
+  std::chrono::days days;
+  at_time at;
 };
-
-template<class TDuration, class THandler>
-class GenericRepeatedTask : public Task
-{
-public:
-  template<class TDurationArg, class THandlerArg>
-  GenericRepeatedTask(
-    boost::uuids::uuid id,
-    std::string owner,
-    boost::asio::io_context& io,
-    TDurationArg&& interval,
-    THandlerArg&& handler
-  )
-  : id_{std::move(id)}
-  , owner_{std::move(owner)}
-  , timer_{io}
-  , interval_{std::forward<TDurationArg>(interval)}
-  , handler_{std::forward<THandlerArg>(handler)}
-  {
-    timer_.expires_from_now(interval_);
-  }
-
-  const Id_t& id() const override
-  {
-    return id_;
-  }
-
-  const std::string& owner() const override
-  {
-    return owner_;
-  }
-
-  Timepoint_t expiry() const override
-  {
-    return timer_.expiry();
-  }
-
-  void set_expiry(Timepoint_t tp) override
-  {
-    spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
-      utils::datetime::to_string(timer_.expiry()),
-      utils::datetime::to_string(tp)
-    ));
-    timer_.expires_at(std::move(tp));
-  }
-
-  void activate() override
-  {
-    spdlog::debug("Installing task: {}", to_string());
-
-    timer_.async_wait([&](const boost::system::error_code& ec) {
-      if (ec) {
-        spdlog::error("Timer error");
-        return;
-      }
-      handler_();
-      timer_.expires_from_now(interval_);
-      activate();
-    });
-  }
-
-  std::string to_string() const override
-  {
-    using std::to_string;
-
-    return "TaskId: " + to_string(id_) + " expires: " + utils::datetime::to_string(timer_.expiry());
-  }
-
-private:
-  boost::uuids::uuid id_;
-  std::string owner_;
-  boost::asio::system_timer timer_;
-  TDuration interval_;
-  THandler handler_;
-};
-
 class Scheduler
 {
 public:
