@@ -12,3 +12,4 @@ include(${CMAKE_ADDONS}/date_ext_lib.cmake)
 include(${CMAKE_ADDONS}/catch2_ext_lib.cmake)
 
 add_subdirectory(src)
+add_subdirectory(test)

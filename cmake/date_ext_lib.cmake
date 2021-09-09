@@ -10,7 +10,7 @@ ExternalProject_Add(date
   GIT_REPOSITORY    "https://github.com/HowardHinnant/date.git"
   GIT_TAG           master
   SOURCE_DIR        ${CMAKE_SOURCE_DIR}/lib/date
-  BINARY_DIR        ${DATE_LIBRARY_DIR}
+  BINARY_DIR        ${CMAKE_CURRENT_BINARY_DIR}/date
   UPDATE_COMMAND    ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -DBUILD_TZ_LIB=ON -DUSE_SYSTEM_TZ_DB=ON ${DATE_DIR}
   BUILD_COMMAND     make
