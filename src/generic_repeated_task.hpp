@@ -19,10 +19,10 @@ public:
   : id_{std::move(id)}
   , owner_{std::move(owner)}
   , timer_{io}
-  , interval_{std::forward<TDurationArg>(interval)}
+  , duration_{std::forward<TDurationArg>(interval)}
   , handler_{std::forward<THandlerArg>(handler)}
   {
-    timer_.expires_from_now(interval_);
+    configure_expiry();
   }
 
   const Id_t& id() const override
@@ -59,7 +59,7 @@ public:
         return;
       }
       handler_();
-      timer_.expires_from_now(interval_);
+      timer_.expires_from_now(duration_);
       activate();
     });
   }
@@ -68,14 +68,19 @@ public:
   {
     using std::to_string;
 
-    return "TaskId: " + to_string(id_) + " expires: " + utils::datetime::to_string(timer_.expiry());
+    return "GenericRepeatedTask - TaskId: " + to_string(id_) + " expires: " + utils::datetime::to_string(timer_.expiry());
+  }
+private:
+  void configure_expiry()
+  {
+    timer_.expires_from_now(duration_);
   }
 
 private:
   boost::uuids::uuid id_;
   std::string owner_;
   boost::asio::system_timer timer_;
-  TDuration interval_;
+  TDuration duration_;
   THandler handler_;
 };
 }

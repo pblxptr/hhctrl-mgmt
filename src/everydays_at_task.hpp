@@ -2,7 +2,9 @@
 
 #include "task.hpp"
 #include <boost/asio.hpp>
-#include "scheduler_helpers.hpp"
+#include "datetime.hpp"
+#include "date/date.h"
+#include "scheduler_durations.hpp"
 
 namespace hhctrl::core::scheduler
 {
@@ -24,37 +26,69 @@ public:
   , duration_{std::forward<TDurationArg>(duration)}
   , handler_{std::forward<THandlerArg>(handler)}
   {
-    // timer_.expires_from_now(interval_);
+    configure_expiry();
   }
 
   const Id_t& id() const override
   {
-    throw std::runtime_error("Not implemented");
+    return id_;
   }
 
   const std::string& owner() const override
   {
-    throw std::runtime_error("Not implemented");
+    return owner_;
   }
 
   Timepoint_t expiry() const override
   {
-    throw std::runtime_error("Not implemented");
+    return timer_.expiry();
   }
 
   void set_expiry(Timepoint_t tp) override
   {
-    throw std::runtime_error("Not implemented");
+    spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
+      utils::datetime::to_string(timer_.expiry()),
+      utils::datetime::to_string(tp)
+    ));
+    timer_.expires_at(std::move(tp));
   }
 
   void activate() override
   {
-    throw std::runtime_error("Not implemented");
+    spdlog::debug("Installing task: {}", to_string());
+
+    timer_.async_wait([&](const boost::system::error_code& ec) {
+      if (ec) {
+        spdlog::error("Timer error");
+        return;
+      }
+      handler_();
+      timer_.expires_at(timer_.expiry() + duration_.days);
+      activate();
+    });
   }
 
   std::string to_string() const override
   {
-    throw std::runtime_error("Not implemented");
+    using std::to_string;
+
+    return "EverydaysAt - TaskId: " + to_string(id_) + " expires: " + utils::datetime::to_string(timer_.expiry());
+  }
+
+private:
+  void configure_expiry()
+  {
+    using namespace date;
+    using namespace std::chrono;
+
+    const auto current_tp = utils::datetime::get_now();
+    auto expiry_tp = utils::datetime::parse_time(duration_.at, current_tp);
+
+    if (current_tp > expiry_tp) {
+      expiry_tp += duration_.days;
+    }
+
+    timer_.expires_at(expiry_tp);
   }
 
 private:
