@@ -33,7 +33,7 @@ namespace hhctrl::core::scheduler
     tasks_store_->add(TaskEntity{
     task.id(),
     task.owner(),
-    std::chrono::time_point_cast<std::chrono::milliseconds>(task.expiry()).time_since_epoch().count()
+    datetime::to_timestamp(task.expiry()) //std::chrono::time_point_cast<std::chrono::milliseconds>(task.expiry()).time_since_epoch().count()
   });
   }
 

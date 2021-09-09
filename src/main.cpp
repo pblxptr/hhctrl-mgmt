@@ -30,19 +30,17 @@ int main()
 {
   using namespace date;
   using namespace std::chrono;
+  namespace sch = hhctrl::core::scheduler;
 
   spdlog::set_level(spdlog::level::debug);
 
   auto io = boost::asio::io_context{};
   auto work = boost::asio::io_context::work{io};
-  auto scheduler = hhctrl::core::scheduler::Scheduler{io,
-    std::make_unique<hhctrl::core::scheduler::FileTaskStore>("./tasks.json")
+  auto scheduler = sch::Scheduler{io,
+    std::make_unique<sch::FileTaskStore>("./tasks.json")
   };
-  // scheduler.every(std::chrono::seconds(30), []() { spdlog::info("TaskHandler: every 30 seconds task");});
-  // scheduler.every(std::chrono::minutes(1), []() { spdlog::info("TaskHandler: every 1 minute task");});
-  // scheduler.every(std::chrono::days(1), []() { spdlog::info("TaskHandler: every 1 days task");});
   scheduler.every(std::chrono::days(2), []() { spdlog::info("TaskHandler: every 1 days task");});
-  scheduler.every(std::chrono::days(2), []() { spdlog::info("TaskHandler: every 1 days task");});
+  scheduler.every(sch::days_at(std::chrono::days(1), "20:34:20"), []() { spdlog::info("TaskHandler: everydays at time");});
 
   io.run();
 
