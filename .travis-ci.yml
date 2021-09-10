@@ -1,0 +1,41 @@
+language: cpp
+
+install:
+  # Pip cannot install Conan without these upgrades
+  - python3 -m pip install --upgrade pip setuptools
+  # Install Conan and CMake >= 3.15
+  - python3 -m pip install conan cmake
+
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+      compiler: gcc
+      env:
+        - GCC_VER="10"
+        - MATRIX_EVAL="CC=gcc-${GCC_VER} && CXX=g++-${GCC_VER}"
+
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-10
+            - g++-10
+            - doxygen
+            - python3-pip
+    - os: linux
+      dist: bionic
+      compiler: clang
+      env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+      addons: { apt: { packages: ['doxygen', 'python3-pip'] } }
+
+
+before_script:
+  - eval "${MATRIX_EVAL}"
+
+script:
+  - cmake -S . -B ./build -D ENABLE_COVERAGE:BOOL=ON ../
+  - cmake --build ./build -- -j2
+  - cd build && ctest -j2

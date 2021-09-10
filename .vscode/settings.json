@@ -59,6 +59,7 @@
     "typeindex": "cpp",
     "deque": "cpp",
     "cstring": "cpp",
-    "numeric": "cpp"
+    "numeric": "cpp",
+    "list": "cpp"
   }
 }

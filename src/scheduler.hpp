@@ -79,12 +79,12 @@ template<class TDuration> requires
 class Scheduler
 {
 public:
-  explicit Scheduler(boost::asio::io_context&, std::unique_ptr<TaskStore>);
+  explicit Scheduler(boost::asio::io_context&, TaskStore&);
 
   template<class TDuration, class THandler>
-  void every(TDuration&& duration, THandler&& handler)
+  auto every(TDuration&& duration, THandler&& handler)
   {
-    every(
+    return every(
       ANONYMOUS_TASK,
       std::forward<TDuration>(duration),
       std::forward<THandler>(handler)
@@ -92,9 +92,9 @@ public:
   }
 
   template<class TOwner, class TDuration, class THandler>
-  void every(TOwner&& owner, TDuration&& duration, THandler&& handler)
+  auto every(TOwner&& owner, TDuration&& duration, THandler&& handler)
   {
-    every(
+    return every(
       std::forward<TOwner>(owner),
       Execution{},
       std::forward<TDuration>(duration),
@@ -104,23 +104,28 @@ public:
 
   //Generic repeated task
   template<class TOwner, class TDuration, class THandler>
-  void every(TOwner&& owner, Execution policy, TDuration&& duration, THandler&& handler)
+  auto every(TOwner&& owner, Execution policy, TDuration&& duration, THandler&& handler)
   {
+    auto task_id = generate_id(owner, duration);
+
     add_task(
       std::make_unique<GenericRepeatedTask<TDuration, THandler>>(
-        generate_id(owner, duration),
+        task_id,
         std::forward<TOwner>(owner),
         io_,
         std::forward<TDuration>(duration),
         std::forward<THandler>(handler)),
       policy
     );
+    return task_id;
   }
 
   //EverydayAt task
   template<class TOwner, class TDuration, class THandler> requires std::is_same_v<std::decay_t<TDuration>, days_at>
-  void every(TOwner&& owner, Execution policy, TDuration&& duration, THandler&& handler)
+  auto every(TOwner&& owner, Execution policy, TDuration&& duration, THandler&& handler)
   {
+    auto task_id = generate_id(owner, duration);
+
     add_task(
       std::make_unique<EverydayAtTask<THandler>>(
         generate_id(owner, duration),
@@ -130,17 +135,20 @@ public:
         std::forward<THandler>(handler)),
       policy
     );
+
+    return task_id;
   }
+
+  bool is_task_active(const Task::Id_t& id) const;
 
 private:
   void add_task(std::unique_ptr<Task>, Execution);
   void activate_task(std::unique_ptr<Task>);
-  bool is_task_active(const Task&) const;
   void process_strict_policy_task(Task&);
   void add_task_to_store(const Task&);
 private:
   boost::asio::io_context& io_;
-  std::unique_ptr<TaskStore> tasks_store_;
+  TaskStore& tasks_store_;
   std::vector<std::unique_ptr<Task>> active_tasks_;
 };
 }

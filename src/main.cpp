@@ -19,9 +19,8 @@ int main()
 
   auto io = boost::asio::io_context{};
   auto work = boost::asio::io_context::work{io};
-  auto s = scheduler::Scheduler{io,
-    std::make_unique<scheduler::FileTaskStore>("./tasks.json")
-  };
+  auto store = scheduler::FileTaskStore("./tasks.json");
+  auto s = scheduler::Scheduler{io, store};
   s.every("custom", scheduler::Execution::Strict, std::chrono::days(2), []() { spdlog::info("TaskHandler: every 1 days task");});
   s.every(scheduler::days_at(std::chrono::days(1), "17:34:20 Europe/Warsaw"), []() { spdlog::info("TaskHandler: everydays at time");});
 

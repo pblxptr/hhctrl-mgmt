@@ -14,7 +14,7 @@ ExternalProject_Add(catch2
   BINARY_DIR        ${CMAKE_CURRENT_BINARY_DIR}/catch2
   UPDATE_COMMAND    ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -DBUILD_TESTING=OFF ${CATCH2_DIR}
-  BUILD_COMMAND     make # change to: make
+  BUILD_COMMAND     make
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
 )
