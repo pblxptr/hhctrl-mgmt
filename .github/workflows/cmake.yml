@@ -25,9 +25,10 @@ jobs:
       
     - name: Install libraries from sources
       run: wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz 
-          && tar -zxvf boost_1_77_0.tar.gz 
-          && ./boost_1_77_0/bootstrap.sh
-          && sudo ./boost_1_77_0/b2 install
+          && tar -zxf boost_1_77_0.tar.gz 
+          && cd boost_1_77_0 && ./bootstrap.sh
+          && sudo ./b2 install
+          && cd ..
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
