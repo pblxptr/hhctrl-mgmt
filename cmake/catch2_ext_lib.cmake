@@ -19,6 +19,18 @@ ExternalProject_Add(catch2
   TEST_COMMAND      ""
 )
 
+ExternalProject_Get_Property(catch2 GIT_REPOSITORY GIT_TAG)
+FetchContent_Declare(
+  catch2
+  GIT_REPOSITORY ${GIT_REPOSITORY}
+  GIT_TAG ${GIT_TAG}
+  SOURCE_DIR ${CATCH2_DIR}
+  GIT_PROGRESS TRUE
+)
+Set(FETCHCONTENT_QUIET FALSE)
+FetchContent_MakeAvailable(catch2)
+
 include(${CATCH2_DIR}/extras/Catch.cmake)
+
 include_directories(${CATCH2_INCLUDE_DIR})
 link_directories(${CATCH2_LIBRARY_DIR})

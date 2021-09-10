@@ -5,6 +5,7 @@ set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
 ### CMAKE MODULES ###
 include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+include(${CMAKE_ROOT}/Modules/FetchContent.cmake)
 
 ### LIRARIES ###
 include(${CMAKE_ADDONS}/curl_ext_lib.cmake)
