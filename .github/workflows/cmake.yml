@@ -26,7 +26,7 @@ jobs:
     - name: Install libraries from sources
       run: wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz 
           && tar -zxf boost_1_77_0.tar.gz 
-          && cd boost_1_77_0 && ./bootstrap.sh
+          && cd boost_1_77_0 && ./bootstrap.sh --prefix=/usr
           && sudo ./b2 install
           && cd ..
 
