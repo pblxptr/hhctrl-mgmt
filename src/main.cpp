@@ -9,11 +9,13 @@
 #include "scheduler.hpp"
 #include "file_task_store.hpp"
 
+namespace scheduler = hhctrl::core::scheduler;
 namespace fs = std::filesystem;
 
 int main()
 {
-  namespace scheduler = hhctrl::core::scheduler;
+
+  using namespace date;
 
   spdlog::set_level(spdlog::level::debug);
 
@@ -22,7 +24,9 @@ int main()
   auto store = scheduler::FileTaskStore("./tasks.json");
   auto s = scheduler::Scheduler{io, store};
 
-  s.every(scheduler::days_at(std::chrono::days(1), "17:34:20 Europe/Warsaw"), []() { spdlog::info("TaskHandler: everydays at time");});
+  s.every(std::chrono::days(1), [](){ spdlog::info("handler: std::chrono::days(1)"); });
+  s.every(std::chrono::days(2), [](){ spdlog::info("handler: std::chrono::days(2)"); });
+  s.every(std::chrono::days(3), [](){ spdlog::info("handler: std::chrono::days(3)"); });
 
   io.run();
 

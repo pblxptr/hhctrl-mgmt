@@ -26,6 +26,8 @@ public:
   , duration_{std::forward<TDurationArg>(duration)}
   , handler_{std::forward<THandlerArg>(handler)}
   {
+    //TODO: Add static_assert to check if duration property is constructible from provided argument.
+
     configure_expiry();
   }
 

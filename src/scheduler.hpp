@@ -139,6 +139,7 @@ public:
   }
 
   bool is_task_active(const Task::Id_t& id) const;
+  std::vector<TaskInfo> get_active_tasks() const;
 
 private:
   void add_task(std::unique_ptr<Task>, Execution);

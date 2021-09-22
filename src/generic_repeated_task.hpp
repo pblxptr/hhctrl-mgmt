@@ -59,7 +59,7 @@ public:
         return;
       }
       handler_();
-      timer_.expires_from_now(duration_);
+      configure_expiry();
       activate();
     });
   }

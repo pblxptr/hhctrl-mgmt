@@ -37,6 +37,20 @@ namespace hhctrl::core::scheduler
     }) != active_tasks_.end();
   }
 
+  std::vector<TaskInfo> Scheduler::get_active_tasks() const
+  {
+    auto tasks = std::vector<TaskInfo>();
+    std::transform(active_tasks_.begin(), active_tasks_.end(), std::back_inserter(tasks), [](const auto& t) {
+      return TaskInfo{
+        t->id(),
+        t->owner(),
+        t->expiry()
+      };
+    });
+
+    return tasks;
+  }
+
   void Scheduler::process_strict_policy_task(Task& task)
   {
     if (tasks_store_.exist(task.id())) {
