@@ -75,11 +75,10 @@ template<class TDuration> requires
     return gen(ss.str());
   }
 }
-
 class Scheduler
 {
 public:
-  explicit Scheduler(boost::asio::io_context&, TaskStore&);
+  Scheduler(boost::asio::io_context&, TaskStore&);
 
   template<class TDuration, class THandler>
   auto every(TDuration&& duration, THandler&& handler)

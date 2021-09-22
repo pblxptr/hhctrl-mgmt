@@ -9,5 +9,5 @@ namespace hhctrl::core::scheduler
   struct days_at {
     std::chrono::days days;
     at_time at;
-};
+  };
 }
