@@ -42,8 +42,8 @@ namespace {
     return ret;
   }
 
-  template<class TVal>
-  void write_attr(const fs::path& path, const TVal& val)
+  template<class TValue>
+  void write_attr(const fs::path& path, const TValue& val)
   {
     auto fstream = std::fstream(path, std::ios::out);
 
