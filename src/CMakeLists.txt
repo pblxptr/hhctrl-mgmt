@@ -13,6 +13,7 @@ add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
   fmt::fmt
-  stdc++fs -pthread -lboost_date_time -lboost_json ${CURL_LIBRARY}
+  stdc++fs -pthread -lboost_date_time -lboost_json
+  ${CURL_LIBRARY}
   ${DATE_TZ_LIBRARY}
 )
