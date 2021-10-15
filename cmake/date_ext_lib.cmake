@@ -6,6 +6,12 @@ set(DATE_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/date)
 ### LIB NAMES ###
 set(DATE_TZ_LIBRARY -ldate-tz)
 
+set(DATE_DEPENDS "")
+
+if (NOT CURL_FOUND)
+  set (DATE_DEPENDS "curl")
+endif(NOT CURL_FOUND)
+
 ExternalProject_Add(date
   GIT_REPOSITORY    "https://github.com/HowardHinnant/date.git"
   GIT_TAG           master
@@ -16,7 +22,7 @@ ExternalProject_Add(date
   BUILD_COMMAND     make
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
-  DEPENDS           curl
+  DEPENDS           ${DATE_DEPENDS}
 )
 include_directories(${DATE_INCLUDE_DIR})
 link_directories(${DATE_LIBRARY_DIR})
