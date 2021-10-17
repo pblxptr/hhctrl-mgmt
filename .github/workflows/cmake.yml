@@ -36,13 +36,13 @@ jobs:
         boost_version: 1.77.0
 
     - name: Configure CMake
-      run: cmake . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTS=ON 
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTS=ON
       env:
         CC: gcc-10
         CXX: g++-10
 
     - name: Build
-      run: cmake . --config ${{env.BUILD_TYPE}} -DBUILD_TESTS=ON
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Test
       working-directory: ${{github.workspace}}/build/test
