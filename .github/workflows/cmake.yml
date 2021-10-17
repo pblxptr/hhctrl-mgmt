@@ -23,25 +23,26 @@ jobs:
     - name: Install precompiled libraries
       run: sudo apt install libfmt-dev libspdlog-dev libboost-all-dev
 
-    - name: Install libraries from sources
-      run: wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
-          && tar -zxf boost_1_77_0.tar.gz 
-          && cd boost_1_77_0 && ./bootstrap.sh --prefix=/usr
-          && sudo ./b2 install
-          && cd ..
+#     - name: Install libraries from sources
+#       run: wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
+#           && tar -zxf boost_1_77_0.tar.gz 
+#           && cd boost_1_77_0 && ./bootstrap.sh --prefix=/usr
+#           && sudo ./b2 install
+#           && cd ..
+    - name: Install boost
+      uses: MarkusJx/install-boost@v2.0.0
+      id: install-boost
+      with:
+        boost_version: 1.77.0
 
     - name: Configure CMake
-      run: mkdir -f ${{github.workspace}}/build && 
-        cd ${{github.workspace}}/build && 
-        cmake -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
+      run: cmake . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTS=ON 
       env:
         CC: gcc-10
         CXX: g++-10
 
     - name: Build
-      run: mkdir -f ${{github.workspace}}/build && 
-        cd ${{github.workspace}}/build && 
-        cmake -DBUILD_TESTS=ON  --config ${{env.BUILD_TYPE}} ..
+      run: cmake . --config ${{env.BUILD_TYPE}} -DBUILD_TESTS=ON
 
     - name: Test
       working-directory: ${{github.workspace}}/build/test
