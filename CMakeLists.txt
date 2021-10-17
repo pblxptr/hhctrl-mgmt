@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(hhctrl)
+project(hhctrl-mgmt)
 
 set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
