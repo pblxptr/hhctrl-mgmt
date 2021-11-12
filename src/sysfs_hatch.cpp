@@ -6,20 +6,30 @@
 #include <tuple>
 
 #include "static_map.hpp"
+#include "sysfs.hpp"
 
 using namespace utils;
 using namespace hhctrl::hw;
 using namespace std::literals;
 
+namespace sysfs = hhctrl::helpers::sysfs;
 namespace fs = std::filesystem;
 
-
 namespace {
-  constexpr auto statusAttrName = "status"sv;
-  constexpr auto changePositionAttrName = "change_position";
-  constexpr auto slowStartAttrName = "slow_start";
+  struct ChangePositionAttr
+  {
+    static constexpr char* name { "change_position" };
+    static constexpr char* open { "open" };
+    static constexpr char* close { "close" };
+  };
+  struct SlowStartAttr
+  {
+    static constexpr char* name { "slow_start" };
+    static constexpr char* enable { "1" };
+    static constexpr char* disable { "0" };
+  };
 
-  constexpr auto statusMap = StaticMap<HatchStatus, std::string_view, 5> {
+  constexpr auto StatusMapping = StaticMap<HatchStatus, std::string_view, 5> {
     std::pair(HatchStatus::Open, "open"sv),
     std::pair(HatchStatus::Closed, "closed"sv),
     std::pair(HatchStatus::ChangingPosition, "changing_position"sv),
@@ -27,32 +37,10 @@ namespace {
     std::pair(HatchStatus::Undefined, "undefined"sv)
   };
 
-  std::string read_attr(const fs::path& path)
+  template<class TRoot, class TPath>
+  auto make_path(const TRoot& root, const TPath& path)
   {
-    auto ret = std::string{};
-    auto fstream = std::fstream(path, std::ios::in);
-
-    if (!fstream)
-    {
-      throw std::runtime_error{"Attribute does not exist."};
-    }
-
-    fstream >> ret;
-
-    return ret;
-  }
-
-  template<class TValue>
-  void write_attr(const fs::path& path, const TValue& val)
-  {
-    auto fstream = std::fstream(path, std::ios::out);
-
-    if (!fstream)
-    {
-      throw std::runtime_error{"Attribute does not exist."};
-    }
-
-    fstream << val;
+    return root /= path;
   }
 }
 
@@ -64,22 +52,23 @@ SysfsHatch::SysfsHatch(std::string sysfsdir)
   {
     throw std::runtime_error("Path does not exist.");
   }
+  sysfsdir_ = std::move(sysfsdir);
 }
 
-void SysfsHatch::open()
+void SysfsHatch::open() const
 {
-  write_attr(changePositionAttrName, "open");
+  sysfs::write_attr(get_path(ChangePositionAttr::name)), ChangePositionAttr::open);
 }
 
-void SysfsHatch::close()
+void SysfsHatch::close() const
 {
-  write_attr(changePositionAttrName, "close");
+  sysfs::write_attr(get_path(ChangePositionAttr::name), ChangePositionAttr::close);
 }
 
 HatchStatus SysfsHatch::status() const
 {
-  const auto attr_val = read_attr(statusAttrName);
+  const auto attr_val = sysfs::read_attr(get_path(StatusAttrName));
 
-  return statusMap.at(attr_val.data());
+  return StatusMapping.at(attr_val.data());
 }
 }

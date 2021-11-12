@@ -13,8 +13,9 @@ namespace hhctrl::hw {
   class HatchDriver
   {
   public:
-    virtual void open() = 0;
-    virtual void close() = 0;
+    virtual ~HatchDriver() = default;
+    virtual void open() const = 0;
+    virtual void close() const = 0;
     virtual HatchStatus status() const;
   };
 }

@@ -2,17 +2,20 @@
 
 #include "hatch.hpp"
 
-#include <string>
+#include <filesystem>
 
 namespace hhctrl::hw {
 class SysfsHatch
 {
 public:
   explicit SysfsHatch(std::string sysfsdir);
-  void open();
-  void close();
+  void open() const;
+  void close() const;
   HatchStatus status() const;
 private:
-  std::string sysfsdir_;
+  template<class TPath>
+  auto get_path(const TPath& path) { return sysfsdir_ /= path; }
+private:
+  std::filesystem::path sysfsdir_;
 };
 }
