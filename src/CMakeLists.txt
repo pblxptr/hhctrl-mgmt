@@ -6,6 +6,9 @@ set(SOURCES
   main.cpp
   scheduler.cpp
   file_task_store.cpp
+  sysfs_led.cpp
+  sysfs_hatch.cpp
+  rgb_led_service.cpp
 )
 find_package(fmt)
 

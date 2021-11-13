@@ -1,12 +1,13 @@
 #pragma once
 
+#include <cstdint>
+
 namespace hhctrl::hw
 {
   class LedDriver
   {
   public:
-    virtual ~Led() = default;
-    virtual void turn_on() const = 0;
-    virtual void turn_off() const = 0;
+    virtual ~LedDriver() = default;
+    virtual void set_brightness(uint8_t) const = 0;
   };
 }

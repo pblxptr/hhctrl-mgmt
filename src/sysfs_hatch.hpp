@@ -14,7 +14,7 @@ public:
   HatchStatus status() const;
 private:
   template<class TPath>
-  auto get_path(const TPath& path) { return sysfsdir_ /= path; }
+  auto get_path(const TPath& path) const { return sysfsdir_ / path; }
 private:
   std::filesystem::path sysfsdir_;
 };

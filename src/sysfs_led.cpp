@@ -2,16 +2,15 @@
 #include "sysfs.hpp"
 
 namespace {
+  namespace sysfs = hhctrl::helpers::sysfs;
   struct BrightnessAttr
   {
-    static constexpr char* name { "brightness" };
-    static constexpr char* min { "0" };
-    static constexpr char* max { "1" };
+    static constexpr const char* name { "brightness" };
   };
 }
 
 namespace hhctrl::hw
-
+{
 SysfsLed::SysfsLed(std::string sysfsdir)
 {
   if (!fs::exists(sysfsdir))
@@ -21,12 +20,8 @@ SysfsLed::SysfsLed(std::string sysfsdir)
   sysfsdir_ = std::move(sysfsdir);
 }
 
-void SysfsLed::turn_on() const
+void SysfsLed::set_brightness(uint8_t value) const
 {
-  sysfs::write_attr(get_path(BrightnessAttr::name)), BrightnessAttr::max);
+  sysfs::write_attr(get_path(BrightnessAttr::name), static_cast<int>(value));
 }
-
-void SysfsLed::turn_off() const
-{
-  sysfs::write_attr(get_path(BrightnessAttr::name), BrightnessAttr::min);
 }
