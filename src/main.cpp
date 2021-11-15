@@ -29,33 +29,6 @@ int main()
   auto blue = hhctrl::hw::SysfsLed{"/sys/class/leds/blue"};
   auto led_service = hhctrl::hw::RgbLedService{red, green, blue};
 
-  spdlog::info("Turning on green led");
-  led_service.set_state(hhctrl::hw::IndicatorType::Status, hhctrl::hw::IndicatorState::SteadyOn);
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-
-  spdlog::info("Turning on yellow led");
-  led_service.set_state(hhctrl::hw::IndicatorType::Warning, hhctrl::hw::IndicatorState::SteadyOn);
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-
-  spdlog::info("Turning on blue led");
-  led_service.set_state(hhctrl::hw::IndicatorType::Maintenance, hhctrl::hw::IndicatorState::SteadyOn);
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-
-  spdlog::info("Turning on red led");
-  led_service.set_state(hhctrl::hw::IndicatorType::Fault, hhctrl::hw::IndicatorState::SteadyOn);
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-
-  spdlog::info("Turning all led off");
-  led_service.set_state(hhctrl::hw::IndicatorType::Fault, hhctrl::hw::IndicatorState::SteadyOff);
-  spdlog::info("Led test done.");
-
-  while (1)
-  {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    led_service.set_state(hhctrl::hw::IndicatorType::Warning, hhctrl::hw::IndicatorState::SteadyOn);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    led_service.set_state(hhctrl::hw::IndicatorType::Warning, hhctrl::hw::IndicatorState::SteadyOff);
-  }
 
   // auto store = scheduler::FileTaskStore("./tasks.json");
   // auto s = scheduler::Scheduler{io, store};
