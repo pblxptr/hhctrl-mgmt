@@ -14,9 +14,19 @@
 namespace scheduler = hhctrl::core::scheduler;
 namespace fs = std::filesystem;
 
-int main()
+struct SetVisualIndicationReq
 {
 
+};
+
+struct SetVisualIndicationCfm
+{
+
+};
+
+
+int main()
+{
   using namespace date;
 
   spdlog::set_level(spdlog::level::debug);
@@ -24,14 +34,16 @@ int main()
   auto io = boost::asio::io_context{};
   auto work = boost::asio::io_context::work{io};
 
+  auto hatch = hhctrl::hw::SysfsHatch{"/sys/class/hatch2sr/hatch2sr"};
   auto red = hhctrl::hw::SysfsLed{"/sys/class/leds/red"};
   auto green = hhctrl::hw::SysfsLed{"/sys/class/leds/green"};
   auto blue = hhctrl::hw::SysfsLed{"/sys/class/leds/blue"};
   auto led_service = hhctrl::hw::RgbLedService{red, green, blue};
 
+  auto store = scheduler::FileTaskStore("./tasks.json");
+  auto s = scheduler::Scheduler{io, store};
 
-  // auto store = scheduler::FileTaskStore("./tasks.json");
-  // auto s = scheduler::Scheduler{io, store};
+
   // s.every(std::chrono::days(1), [](){ spdlog::info("handler: std::chrono::days(1)"); });
   // s.every(std::chrono::days(2), [](){ spdlog::info("handler: std::chrono::days(2)"); });
   // s.every(std::chrono::days(3), [](){ spdlog::info("handler: std::chrono::days(3)"); });

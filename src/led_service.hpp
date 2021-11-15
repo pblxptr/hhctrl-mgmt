@@ -1,10 +1,9 @@
 #pragma once
 
+#include "indicator.hpp"
+
 namespace hhctrl::hw
 {
-  enum class IndicatorType { Status, Warning, Maintenance, Fault };
-  enum class IndicatorState { SteadyOn, SteadyOff };
-
   class LedService
   {
   public:
