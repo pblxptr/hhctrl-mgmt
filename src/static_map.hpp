@@ -1,8 +1,9 @@
 #pragma once
 
 #include <array>
+#include <algorithm>
 
-namespace utils {
+namespace hhctrl::utils {
 
 template<class TKey, class TValue, std::size_t Size>
 class StaticMap

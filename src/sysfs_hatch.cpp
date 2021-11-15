@@ -8,7 +8,7 @@
 #include "static_map.hpp"
 #include "sysfs.hpp"
 
-using namespace utils;
+using namespace hhctrl::utils;
 using namespace hhctrl::hw;
 using namespace std::literals;
 

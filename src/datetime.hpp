@@ -12,7 +12,7 @@ namespace {
   using namespace std::literals;
   namespace dt = date;
 }
-namespace utils::datetime {
+namespace hhctrl::utils::datetime {
   constexpr auto DATE_FMT = "%Y-%m-%d"sv;
   constexpr auto TIME_FMT = "%H:%M:%S"sv;
   constexpr auto DATETIME_FMT = "%Y-%m-%d %H:%M:%S %Z"sv;

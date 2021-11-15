@@ -49,8 +49,8 @@ public:
   void set_expiry(Timepoint_t tp) override
   {
     spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
-      utils::datetime::to_string(timer_.expiry()),
-      utils::datetime::to_string(tp)
+      hhctrl::utils::datetime::to_string(timer_.expiry()),
+      hhctrl::utils::datetime::to_string(tp)
     ));
     timer_.expires_at(std::move(tp));
   }
@@ -74,7 +74,7 @@ public:
   {
     using std::to_string;
 
-    return "EverydaysAt - TaskId: " + to_string(id_) + " expires: " + utils::datetime::to_string(timer_.expiry());
+    return "EverydaysAt - TaskId: " + to_string(id_) + " expires: " + hhctrl::utils::datetime::to_string(timer_.expiry());
   }
 
 private:
@@ -83,8 +83,8 @@ private:
     using namespace date;
     using namespace std::chrono;
 
-    const auto current_tp = utils::datetime::get_now();
-    auto expiry_tp = utils::datetime::parse_time(duration_.at, current_tp);
+    const auto current_tp = hhctrl::utils::datetime::get_now();
+    auto expiry_tp = hhctrl::utils::datetime::parse_time(duration_.at, current_tp);
 
     if (current_tp > expiry_tp) {
       expiry_tp += duration_.days;

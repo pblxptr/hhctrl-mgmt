@@ -2,7 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace datetime = utils::datetime;
+namespace datetime = hhctrl::utils::datetime;
 
 namespace hhctrl::core::scheduler
 {

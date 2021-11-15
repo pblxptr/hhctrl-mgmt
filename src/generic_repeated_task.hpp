@@ -43,8 +43,8 @@ public:
   void set_expiry(Timepoint_t tp) override
   {
     spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
-      utils::datetime::to_string(timer_.expiry()),
-      utils::datetime::to_string(tp)
+      hhctrl::utils::datetime::to_string(timer_.expiry()),
+      hhctrl::utils::datetime::to_string(tp)
     ));
     timer_.expires_at(std::move(tp));
   }
@@ -68,7 +68,7 @@ public:
   {
     using std::to_string;
 
-    return "GenericRepeatedTask - TaskId: " + to_string(id_) + " expires: " + utils::datetime::to_string(timer_.expiry());
+    return "GenericRepeatedTask - TaskId: " + to_string(id_) + " expires: " + hhctrl::utils::datetime::to_string(timer_.expiry());
   }
 private:
   void configure_expiry()
