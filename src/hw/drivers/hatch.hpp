@@ -2,7 +2,7 @@
 
 #include <optional>
 
-namespace hhctrl::hw {
+namespace hw::drivers {
   enum class HatchStatus {
     Open,
     Closed,

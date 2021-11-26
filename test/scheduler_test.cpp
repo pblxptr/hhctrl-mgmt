@@ -1,10 +1,10 @@
-#include "scheduler.hpp"
+#include <common/scheduler/scheduler.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "gmock_task_store.hpp"
 
-using namespace hhctrl::core::scheduler;
+using namespace common::scheduler;
 
 TEST_CASE("Tasks can be addded to scheduler") {
   auto io_context = boost::asio::io_context{};

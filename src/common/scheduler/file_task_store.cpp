@@ -11,9 +11,9 @@
 namespace json = boost::json;
 namespace fs = std::filesystem;
 
-using namespace hhctrl::core::scheduler;
+using namespace common::scheduler;
 
-namespace hhctrl::core::scheduler
+namespace common::scheduler
 {
 //Serialize
 void tag_invoke(json::value_from_tag, json::value& jv, const TaskEntity& task)

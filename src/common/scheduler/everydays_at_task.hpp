@@ -1,12 +1,14 @@
 #pragma once
 
-#include "task.hpp"
-#include <boost/asio.hpp>
-#include "datetime.hpp"
-#include "date/date.h"
-#include "scheduler_durations.hpp"
+#include <common/scheduler/task.hpp>
 
-namespace hhctrl::core::scheduler
+#include <boost/asio.hpp>
+#include <date/date.h>
+
+#include <common/utils/datetime.hpp>
+#include <common/scheduler/scheduler_durations.hpp>
+
+namespace common::scheduler
 {
 template<class THandler>
 class EverydayAtTask : public Task
@@ -49,8 +51,8 @@ public:
   void set_expiry(Timepoint_t tp) override
   {
     spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
-      hhctrl::utils::datetime::to_string(timer_.expiry()),
-      hhctrl::utils::datetime::to_string(tp)
+      common::utils::datetime::to_string(timer_.expiry()),
+      common::utils::datetime::to_string(tp)
     ));
     timer_.expires_at(std::move(tp));
   }
@@ -74,7 +76,7 @@ public:
   {
     using std::to_string;
 
-    return "EverydaysAt - TaskId: " + to_string(id_) + " expires: " + hhctrl::utils::datetime::to_string(timer_.expiry());
+    return "EverydaysAt - TaskId: " + to_string(id_) + " expires: " + common::utils::datetime::to_string(timer_.expiry());
   }
 
 private:
@@ -83,8 +85,8 @@ private:
     using namespace date;
     using namespace std::chrono;
 
-    const auto current_tp = hhctrl::utils::datetime::get_now();
-    auto expiry_tp = hhctrl::utils::datetime::parse_time(duration_.at, current_tp);
+    const auto current_tp = common::utils::datetime::get_now();
+    auto expiry_tp = common::utils::datetime::parse_time(duration_.at, current_tp);
 
     if (current_tp > expiry_tp) {
       expiry_tp += duration_.days;

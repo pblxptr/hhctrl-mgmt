@@ -3,7 +3,7 @@
 #include <string>
 #include <chrono>
 
-namespace hhctrl::core::scheduler
+namespace common::scheduler
 {
   using at_time = std::string;
   struct days_at {

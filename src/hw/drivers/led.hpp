@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace hhctrl::hw
+namespace hw::drivers
 {
   class LedDriver
   {

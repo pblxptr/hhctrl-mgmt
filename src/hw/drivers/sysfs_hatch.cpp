@@ -1,15 +1,15 @@
-#include "sysfs_hatch.hpp"
+#include <hw/drivers/sysfs_hatch.hpp>
 
 #include <filesystem>
 #include <string_view>
 #include <fstream>
 #include <tuple>
 
-#include "static_map.hpp"
-#include "sysfs.hpp"
+#include <common/utils/static_map.hpp>
+#include <hw/drivers/sysfs.hpp>
 
-using namespace hhctrl::utils;
-using namespace hhctrl::hw;
+using namespace common::utils;
+using namespace hw::drivers;
 using namespace std::literals;
 
 namespace sysfs = hhctrl::helpers::sysfs;
@@ -43,7 +43,7 @@ namespace {
   };
 }
 
-namespace hhctrl::hw
+namespace hw::drivers
 {
 SysfsHatch::SysfsHatch(std::string sysfsdir)
 {

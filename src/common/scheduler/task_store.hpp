@@ -4,7 +4,7 @@
 #include <optional>
 #include <boost/uuid/uuid.hpp>
 
-namespace hhctrl::core::scheduler
+namespace common::scheduler
 {
   struct TaskEntity
   {

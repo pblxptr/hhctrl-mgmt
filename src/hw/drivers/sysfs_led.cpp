@@ -1,5 +1,5 @@
-#include "sysfs_led.hpp"
-#include "sysfs.hpp"
+#include <hw/drivers/sysfs_led.hpp>
+#include <hw/drivers/sysfs.hpp>
 
 namespace {
   namespace sysfs = hhctrl::helpers::sysfs;
@@ -9,7 +9,7 @@ namespace {
   };
 }
 
-namespace hhctrl::hw
+namespace hw::drivers
 {
 SysfsLed::SysfsLed(std::string sysfsdir)
 {

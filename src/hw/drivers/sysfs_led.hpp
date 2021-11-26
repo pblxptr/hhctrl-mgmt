@@ -1,11 +1,11 @@
 #pragma once
 
-#include "led.hpp"
+#include <hw/drivers/led.hpp>
 
 #include <string>
 #include <filesystem>
 
-namespace hhctrl::hw
+namespace hw::drivers
 {
   class SysfsLed : public LedDriver
   {

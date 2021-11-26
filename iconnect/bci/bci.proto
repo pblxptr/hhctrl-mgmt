@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+/* Board Control Interface */
+
+package bci;
+
+message ConnEstablishReq
+{
+
+}
+
+message ConnEstablishCfm
+{
+
+}
+
+message GetCapabilitiesReq
+{
+
+}
+
+message GetCapabilitiesCfm
+{
+
+}
+
+message RestartBoardFwd
+{
+
+}
+
+message GetVisualIndicationReq
+{
+
+}
+
+message GetVisualIndicationCfm
+{
+
+}
+
+message SetVisualIndicationReq
+{
+
+}
+
+message SetVisualIndicationCfm
+{
+
+}

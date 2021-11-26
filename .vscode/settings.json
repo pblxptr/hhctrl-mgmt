@@ -60,6 +60,8 @@
     "deque": "cpp",
     "cstring": "cpp",
     "numeric": "cpp",
-    "list": "cpp"
+    "list": "cpp",
+    "unordered_set": "cpp",
+    "shared_mutex": "cpp"
   }
 }

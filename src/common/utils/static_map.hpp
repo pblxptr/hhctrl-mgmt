@@ -3,7 +3,7 @@
 #include <array>
 #include <algorithm>
 
-namespace hhctrl::utils {
+namespace common::utils {
 
 template<class TKey, class TValue, std::size_t Size>
 class StaticMap

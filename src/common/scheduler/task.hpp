@@ -8,7 +8,7 @@
 //TODO: Consider changing to base class instead of interface, as all types share some similar methods to return 
 //e.g. id, owner and so on.
 
-namespace hhctrl::core::scheduler
+namespace common::scheduler
 {
 class Task
 {

@@ -5,13 +5,14 @@
 #include <boost/uuid/detail/sha1.hpp>
 #include <boost/uuid/name_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include "datetime.hpp"
-#include "scheduler_durations.hpp"
-#include "task_store.hpp"
-#include "generic_repeated_task.hpp"
-#include "everydays_at_task.hpp"
 
-namespace hhctrl::core::scheduler
+#include <common/utils/datetime.hpp>
+#include <common/scheduler/scheduler_durations.hpp>
+#include <common/scheduler/task_store.hpp>
+#include <common/scheduler/generic_repeated_task.hpp>
+#include <common/scheduler/everydays_at_task.hpp>
+
+namespace common::scheduler
 {
   enum class Execution { Relaxed, Strict };
 namespace {

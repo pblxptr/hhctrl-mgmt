@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+/* Equipment Control Interface::HatchContol */
+
+package eci.hc;
+
+message GetStatusReq
+{
+
+}
+
+message GetStatusResp
+{
+
+}
+
+message OpenHatchReq
+{
+
+}
+
+message OpenHatchCfm
+{
+
+}
+
+message CloseHatchReq
+{
+
+}
+
+message CloseHatchCfm
+{
+
+}

@@ -1,12 +1,12 @@
-#include "task_store.hpp"
+#include <common/scheduler/task_store.hpp>
 
 #include <gmock/gmock.h>
 
 namespace {
-  using namespace hhctrl::core::scheduler;
+  using namespace common::scheduler;
 }
 
-class GMockTaskStore : public hhctrl::core::scheduler::TaskStore
+class GMockTaskStore : public common::scheduler::TaskStore
 {
 public:
   MOCK_METHOD(void, add, (TaskEntity), (override));

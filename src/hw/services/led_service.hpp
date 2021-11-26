@@ -2,7 +2,7 @@
 
 #include "indicator.hpp"
 
-namespace hhctrl::hw
+namespace hw::services
 {
   class LedService
   {

@@ -2,9 +2,9 @@
 
 #include <spdlog/spdlog.h>
 
-namespace datetime = hhctrl::utils::datetime;
+namespace datetime = common::utils::datetime;
 
-namespace hhctrl::core::scheduler
+namespace common::scheduler
 {
   Scheduler::Scheduler(boost::asio::io_context& io, TaskStore& tasks_store)
     : io_{io}

@@ -6,8 +6,8 @@ find_package(fmt)
 
 set(SOURCES
   main_test.cpp
-  ../src/scheduler.cpp
-  ../src/file_task_store.cpp
+  ../src/common/scheduler/scheduler.cpp
+  ../src/common/scheduler/file_task_store.cpp
 )
 
 set(TEST_SOURCES scheduler_test.cpp)

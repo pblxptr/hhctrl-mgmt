@@ -1,10 +1,10 @@
 #pragma once
 
-#include "hatch.hpp"
+#include <hw/drivers/hatch.hpp>
 
 #include <filesystem>
 
-namespace hhctrl::hw {
+namespace hw::drivers {
 class SysfsHatch
 {
 public:
