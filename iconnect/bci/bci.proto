@@ -4,22 +4,24 @@ syntax = "proto3";
 
 package bci;
 
+enum IndicatorType {
+  Status = 0;
+  Warning = 1;
+  Maintenance = 2;
+  Fault = 3;
+}
+enum IndicatorState {
+  SteadyOff = 0;
+  SteadyOn = 1;
+  Blink = 2;
+};
+
 message ConnEstablishReq
 {
 
 }
 
 message ConnEstablishCfm
-{
-
-}
-
-message GetCapabilitiesReq
-{
-
-}
-
-message GetCapabilitiesCfm
 {
 
 }
@@ -31,17 +33,19 @@ message RestartBoardFwd
 
 message GetVisualIndicationReq
 {
-
+  IndicatorType indicator = 1;
 }
 
 message GetVisualIndicationCfm
 {
-
+  IndicatorType indicator = 1;
+  IndicatorState state = 2;
 }
 
 message SetVisualIndicationReq
 {
-
+  IndicatorType indicator = 1;
+  IndicatorState state = 2;
 }
 
 message SetVisualIndicationCfm

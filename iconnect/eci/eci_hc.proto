@@ -4,14 +4,22 @@ syntax = "proto3";
 
 package eci.hc;
 
+enum HatchStatus {
+  Undefined = 0;
+  Open = 1;
+  Closed = 2;
+  ChangingPosition = 3;
+  Faulty = 4;
+}
+
 message GetStatusReq
 {
 
 }
 
-message GetStatusResp
+message GetStatusCfm
 {
-
+  HatchStatus status = 1;
 }
 
 message OpenHatchReq
