@@ -1,9 +1,18 @@
 cmake_minimum_required(VERSION 3.12)
-project(hhctrl-mgmt)
+
+
+project(hhctrl-mgmt CXX)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+# find_package(spdlog REQUIRED)
 
 set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
 OPTION(BUILD_TESTS, "Build tests" OFF)
+
+set(CMAKE_CXX_FLAGS "-Wno-deprecated")
 
 ### CMAKE MODULES ###
 include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)

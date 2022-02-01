@@ -1,0 +1,9 @@
+
+[requires]
+boost/1.78.0
+icon/0.1
+spdlog/1.9.2
+
+[generators]
+cmake
+cmake_find_package

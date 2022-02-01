@@ -38,11 +38,11 @@ namespace {
     std::array<uint8_t, NumberOfLeds> data_;
   };
 
-  constexpr auto IndicatorMapping = StaticMap<hw::services::IndicatorType, RGBbrightnessProxy, 4> {
-    std::pair(hw::services::IndicatorType::Status, RGBbrightnessProxy{0, 255, 0}),
-    std::pair(hw::services::IndicatorType::Warning, RGBbrightnessProxy{255, 255, 0}),
-    std::pair(hw::services::IndicatorType::Maintenance, RGBbrightnessProxy{0, 0, 255}),
-    std::pair(hw::services::IndicatorType::Fault, RGBbrightnessProxy{255, 0, 0})
+  constexpr auto IndicatorMapping = StaticMap<common::data::IndicatorType, RGBbrightnessProxy, 4> {
+    std::pair(common::data::IndicatorType::Status, RGBbrightnessProxy{0, 255, 0}),
+    std::pair(common::data::IndicatorType::Warning, RGBbrightnessProxy{255, 255, 0}),
+    std::pair(common::data::IndicatorType::Maintenance, RGBbrightnessProxy{0, 0, 255}),
+    std::pair(common::data::IndicatorType::Fault, RGBbrightnessProxy{255, 0, 0})
   };
 
 }
@@ -55,29 +55,29 @@ RgbLedService::RgbLedService(hw::drivers::LedDriver& red, hw::drivers::LedDriver
   , blue_{blue}
 {}
 
-void RgbLedService::set_state(IndicatorType indicator, IndicatorState state) const
+void RgbLedService::set_state(common::data::IndicatorType indicator, common::data::IndicatorState state) const
 {
   const auto& led_proxy = IndicatorMapping.at(indicator);
 
   switch (state)
   {
-    case IndicatorState::SteadyOn:
+    case common::data::IndicatorState::SteadyOn:
       led_proxy.enable(red_, green_, blue_);
       break;
-    case IndicatorState::SteadyOff:
+    case common::data::IndicatorState::SteadyOff:
       led_proxy.disable(red_, green_, blue_);
       break;
   }
 }
 
-IndicatorState RgbLedService::get_state(IndicatorType indicator) const
+common::data::IndicatorState RgbLedService::get_state(common::data::IndicatorType indicator) const
 {
   const auto& led_proxy = IndicatorMapping.at(indicator);
 
   if (led_proxy.is_enabled()) {
-    return IndicatorState::SteadyOn;
+    return common::data::IndicatorState::SteadyOn;
   } else {
-    return IndicatorState::SteadyOff;
+    return common::data::IndicatorState::SteadyOff;
   }
 }
 }

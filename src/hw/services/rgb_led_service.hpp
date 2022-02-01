@@ -11,8 +11,8 @@ namespace hw::services
   {
   public:
     RgbLedService(hw::drivers::LedDriver& rled, hw::drivers::LedDriver& gled, hw::drivers::LedDriver& bled);
-    void set_state(IndicatorType, IndicatorState) const override;
-    IndicatorState get_state(IndicatorType) const override;
+    void set_state(common::data::IndicatorType, common::data::IndicatorState) const override;
+    common::data::IndicatorState get_state(common::data::IndicatorType) const override;
   private:
     hw::drivers::LedDriver& red_;
     hw::drivers::LedDriver& green_;

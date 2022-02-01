@@ -1,7 +1,7 @@
 #pragma once
 
-namespace hw::services
-{
+namespace common::data {
   enum class IndicatorType { Status, Warning, Maintenance, Fault };
   enum class IndicatorState { SteadyOn, SteadyOff };
 }
+

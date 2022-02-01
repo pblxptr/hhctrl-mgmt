@@ -4,7 +4,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 ## TODO: Add separate cmake files, build as libraries ###
 
+
 set(HW_SOURCES
+  hw/bootstrap.cpp
+  hw/board_ctrl/board_ctrl_server.cpp
   hw/drivers/sysfs_hatch.cpp
   hw/drivers/sysfs_led.cpp
   hw/services/rgb_led_service.cpp
@@ -15,14 +18,21 @@ set(COMMON_SOURCES
   common/scheduler/file_task_store.cpp
 )
 
-set(CORE_SOURCES
-  core/main.cpp
+set(MGMT_SOURCES
+  mgmt/bootstrap.cpp
+  mgmt/board_ctrl/board_ctrl.cpp
+  mgmt/board_ctrl/board_ctrl_client.cpp
+)
+
+set(BOOTSTRAP_SOURCES
+  main.cpp
 )
 
 set(SOURCES
   ${HW_SOURCES}
   ${COMMON_SOURCES}
-  ${CORE_SOURCES}
+  ${MGMT_SOURCES}
+  ${BOOTSTRAP_SOURCES}
 )
 find_package(fmt)
 
@@ -35,8 +45,13 @@ add_dependencies(${CMAKE_PROJECT_NAME}
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
-  fmt::fmt
   stdc++fs -pthread -lboost_date_time -lboost_json
+  spdlog
+  fmt
+  zmq
+  icon
+  protobuf
+  sodium
   ${CURL_LIBRARY}
   ${DATE_TZ_LIBRARY}
   ${ICONNECT_LIBRARY}

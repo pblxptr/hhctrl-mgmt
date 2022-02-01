@@ -1,6 +1,6 @@
 #pragma once
 
-#include "indicator.hpp"
+#include <common/data/indicator.hpp>
 
 namespace hw::services
 {
@@ -8,7 +8,7 @@ namespace hw::services
   {
   public:
     virtual ~LedService() = default;
-    virtual void set_state(IndicatorType, IndicatorState) const = 0;
-    virtual IndicatorState get_state(IndicatorType) const = 0;
+    virtual void set_state(common::data::IndicatorType, common::data::IndicatorState) const = 0;
+    virtual common::data::IndicatorState get_state(common::data::IndicatorType) const = 0;
   };
 }
