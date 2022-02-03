@@ -90,5 +90,5 @@ private:
 
     return false;
   }
-}; 
+};
 }
