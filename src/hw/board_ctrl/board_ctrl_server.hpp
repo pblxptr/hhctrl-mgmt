@@ -4,7 +4,7 @@
 #include <boost/asio/awaitable.hpp>
 #include <icon/endpoint/endpoint.hpp>
 #include <icon/endpoint/message_context.hpp>
-#include <bci.pb.h>
+#include <iconnect/bci.pb.h>
 #include <hw/services/led_service.hpp>
 
 #include <string>

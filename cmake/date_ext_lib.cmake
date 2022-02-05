@@ -8,9 +8,9 @@ set(DATE_TZ_LIBRARY -ldate-tz)
 
 set(DATE_DEPENDS "")
 
-if (NOT CURL_FOUND)
-  set (DATE_DEPENDS "curl")
-endif(NOT CURL_FOUND)
+# if (NOT CURL_FOUND)
+#   set (DATE_DEPENDS "curl")
+# endif(NOT CURL_FOUND)
 
 ExternalProject_Add(date
   GIT_REPOSITORY    "https://github.com/HowardHinnant/date.git"

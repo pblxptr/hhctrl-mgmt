@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 ## TODO: Add separate cmake files, build as libraries ###
 
+find_package(icon 0.1 CONFIG REQUIRED)
+find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
 
 set(HW_SOURCES
   hw/bootstrap.cpp
@@ -34,7 +37,6 @@ set(SOURCES
   ${MGMT_SOURCES}
   ${BOOTSTRAP_SOURCES}
 )
-find_package(fmt)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
 
@@ -46,13 +48,13 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAK
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
   stdc++fs -pthread -lboost_date_time -lboost_json
-  spdlog
+  spdlog::spdlog
   fmt
   zmq
   icon
   protobuf
   sodium
-  ${CURL_LIBRARY}
+  # ${CURL_LIBRARY}
   ${DATE_TZ_LIBRARY}
   ${ICONNECT_LIBRARY}
 )
