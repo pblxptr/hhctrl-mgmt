@@ -36,7 +36,3 @@ void bootstrap()
   bctx.run();
 }
 }
-
-void run()
-{
-}

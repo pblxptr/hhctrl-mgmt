@@ -2,6 +2,12 @@ syntax = "proto3";
 
 /* Board Control Interface */
 
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+  uint32 MESSAGE_NUMBER = 50001;
+}
+
 package bci;
 
 enum IndicatorType {
@@ -16,39 +22,35 @@ enum IndicatorState {
   Blink = 2;
 };
 
-message ConnEstablishReq
-{
-
-}
-
-message ConnEstablishCfm
-{
-
-}
-
-message RestartBoardFwd
-{
-
-}
 
 message GetVisualIndicationReq
 {
+  option (MESSAGE_NUMBER) = 0x1000101;
   IndicatorType indicator = 1;
 }
 
 message GetVisualIndicationCfm
 {
+  option (MESSAGE_NUMBER) = 0x1000102;
+
   IndicatorType indicator = 1;
   IndicatorState state = 2;
 }
 
 message SetVisualIndicationReq
 {
+  option (MESSAGE_NUMBER) = 0x1000103;
+
   IndicatorType indicator = 1;
   IndicatorState state = 2;
 }
 
 message SetVisualIndicationCfm
 {
+  option (MESSAGE_NUMBER) = 0x1000104;
+}
 
+message RestartBoardFwd
+{
+  option (MESSAGE_NUMBER) = 0x1000105;
 }
