@@ -6,7 +6,7 @@ set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
 OPTION(BUILD_TESTS, "Build tests" OFF)
 
-set(CMAKE_CXX_FLAGS "-Wno-deprecated")
+add_compile_options("-Wno-deprecated")
 
 ### Protobuf ###
 include_directories(${CMAKE_BINARY_DIR})
