@@ -3,6 +3,7 @@
 #include <array>
 
 #include <common/utils/static_map.hpp>
+#include <spdlog/spdlog.h>
 
 
 using namespace common::utils;
@@ -57,6 +58,8 @@ RgbLedService::RgbLedService(hw::drivers::LedDriver& red, hw::drivers::LedDriver
 
 void RgbLedService::set_state(common::data::IndicatorType indicator, common::data::IndicatorState state) const
 {
+  spdlog::get("hw")->info("RgbLedService: set_state");
+
   const auto& led_proxy = IndicatorMapping.at(indicator);
 
   switch (state)
@@ -72,6 +75,8 @@ void RgbLedService::set_state(common::data::IndicatorType indicator, common::dat
 
 common::data::IndicatorState RgbLedService::get_state(common::data::IndicatorType indicator) const
 {
+  spdlog::get("hw")->info("RgbLedService: get_state");
+
   const auto& led_proxy = IndicatorMapping.at(indicator);
 
   if (led_proxy.is_enabled()) {

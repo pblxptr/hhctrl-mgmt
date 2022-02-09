@@ -5,6 +5,8 @@
 #include <common/utils/enum_mapper.hpp>
 #include <common/data/indicator.hpp>
 #include <common/mapper/indicator_mapper_config.hpp>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace {
 }
@@ -21,6 +23,8 @@ BoardControlServer::BoardControlServer(
 )
   : led_service_{led_service}
 {
+  spdlog::get("hw")->info("BoardControlServer: ctor, endpoint will be set on addr: {}", address);
+
   endpoint_ = icon::setup_default_endpoint(
     icon::use_services(bctx, zctx),
     icon::address(address),
@@ -28,17 +32,23 @@ BoardControlServer::BoardControlServer(
     icon::consumer<bci::SetVisualIndicationReq>([this](auto& context) -> awaitable<void> { co_await handle(context); }),
     icon::consumer<bci::RestartBoardFwd>([this](auto& context) -> awaitable<void>  { co_await handle(context); }))
   .build();
+
+  spdlog::get("hw")->info("BoardControlServer: ctor, endpoint built");
 }
 
 awaitable<void> BoardControlServer::run()
 {
-  co_return;
+  spdlog::get("hw")->info("BoardControlServer: run");
+
+  co_await endpoint_->run();
+
+  spdlog::get("hw")->info("BoardControlServer: run finished");
 }
 
 
 awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::GetVisualIndicationReq>& context)
 {
-  spdlog::debug("BoardControlServer: handle GetVisualIndicationReq");
+  spdlog::get("hw")->info("BoardControlServer: handle GetVisualIndicationReq");
 
   auto& message = context.message();
   const auto indicator_type = common::mapper::IndicatorTypeMapper_t::map_safe<common::data::IndicatorType>(message.indicator());
@@ -53,7 +63,7 @@ awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::GetVisualIn
 
 awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::SetVisualIndicationReq>& context)
 {
-  spdlog::debug("BoardControlServer: handle SetVisualIndicationReq");
+  spdlog::get("hw")->info("BoardControlServer: handle SetVisualIndicationReq");
 
   auto& message = context.message();
   const auto indicator_type = common::mapper::IndicatorTypeMapper_t::map_safe<common::data::IndicatorType>(message.indicator());
@@ -66,7 +76,7 @@ awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::SetVisualIn
 
 awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::RestartBoardFwd>& context)
 {
-  spdlog::debug("BoardControlServer: handle RestartBoardFwd. Not implemented");
+  spdlog::get("hw")->info("BoardControlServer: handle RestartBoardFwd");
 
   co_return;
 }

@@ -6,7 +6,7 @@ set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
 OPTION(BUILD_TESTS, "Build tests" OFF)
 
-add_compile_options("-Wno-deprecated")
+add_compile_options("-Wno-deprecated -fno-omit-frame-pointer -ggdb3")
 
 ### Protobuf ###
 include_directories(${CMAKE_BINARY_DIR})

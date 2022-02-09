@@ -8,6 +8,9 @@ find_package(icon 0.1 CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 
+add_compile_options("-fsanitize=address")
+add_link_options("-fsanitize=address")
+
 set(HW_SOURCES
   hw/bootstrap.cpp
   hw/board_ctrl/board_ctrl_server.cpp
@@ -49,7 +52,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAK
 target_link_libraries(${CMAKE_PROJECT_NAME}
   stdc++fs -pthread -lboost_date_time -lboost_json
   spdlog::spdlog
-  fmt
+  fmt::fmt
   zmq
   icon
   protobuf

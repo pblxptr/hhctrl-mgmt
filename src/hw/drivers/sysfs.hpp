@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <fmt/format.h>
 
 namespace {
   namespace fs = std::filesystem;
@@ -13,9 +14,8 @@ namespace hhctrl::helpers::sysfs
     auto ret = std::string{};
     auto fstream = std::fstream(path, std::ios::in);
 
-    if (!fstream)
-    {
-      throw std::runtime_error{"Attribute does not exist."};
+    if (!fstream) {
+      throw std::runtime_error{fmt::format("Attribute does not exist. Path: {}", path.string())};
     }
 
     fstream >> ret;
@@ -28,9 +28,8 @@ namespace hhctrl::helpers::sysfs
   {
     auto fstream = std::fstream(path, std::ios::out);
 
-    if (!fstream)
-    {
-      throw std::runtime_error{"Attribute does not exist."};
+    if (!fstream) {
+      throw std::runtime_error{fmt::format("Attribute does not exist. Path: {}", path.string())};
     }
 
     fstream << val;
