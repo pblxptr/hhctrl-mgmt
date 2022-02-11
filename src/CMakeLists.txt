@@ -8,9 +8,6 @@ find_package(icon 0.1 CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 
-add_compile_options("-fsanitize=address")
-add_link_options("-fsanitize=address")
-
 set(HW_SOURCES
   hw/bootstrap.cpp
   hw/board_ctrl/board_ctrl_server.cpp
