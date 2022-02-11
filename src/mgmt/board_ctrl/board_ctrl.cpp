@@ -32,10 +32,12 @@ boost::asio::awaitable<void> BoardController::setup_default()
 {
   spdlog::get("mgmt")->info("BoardController: setup_default");
 
-  co_await client_.set_visual_indication(common::data::IndicatorType::Status, common::data::IndicatorState::SteadyOn);
+  co_await client_.set_visual_indication(common::data::IndicatorType::Status, common::data::IndicatorState::SteadyOff);
   co_await client_.set_visual_indication(common::data::IndicatorType::Warning, common::data::IndicatorState::SteadyOff);
   co_await client_.set_visual_indication(common::data::IndicatorType::Maintenance, common::data::IndicatorState::SteadyOff);
   co_await client_.set_visual_indication(common::data::IndicatorType::Fault, common::data::IndicatorState::SteadyOff);
+
+  co_await client_.set_visual_indication(common::data::IndicatorType::Status, common::data::IndicatorState::SteadyOn);
 
   spdlog::get("mgmt")->info("BoardController: default setup done");
 }
