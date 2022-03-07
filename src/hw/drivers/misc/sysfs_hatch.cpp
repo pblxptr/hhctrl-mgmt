@@ -1,9 +1,10 @@
-#include <hw/drivers/sysfs_hatch.hpp>
+#include <hw/drivers/misc/sysfs_hatch.hpp>
 
 #include <filesystem>
 #include <string_view>
 #include <fstream>
 #include <tuple>
+#include <spdlog/spdlog.h>
 
 #include <common/utils/static_map.hpp>
 #include <hw/drivers/sysfs.hpp>
@@ -41,32 +42,35 @@ namespace {
     std::pair(HatchStatus::Faulty, "faulty"sv),
     std::pair(HatchStatus::Undefined, "undefined"sv)
   };
+
 }
 
 namespace hw::drivers
 {
-SysfsHatch::SysfsHatch(std::string sysfsdir)
+SysfsHatchDriver::SysfsHatchDriver(std::string sysfsdir)
 {
   if (!fs::exists(sysfsdir))
   {
-    throw std::runtime_error("Path does not exist.");
+    throw std::runtime_error(fmt::format("Sysfs directory: {} for SysfsHatchDriverDriver does not exist", sysfsdir));
   }
   sysfsdir_ = std::move(sysfsdir);
+
+  spdlog::get("hw")->debug("SysfsHatchDriver has been loaded successfully");
 }
 
-void SysfsHatch::open() const
+void SysfsHatchDriver::open() const
 {
-  sysfs::write_attr(get_path(ChangePositionAttr::name), ChangePositionAttr::open);
+  sysfs::write_attr(sysfsdir_ / ChangePositionAttr::name, ChangePositionAttr::open);
 }
 
-void SysfsHatch::close() const
+void SysfsHatchDriver::close() const
 {
-  sysfs::write_attr(get_path(ChangePositionAttr::name), ChangePositionAttr::close);
+  sysfs::write_attr(sysfsdir_ / ChangePositionAttr::name, ChangePositionAttr::close);
 }
 
-HatchStatus SysfsHatch::status() const
+HatchStatus SysfsHatchDriver::status() const
 {
-  const auto attr_val = sysfs::read_attr(get_path(StatusAttr::name));
+  const auto attr_val = sysfs::read_attr(sysfsdir_ / StatusAttr::name);
 
   return StatusMapping.at(attr_val.data());
 }

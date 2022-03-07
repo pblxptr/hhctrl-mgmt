@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <hw/drivers/driver.hpp>
 
 namespace hw::drivers {
   enum class HatchStatus {
@@ -10,13 +11,12 @@ namespace hw::drivers {
     Faulty,
     Undefined
   };
-  class HatchDriver
+  class HatchDriver : public Driver
   {
   public:
-    virtual ~HatchDriver() = default;
     virtual void open() const = 0;
     virtual void close() const = 0;
-    virtual HatchStatus status() const;
+    virtual HatchStatus status() const = 0;
   };
 }
 

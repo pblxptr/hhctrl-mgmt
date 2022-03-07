@@ -1,0 +1,49 @@
+/* Platform Device Control Interface - hatch2sr */
+
+//Base: 0x10000100
+//Max: 10
+
+syntax = "proto3";
+
+import "icon/metadata/metadata.proto";
+
+package pdci.hatch;
+
+enum HatchStatus {
+  Undefined = 0;
+  Open = 1;
+  Closed = 2;
+  ChangingPosition = 3;
+  Faulty = 4;
+}
+
+message GetStatusReq
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x100001010;
+}
+
+message GetStatusCfm
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000101;
+  HatchStatus status = 1;
+}
+
+message OpenHatchReq
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000102;
+}
+
+message OpenHatchCfm
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000103;
+}
+
+message CloseHatchReq
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000104;
+}
+
+message CloseHatchCfm
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000105;
+}

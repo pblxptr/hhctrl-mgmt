@@ -3,6 +3,8 @@
 boost/1.78.0
 spdlog/1.9.2
 libcurl/7.80.0
+protobuf/3.19.1
+icon/0.1
 
 [generators]
 cmake_find_package

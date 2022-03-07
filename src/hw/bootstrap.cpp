@@ -1,20 +1,69 @@
 #include "bootstrap.hpp"
 
+#include <fstream>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
-#include <zmq.hpp>
-
-#include <hw/board_ctrl/board_ctrl_server.hpp>
-#include <hw/drivers/sysfs_hatch.hpp>
-#include <hw/drivers/sysfs_led.hpp>
-#include <hw/services/rgb_led_service.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <zmq.hpp>
 #include <icon/utils/logger.hpp>
+
+#include <hw/board_ctrl/board_ctrl_server.hpp>
+// #include <hw/platform_device/pd_device_loader.hpp>
+
+#include <hw/platform_device/new/device_manager.hpp>
+#include <hw/platform_device/new/device_loader_ctrl.hpp>
+#include <hw/platform_device/new/loaders/hatch2sr_driver_loader.hpp>
+#include <hw/platform_device/new/loaders/sysfsled_driver_loader.hpp>
+#include <hw/platform_device/new/loaders/rgb3led_driver_loader.hpp>
+
+
+void create_pdtree_for_tests()
+{
+const char* json = R"(
+[
+  {
+    "name" : "rgb_led",
+    "compatible" : "rgb3led",
+    "leds" : [
+      {
+        "name"      : "led",
+        "compatible" : "sysfs_led",
+        "sysfs_path" : "/tmp/leds/red",
+        "color" : "red"
+      },
+      {
+        "name"      : "led",
+        "compatible" : "sysfs_led",
+        "sysfs_path" : "/tmp/leds/green",
+        "color" : "green"
+      },
+      {
+        "name"      : "led",
+        "compatible" : "sysfs_led",
+        "sysfs_path" : "/tmp/leds/blue",
+        "color" : "blue"
+      }
+    ]
+  },
+  {
+    "name" : "hatch2sr",
+    "compatible" : "sysfs_hatch2sr",
+    "sysfs_path" : "/tmp/misc/hatch2sr"
+  }
+]
+)";
+
+  auto file = std::ofstream{"/tmp/pdtree.json"};
+
+  file << json << '\n';
+}
+
 
 namespace {
   constexpr auto BoardControlServerAddress = "tcp://127.0.0.1:9595";
+  constexpr auto PlatformDeviceControlServerAddress = "tcp://127.0.0.1:9596";
 }
 
 using boost::asio::use_awaitable;
@@ -26,7 +75,7 @@ void bootstrap()
 {
   auto icon_logger = icon::utils::setup_logger();
   auto hw_logger = spdlog::stdout_color_mt("hw");
-
+  
   spdlog::set_level(spdlog::level::debug);
 
   hw_logger->info("Booststrap: hw");
@@ -43,22 +92,65 @@ void bootstrap()
   auto zctx = zmq::context_t{};
   work_guard_type work_guard(bctx.get_executor());
 
-  //Hw services
-  auto hatch = hw::drivers::SysfsHatch{"/sys/class/hatch2sr/hatch2sr"};
-  auto red = hw::drivers::SysfsLed{"/sys/class/leds/red"};
-  auto green = hw::drivers::SysfsLed{"/sys/class/leds/green"};
-  auto blue = hw::drivers::SysfsLed{"/sys/class/leds/blue"};
-  auto led_service = hw::services::RgbLedService{red, green, blue};
 
-  //Serves
-  auto bci_server = hw::board_ctrl::BoardControlServer{
-    led_service,
-    bctx,
-    zctx,
-    BoardControlServerAddress
-  };
-  boost::asio::co_spawn(bctx, bci_server.run(), handle_coroutine);
+  //new
+  create_pdtree_for_tests();
+  using SupportedDeviceInterfaces_t = std::tuple<
+    hw::drivers::LedDriver,
+    hw::drivers::RGBLedDriver,
+    hw::drivers::HatchDriver
+  >;
+
+  using SupportedDeviceLoaders_t = std::tuple<
+    hw::platform_device::SysfsLedDriverLoader,
+    hw::platform_device::RGBLedDriverLoader,
+    hw::platform_device::Hatch2srDriverLoader
+  >;
+
+  auto devm = hw::platform_device::DeviceManager<SupportedDeviceInterfaces_t>{};
+  auto pd_loader_ctrl = hw::platform_device::DeviceLoaderCtrl<SupportedDeviceLoaders_t, decltype(devm)>{devm};
+  pd_loader_ctrl.load("/tmp/pdtree.json");
+
+  for(const auto& dev : devm.devices<hw::drivers::HatchDriver>()) {
+    hw_logger->info("Device id: {} for interface: HatchDriver", dev.id());
+  }
+
+  for(auto& dev : devm.devices<hw::drivers::LedDriver>()) {
+    hw_logger->info("Device id: {} for interface: LedDriver", dev.id());
+    auto* driver = dev.driver();
+    driver->set_brightness(100);
+  }
+
+  for(const auto& dev : devm.devices<hw::drivers::RGBLedDriver>()) {
+    hw_logger->info("Device id: {} for interface: RGBLedDriver", dev.id());
+  }
+
+
+  // auto pd_loader = hw::platform_device::PlatformDeviceLoader{};
+  // pd_loader.add_driver_loader<hw::platform_device::LedDriverLoader>();
+  // pd_loader.add_driver_loader<hw::platform_device::RGBLedDriverLoader>();
+  // pd_loader.add_driver_loader<hw::platform_device::Hatch2srDriverLoader>();
+  // pd_loader.load("/tmp/pdtree.json");
+
+
+  // //Hw services
+
+  // auto hatch = hw::drivers::SysfsHatchDriver{"/sys/class/hatch2sr/hatch2sr"};
+  // auto red = hw::drivers::SysfsLedDriver{"/sys/class/leds/red"};
+  // auto green = hw::drivers::SysfsLedDriver{"/sys/class/leds/green"};
+  // auto blue = hw::drivers::SysfsLedDriver{"/sys/class/leds/blue"};
+  // auto led_service = hw::services::RgbLedService{red, green, blue};
+
+  // //Serves
+  // auto bci_server = hw::board_ctrl::BoardControlServer{
+  //   led_service,
+  //   bctx,
+  //   zctx,
+  //   BoardControlServerAddress
+  // };
+  // boost::asio::co_spawn(bctx, bci_server.run(), handle_coroutine);
 
   bctx.run();
 }
 }
+

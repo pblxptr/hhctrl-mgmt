@@ -2,7 +2,7 @@
 
 #include <common/utils/enum_mapper.hpp>
 #include <common/data/indicator.hpp>
-#include <iconnect/bci.pb.h>
+#include <iconnect/bci/bci.pb.h>
 
 namespace common::mapper {
   using IndicatorTypeMapper_t = common::utils::EnumMapper<>::MakeMapper<

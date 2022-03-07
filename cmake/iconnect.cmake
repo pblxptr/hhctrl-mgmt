@@ -1,10 +1,10 @@
 
 ### PATHS ###
-set(ICONNECT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/iconnect)
-set(ICONNECT_LIBRARY_DIR ${CMAKE_BINARY_DIR}/iconnect)
-set(ICONNECT_LIBRARY     iconnect)
+set(iconnect_INCLUDE_DIR ${CMAKE_BINARY_DIR}/iconnect)
+set(iconnect_LIBRARY_DIR ${CMAKE_BINARY_DIR}/iconnect)
+set(iconnect_LIBRARY     iconnect)
+set(iconnect_INCLUDES    ${CMAKE_BINARY_DIR}/iconnect)
+
+link_directories(${iconnect_LIBRARY_DIR})
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/iconnect)
-
-include_directories(${ICONNECT_INCLUDE_DIR})
-link_directories(${ICONNECT_LIBRARY_DIR})
