@@ -1,7 +1,7 @@
 #pragma once
 
 #include <hw/platform_device/pdtree.hpp>
-#include <hw/platform_device/new/probe_context.hpp>
+#include <hw/platform_device/probe_context.hpp>
 #include <common/traits/tuple_traits.hpp>
 
 namespace {

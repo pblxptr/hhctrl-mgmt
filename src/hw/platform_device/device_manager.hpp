@@ -1,6 +1,6 @@
 #pragma once
 
-#include <hw/platform_device/new/device_resource.hpp>
+#include <hw/platform_device/device_resource.hpp>
 #include <common/traits/tuple_traits.hpp>
 
 #include <utility>

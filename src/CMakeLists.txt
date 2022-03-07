@@ -18,7 +18,6 @@ set(HW_SOURCES
   hw/drivers/led/rgb3led.cpp
 
   hw/platform_device/pdtree.cpp
-  hw/platform_device/pd_device_loader.cpp
 )
 
 set(COMMON_SOURCES

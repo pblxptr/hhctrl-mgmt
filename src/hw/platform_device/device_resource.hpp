@@ -1,6 +1,6 @@
 #pragma once
 
-#include <hw/platform_device/new/device.hpp>
+#include <hw/platform_device/device.hpp>
 
 namespace hw::platform_device
 {
@@ -24,7 +24,7 @@ namespace hw::platform_device
       return &*device_it;
     }
 
-    const std::vector<Device_t>& devices()
+    const std::vector<Device_t>& devices() const
     {
       return devices_;
     }

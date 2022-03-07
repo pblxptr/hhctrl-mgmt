@@ -12,11 +12,11 @@
 #include <hw/board_ctrl/board_ctrl_server.hpp>
 // #include <hw/platform_device/pd_device_loader.hpp>
 
-#include <hw/platform_device/new/device_manager.hpp>
-#include <hw/platform_device/new/device_loader_ctrl.hpp>
-#include <hw/platform_device/new/loaders/hatch2sr_driver_loader.hpp>
-#include <hw/platform_device/new/loaders/sysfsled_driver_loader.hpp>
-#include <hw/platform_device/new/loaders/rgb3led_driver_loader.hpp>
+#include <hw/platform_device/device_manager.hpp>
+#include <hw/platform_device/device_loader_ctrl.hpp>
+#include <hw/platform_device/loaders/hatch2sr_driver_loader.hpp>
+#include <hw/platform_device/loaders/sysfsled_driver_loader.hpp>
+#include <hw/platform_device/loaders/rgb3led_driver_loader.hpp>
 
 
 void create_pdtree_for_tests()

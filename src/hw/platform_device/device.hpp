@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <hw/platform_device/new/device_attributes.hpp>
+#include <hw/platform_device/device_attributes.hpp>
 
 namespace hw::platform_device
 {

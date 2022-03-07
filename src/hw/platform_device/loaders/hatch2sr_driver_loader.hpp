@@ -1,39 +1,37 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
-
-#include <hw/platform_device/driver_loader.hpp>
 #include <hw/drivers/misc/sysfs_hatch.hpp>
+
+#include <spdlog/spdlog.h>
+#include <string_view>
 
 namespace hw::platform_device
 {
-class Hatch2srDriverLoader : public BaseDriverLoader<hw::drivers::SysfsHatchDriver>
-{
-public:
-  constexpr std::string_view compatible() const override
+  class Hatch2srDriverLoader
   {
-    return "sysfs_hatch2sr";
-  }
-  hw::drivers::SysfsHatchDriver* probe(const PdTreeObject_t& object) override
-  {
-    spdlog::get("hw")->info("Hatch2srDriverLoader: probe");
+  public:
+    using Compatible_t = hw::drivers::HatchDriver;
 
-    if (not object.contains("sysfs_path")) {
-      spdlog::get("hw")->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
-      return nullptr;
+    constexpr static std::string_view compatible()
+    {
+      return "sysfs_hatch2sr";
     }
 
-    //register_driver(..., false);
-    //return register_driver(std::unique_ptr<>, true);
+    template<class Context>
+    static Compatible_t* probe(Context& ctx, const PdTreeObject_t& object)
+    {
+      constexpr auto sysfs_path_atrr = "sysfs_path";
 
-    // const auto driver_id = allocate_driver<hw::drivers::SysfsHatchDriver>(...);
-    // enable_direct_control(driver_id);
+      spdlog::get("hw")->info("Hatch2srDriverLoader: probe");
 
-    // auto driver_id = pd.register_driver();
-    // pd.enable_ctrl_adapter<SysfsHatchDriver>(driver_id);
+      if (not object.contains("sysfs_path")) {
+        spdlog::get("hw")->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
+        return nullptr;
+      }
 
-    // return std::make_unique<hw::drivers::SysfsHatchDriver>(object.at("sysfs_path").as_string().c_str());
-    return nullptr;
-  }
-};
+      return ctx.template register_device(std::make_unique<hw::drivers::SysfsHatchDriver>(
+          pdtree_to_string(object.at(sysfs_path_atrr)))
+      );
+    }
+  };
 }
