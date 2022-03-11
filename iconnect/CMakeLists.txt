@@ -12,7 +12,7 @@ endif()
 set(PROTOBUF_GENERATE_CPP_APPEND_PATH FALSE)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
   bci/bci.proto
-  # pdci/pdci_hatch.proto
+  pdci/pdci_hatch.proto
 )
 
 add_library(iconnect STATIC ${PROTO_SRCS} ${PROTO_HDRS})

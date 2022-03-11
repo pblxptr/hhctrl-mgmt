@@ -12,12 +12,11 @@ find_package(Protobuf REQUIRED)
 set(HW_SOURCES
   hw/bootstrap.cpp
   hw/board_ctrl/board_ctrl_server.cpp
-
   hw/drivers/misc/sysfs_hatch.cpp
   hw/drivers/led/sysfs_led.cpp
   hw/drivers/led/rgb3led.cpp
-
   hw/platform_device/pdtree.cpp
+  hw/platform_device_ctrl/pdctrl_hatch_handler.cpp
 )
 
 set(COMMON_SOURCES

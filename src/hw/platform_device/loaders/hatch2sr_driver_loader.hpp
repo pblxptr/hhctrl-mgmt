@@ -22,7 +22,7 @@ namespace hw::platform_device
     {
       constexpr auto sysfs_path_atrr = "sysfs_path";
 
-      spdlog::get("hw")->info("Hatch2srDriverLoader: probe");
+      spdlog::get("hw")->debug("Hatch2srDriverLoader: probe");
 
       if (not object.contains("sysfs_path")) {
         spdlog::get("hw")->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");

@@ -12,7 +12,6 @@ namespace hw::drivers
   , green_{green}
   , blue_{blue}
   {
-    spdlog::get("hw")->debug("RGB3LedDriver has been loaded successfully");
   }
 
   void RGB3LedDriver::set_brightness(const RGBLedDriver::Value& value)

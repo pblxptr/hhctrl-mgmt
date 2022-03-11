@@ -19,7 +19,7 @@ enum HatchStatus {
 
 message GetStatusReq
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x100001010;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000100;
 }
 
 message GetStatusCfm

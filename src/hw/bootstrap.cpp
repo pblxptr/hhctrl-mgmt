@@ -17,6 +17,7 @@
 #include <hw/platform_device/loaders/hatch2sr_driver_loader.hpp>
 #include <hw/platform_device/loaders/sysfsled_driver_loader.hpp>
 #include <hw/platform_device/loaders/rgb3led_driver_loader.hpp>
+#include <hw/platform_device_ctrl/pdctrl_server.hpp>
 
 
 void create_pdtree_for_tests()
@@ -111,27 +112,11 @@ void bootstrap()
   auto pd_loader_ctrl = hw::platform_device::DeviceLoaderCtrl<SupportedDeviceLoaders_t, decltype(devm)>{devm};
   pd_loader_ctrl.load("/tmp/pdtree.json");
 
-  for(const auto& dev : devm.devices<hw::drivers::HatchDriver>()) {
-    hw_logger->info("Device id: {} for interface: HatchDriver", dev.id());
-  }
+  hw::pdctrl::PlatformDeviceCtrlServer pdctrl_server = hw::pdctrl::PlatformDeviceCtrlServer{
+      bctx, zctx, devm, PlatformDeviceControlServerAddress
+  };
 
-  for(auto& dev : devm.devices<hw::drivers::LedDriver>()) {
-    hw_logger->info("Device id: {} for interface: LedDriver", dev.id());
-    auto* driver = dev.driver();
-    driver->set_brightness(100);
-  }
-
-  for(const auto& dev : devm.devices<hw::drivers::RGBLedDriver>()) {
-    hw_logger->info("Device id: {} for interface: RGBLedDriver", dev.id());
-  }
-
-
-  // auto pd_loader = hw::platform_device::PlatformDeviceLoader{};
-  // pd_loader.add_driver_loader<hw::platform_device::LedDriverLoader>();
-  // pd_loader.add_driver_loader<hw::platform_device::RGBLedDriverLoader>();
-  // pd_loader.add_driver_loader<hw::platform_device::Hatch2srDriverLoader>();
-  // pd_loader.load("/tmp/pdtree.json");
-
+  boost::asio::co_spawn(bctx, pdctrl_server.run(), handle_coroutine);
 
   // //Hw services
 

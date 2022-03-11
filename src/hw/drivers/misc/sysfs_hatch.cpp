@@ -54,8 +54,6 @@ SysfsHatchDriver::SysfsHatchDriver(std::string sysfsdir)
     throw std::runtime_error(fmt::format("Sysfs directory: {} for SysfsHatchDriverDriver does not exist", sysfsdir));
   }
   sysfsdir_ = std::move(sysfsdir);
-
-  spdlog::get("hw")->debug("SysfsHatchDriver has been loaded successfully");
 }
 
 void SysfsHatchDriver::open() const

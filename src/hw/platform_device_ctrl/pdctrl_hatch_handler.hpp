@@ -1,41 +1,47 @@
 #pragma once
 
-#include <iconect/pdci/pdci.pb.h>
+#include <icon/endpoint/message_context.hpp>
+#include <iconnect/pdci/pdci_hatch.pb.h>
+#include <boost/asio/awaitable.hpp>
 
-
-template<class DriverInterface>
-class DriverControlAdapter
-{
-public:
-  void add_compatible_driver_id()
-};
+#include <hw/drivers/misc/hatch.hpp>
+#include <hw/platform_device_ctrl/pdctrl_handler.hpp>
+#include <hw/platform_device/device_access.hpp>
 
 namespace hw::pdctrl
 {
-  class PdciHatchControlAdapter : public DriverControlAdapter<HatchDriver>
+  class PlatformDeviceHatchCtrlHandler : public PlatformDeviceCtrlHandler
   {
+    using DeviceAccess_t = hw::platform_device::DeviceAccess<hw::drivers::HatchDriver>;
+    using PlatformDeviceCtrlHandler::DeviceIdCollection_t;
   public:
-    void add_driver_id()
-
-
-    template<class Builder>
-    void setup(Builder& builder)
+    template<
+      class EndpointBuilder,
+      class DeviceManager
+    >
+    PlatformDeviceHatchCtrlHandler(
+        EndpointBuilder& builder,
+        DeviceManager& devm
+      )
+      : dev_access_{DeviceAccess_t{devm}}
     {
-      builder.template add_consumer<pdci::GetStatusReq>([this](auto& context)
-        -> awaitable<void> { co_await handle(context); }));
+      builder.template add_consumer<pdci::hatch::GetStatusReq>([this](auto& context)
+        -> awaitable<void> { co_await handle(context); });
 
-      builder.template add_consumer<pdci::OpenHatchReq>([this](auto& context)
-        -> awaitable<void> { co_await handle(context); }));
+      builder.template add_consumer<pdci::hatch::OpenHatchReq>([this](auto& context)
+        -> awaitable<void> { co_await handle(context); });
 
-      builder.template add_consumer<pdci::CloseHatchReq>([this](auto& context)
-        -> awaitable<void> { co_await handle(context); }));
+      builder.template add_consumer<pdci::hatch::CloseHatchReq>([this](auto& context)
+        -> awaitable<void> { co_await handle(context); });
     }
+
+    DeviceIdCollection_t available_devices() const override;
+
   private:
-    boost::asio::awaitable<void> handle(icon::MessageContext<bci::GetStatusReq>&)
-    {
-      auto driver = get_driver<hw::drivers::HatchDriver>("driver_rt_id")->open()
-    }
-    boost::asio::awaitable<void> handle(icon::MessageContext<bci::OpenHatchReq>&) { co_return; }
-    boost::asio::awaitable<void> handle(icon::MessageContext<bci::CloseHatchReq>&) { co_return; }
+    boost::asio::awaitable<void> handle(icon::MessageContext<pdci::hatch::GetStatusReq>&);
+    boost::asio::awaitable<void> handle(icon::MessageContext<pdci::hatch::OpenHatchReq>&);
+    boost::asio::awaitable<void> handle(icon::MessageContext<pdci::hatch::CloseHatchReq>&);
+  private:
+    DeviceAccess_t dev_access_;
   };
 }

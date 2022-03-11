@@ -21,8 +21,6 @@ SysfsLedDriver::SysfsLedDriver(std::string sysfsdir)
     throw std::runtime_error(fmt::format("Sysfs directory: {} for SysfsLedDriver does not exist", sysfsdir));
   }
   sysfsdir_ = std::move(sysfsdir);
-
-  spdlog::get("hw")->debug("SysfsLedDriver has been loaded successfully");
 }
 
 void SysfsLedDriver::set_brightness(uint8_t value) const

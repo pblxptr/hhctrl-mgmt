@@ -20,6 +20,12 @@ namespace hw::platform_device
 {
   using DeviceResource<std::tuple_element_t<Idx, T>>::register_dev_resource...;
   public:
+    DeviceManager() = default;
+    DeviceManager(const DeviceManager&) = delete;
+    DeviceManager(DeviceManager&&) = default;
+    DeviceManager& operator=(const DeviceManager&) = delete;
+    DeviceManager& operator=(DeviceManager&&) = default;
+
     template<class DriverInterface>
     decltype(auto) device(const std::string& device_id)
     {

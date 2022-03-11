@@ -2,11 +2,12 @@
 
 #include <string>
 
+#include <spdlog/spdlog.h>
 #include <hw/platform_device/device_attributes.hpp>
 
 namespace hw::platform_device
 {
-  class DeviceBase
+  class DeviceBase //Todo: Change to Device, and device class that is below change to generic device
   {
   public:
     using DeviceId_t = std::string;
@@ -14,7 +15,9 @@ namespace hw::platform_device
     DeviceBase(DeviceId_t devid, DeviceAttributes attrs)
       : device_id_{std::move(devid)}
       , attributes_{std::move(attrs)}
-    {}
+    {
+      spdlog::get("hw")->debug("Create device with id: {}", device_id_);
+    }
 
     const DeviceId_t& id() const
     {

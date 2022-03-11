@@ -20,7 +20,7 @@ namespace hw::platform_device
     template<class Context>
     static Compatible_t* probe(Context& ctx, const PdTreeObject_t& object)
     {
-      spdlog::get("hw")->info("RGBLedDriverLoader: probe");
+      spdlog::get("hw")->debug("RGBLedDriverLoader: probe");
 
       const auto& leds = object.at("leds").as_array();
       auto red = load_led<hw::drivers::LedDriver>(ctx, leds, "red");

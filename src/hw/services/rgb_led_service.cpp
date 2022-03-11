@@ -58,7 +58,7 @@ RgbLedService::RgbLedService(hw::drivers::LedDriver& red, hw::drivers::LedDriver
 
 void RgbLedService::set_state(common::data::IndicatorType indicator, common::data::IndicatorState state) const
 {
-  spdlog::get("hw")->info("RgbLedService: set_state");
+  spdlog::get("hw")->debug("RgbLedService: set_state");
 
   const auto& led_proxy = IndicatorMapping.at(indicator);
 
