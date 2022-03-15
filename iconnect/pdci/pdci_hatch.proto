@@ -1,7 +1,7 @@
 /* Platform Device Control Interface - hatch2sr */
 
-//Base: 0x10000100
-//Max: 10
+//First: 0x10000120
+//Last:  0x10000129
 
 syntax = "proto3";
 
@@ -19,31 +19,31 @@ enum HatchStatus {
 
 message GetStatusReq
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000100;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000120;
 }
 
 message GetStatusCfm
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000101;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000121;
   HatchStatus status = 1;
 }
 
 message OpenHatchReq
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000102;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000122;
 }
 
 message OpenHatchCfm
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000103;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000123;
 }
 
 message CloseHatchReq
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000104;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000124;
 }
 
 message CloseHatchCfm
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000105;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000125;
 }

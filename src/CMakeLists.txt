@@ -16,6 +16,7 @@ set(HW_SOURCES
   hw/drivers/led/sysfs_led.cpp
   hw/drivers/led/rgb3led.cpp
   hw/platform_device/pdtree.cpp
+  hw/platform_device_ctrl/pdctrl_server.cpp
   hw/platform_device_ctrl/pdctrl_hatch_handler.cpp
 )
 

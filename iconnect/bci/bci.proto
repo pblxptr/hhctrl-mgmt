@@ -1,8 +1,8 @@
 
 /* Board Control Interface */
 
-//Base: 0x10000030
-//Max: 20
+//First: 0x10000030
+//Last:  0x10000059
 
 syntax = "proto3";
 

@@ -9,6 +9,7 @@
 #include <hw/platform_device_ctrl/pdctrl_handler.hpp>
 #include <hw/platform_device_ctrl/pdctrl_hatch_handler.hpp>
 #include <common/traits/tuple_traits.hpp>
+#include <iconnect/pdci/pdci.pb.h>
 
 #include <string>
 
@@ -27,7 +28,8 @@ namespace hw::pdctrl
     {
       auto builder = icon::setup_default_endpoint(
         icon::use_services(bctx, zctx),
-        icon::address(address)
+        icon::address(address),
+        icon::consumer<pdci::GetDeviceIdsReq>([this](auto& context) -> awaitable<void> { co_await handle(context); })
       );
 
       create_ctrl_adapter<PlatformDeviceHatchCtrlHandler>(builder, devm);
@@ -35,10 +37,7 @@ namespace hw::pdctrl
       endpoint_ = builder.build();
     }
 
-    boost::asio::awaitable<void> run()
-    {
-      co_return;
-    }
+    boost::asio::awaitable<void> run();
 
   private:
     template<
@@ -51,6 +50,7 @@ namespace hw::pdctrl
       handlers_.push_back(std::make_unique<Handler>(builder, devm));
     }
 
+    boost::asio::awaitable<void> handle(icon::MessageContext<pdci::GetDeviceIdsReq>&);
   private:
     std::unique_ptr<icon::Endpoint> endpoint_{};
     std::vector<std::unique_ptr<PlatformDeviceCtrlHandler>> handlers_;

@@ -1,0 +1,22 @@
+/* Platform Device Control Interface - generak */
+
+//First: 0x10000100
+//Last:  0x10000119
+
+
+syntax = "proto3";
+
+import "icon/metadata/metadata.proto";
+
+package pdci;
+
+message GetDeviceIdsReq
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000100;
+}
+
+message GetDeviceIdsCfm
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000101;
+  repeated string device_id = 1;
+}
