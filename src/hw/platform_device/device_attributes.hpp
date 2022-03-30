@@ -11,12 +11,63 @@ concept VariantContains = requires(V v, T t)
   v = t;
 };
 
-class DeviceAttributes
+class DeviceAttribute
 {
-  using Attribute_t = std::variant<
+  using Value_t = std::variant<
       std::string,
       std::uint32_t
     >;
+public:
+  DeviceAttribute() = default;
+
+  template<class T>
+  explicit DeviceAttribute(T value)
+    : value_{std::move(value)}
+  {}
+
+  template<class T>
+  bool is() const
+  {
+    return std::holds_alternative<T>(value_);
+  }
+
+  template<class T>
+  T as() const
+  {
+    if (not is<T>()) {
+      throw std::runtime_error("Cannot get attribute. Requested type is not compatible");
+    }
+
+    return std::get<T>(value_);
+  }
+
+  template<class T>
+  T get() const
+  {
+    return std::get<T>(value_);
+  }
+
+  friend std::string to_string(const DeviceAttribute& attribute) //TODO: MOve out of class perhaps?
+  {
+    using std::to_string;
+
+    if (attribute.is<std::string>()) {
+      return attribute.get<std::string>();
+    }
+    else if (attribute.is<std::uint32_t>()) {
+      return to_string(attribute.get<std::uint32_t>());
+    }
+    else {
+      return "";
+    }
+  }
+
+private:
+  Value_t value_;
+};
+
+class DeviceAttributes
+{
 public:
   template<class...T>
   DeviceAttributes(T&&... args)
@@ -36,7 +87,7 @@ public:
   {
     const auto& val = attributes_.at(key);
 
-    return std::get<T>(val);
+    return val.get<T>();
   }
 
   template<class T>
@@ -48,20 +99,30 @@ public:
 
     const auto& val = attributes_.at(key);
 
-    if (not std::holds_alternative<T>(val)) {
+    if (not val.is<T>()) {
       return std::nullopt;
     }
 
-    return std::get<T>(val);
+    return val.get<T>();
   }
 
   template<class T>
-  void set_attribute(const std::string& key, T value) requires VariantContains<Attribute_t, T>
+  void set_attribute(const std::string& key, T&& value)
   {
-    attributes_[key] = std::move(value);
+    attributes_[key] = DeviceAttribute{std::forward<T>(value)};
+  }
+
+  decltype(auto) begin() const
+  {
+    return attributes_.begin();
+  }
+
+  decltype(auto) end() const
+  {
+    return attributes_.end();
   }
 
 private:
-  std::unordered_map<std::string, Attribute_t> attributes_;
+  std::unordered_map<std::string, DeviceAttribute> attributes_;
 };
 }

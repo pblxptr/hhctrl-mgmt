@@ -22,6 +22,8 @@ namespace hw::platform_device
     {
       spdlog::get("hw")->debug("RGBLedDriverLoader: probe");
 
+      constexpr auto model_attr = "model";
+
       const auto& leds = object.at("leds").as_array();
       auto red = load_led<hw::drivers::LedDriver>(ctx, leds, "red");
       auto green = load_led<hw::drivers::LedDriver>(ctx, leds, "green");
@@ -32,7 +34,10 @@ namespace hw::platform_device
         return nullptr;
       }
 
-      return ctx.template register_device(std::make_unique<hw::drivers::RGB3LedDriver>(*red, *green, *blue));
+      return ctx.template register_device(
+          std::make_unique<hw::drivers::RGB3LedDriver>(*red, *green, *blue),
+          DeviceAttributes { std::pair{ model_attr, pdtree_get<std::string>(object, model_attr) }}
+        );
     }
   private:
     template<class LedDriverInterface, class Context>

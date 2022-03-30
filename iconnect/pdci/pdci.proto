@@ -20,3 +20,15 @@ message GetDeviceIdsCfm
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000101;
   repeated string device_id = 1;
 }
+
+message GetDeviceAttributesReq
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000102;
+  string device_id = 1;
+}
+
+message GetDeviceAttributesCfm
+{
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000103;
+  map<string, string> attribute = 1;
+}

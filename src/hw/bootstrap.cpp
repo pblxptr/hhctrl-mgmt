@@ -25,7 +25,7 @@ void create_pdtree_for_tests()
 const char* json = R"(
 [
   {
-    "name" : "rgb_led",
+    "model" : "rgb_led",
     "compatible" : "rgb3led",
     "leds" : [
       {
@@ -49,7 +49,7 @@ const char* json = R"(
     ]
   },
   {
-    "name" : "hatch2sr",
+    "model" : "hatch",
     "compatible" : "sysfs_hatch2sr",
     "sysfs_path" : "/tmp/misc/hatch2sr"
   }

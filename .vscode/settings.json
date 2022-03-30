@@ -67,6 +67,15 @@
     "map": "cpp",
     "set": "cpp",
     "mutex": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "any": "cpp",
+    "complex": "cpp",
+    "coroutine": "cpp",
+    "csignal": "cpp",
+    "source_location": "cpp",
+    "future": "cpp",
+    "variant": "cpp",
+    "regex": "cpp",
+    "strstream": "cpp"
   }
 }

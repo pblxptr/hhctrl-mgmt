@@ -21,6 +21,7 @@ namespace hw::platform_device
     static Compatible_t* probe(Context& ctx, const PdTreeObject_t& object)
     {
       constexpr auto sysfs_path_atrr = "sysfs_path";
+      constexpr auto model_attr = "model";
 
       spdlog::get("hw")->debug("Hatch2srDriverLoader: probe");
 
@@ -29,8 +30,9 @@ namespace hw::platform_device
         return nullptr;
       }
 
-      return ctx.template register_device(std::make_unique<hw::drivers::SysfsHatchDriver>(
-          pdtree_to_string(object.at(sysfs_path_atrr)))
+      return ctx.template register_device(
+          std::make_unique<hw::drivers::SysfsHatchDriver>(pdtree_get<std::string>(object, sysfs_path_atrr)),
+          DeviceAttributes { std::pair{ model_attr, pdtree_get<std::string>(object, model_attr) }}
       );
     }
   };

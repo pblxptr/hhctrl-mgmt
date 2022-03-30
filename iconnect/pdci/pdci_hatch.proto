@@ -20,6 +20,7 @@ enum HatchStatus {
 message GetStatusReq
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000120;
+  string device_id = 1;
 }
 
 message GetStatusCfm
@@ -31,6 +32,7 @@ message GetStatusCfm
 message OpenHatchReq
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000122;
+  string device_id = 1;
 }
 
 message OpenHatchCfm
@@ -41,6 +43,7 @@ message OpenHatchCfm
 message CloseHatchReq
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000124;
+  string device_id = 1;
 }
 
 message CloseHatchCfm

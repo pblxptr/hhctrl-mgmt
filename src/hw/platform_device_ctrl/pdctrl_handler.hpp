@@ -9,9 +9,9 @@ namespace hw::pdctrl
   class PlatformDeviceCtrlHandler
   {
   public:
-    using DeviceIdCollection_t = std::vector<hw::platform_device::DeviceBase::DeviceId_t>;
+    using DeviceCollection_t = std::vector<std::reference_wrapper<const hw::platform_device::Device>>;
 
     virtual ~PlatformDeviceCtrlHandler() = default;
-    virtual DeviceIdCollection_t available_devices() const = 0;
+    virtual DeviceCollection_t available_devices() const = 0;
   };
 }

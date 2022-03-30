@@ -18,6 +18,7 @@ set(HW_SOURCES
   hw/platform_device/pdtree.cpp
   hw/platform_device_ctrl/pdctrl_server.cpp
   hw/platform_device_ctrl/pdctrl_hatch_handler.cpp
+  hw/platform_device_ctrl/pdctrl_rgbled_handler.cpp
 )
 
 set(COMMON_SOURCES
@@ -27,8 +28,9 @@ set(COMMON_SOURCES
 
 set(MGMT_SOURCES
   mgmt/bootstrap.cpp
-  mgmt/board_ctrl/board_ctrl.cpp
   mgmt/board_ctrl/board_ctrl_client.cpp
+  mgmt/platform_device/hatch/hatch_pd_client.cpp
+  mgmt/platform_device/hatch/hatch_pd.cpp
 )
 
 set(BOOTSTRAP_SOURCES

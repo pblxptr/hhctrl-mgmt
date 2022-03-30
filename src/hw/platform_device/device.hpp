@@ -7,12 +7,17 @@
 
 namespace hw::platform_device
 {
-  class DeviceBase //Todo: Change to Device, and device class that is below change to generic device
+  class Device
   {
   public:
     using DeviceId_t = std::string;
+    ~Device() = default;
+    Device(const Device&) = default;
+    Device(Device&&) = default;
+    Device& operator=(const Device&) = default;
+    Device& operator=(Device&&) = default;
 
-    DeviceBase(DeviceId_t devid, DeviceAttributes attrs)
+    Device(DeviceId_t devid, DeviceAttributes attrs)
       : device_id_{std::move(devid)}
       , attributes_{std::move(attrs)}
     {
@@ -36,17 +41,21 @@ namespace hw::platform_device
       return attributes_.find_attribute<T>(key);
     }
 
+    decltype(auto) attributes() const
+    {
+      return attributes_;
+    }
   private:
     DeviceId_t device_id_;
     DeviceAttributes attributes_;
   };
 
   template<class DriverInterface>
-  class Device : public DeviceBase
+  class GenericDevice : public Device
   {
   public:
-    Device(DeviceId_t devid, DeviceAttributes attrs, std::unique_ptr<DriverInterface> driver) 
-      : DeviceBase(std::move(devid), std::move(attrs))
+    GenericDevice(DeviceId_t devid, DeviceAttributes attrs, std::unique_ptr<DriverInterface> driver) 
+      : Device(std::move(devid), std::move(attrs))
       , driver_{std::move(driver)}
     {}
 

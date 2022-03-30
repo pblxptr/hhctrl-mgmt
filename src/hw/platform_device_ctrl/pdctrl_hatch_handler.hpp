@@ -13,7 +13,7 @@ namespace hw::pdctrl
   class PlatformDeviceHatchCtrlHandler : public PlatformDeviceCtrlHandler
   {
     using DeviceAccess_t = hw::platform_device::DeviceAccess<hw::drivers::HatchDriver>;
-    using PlatformDeviceCtrlHandler::DeviceIdCollection_t;
+    using PlatformDeviceCtrlHandler::DeviceCollection_t;
   public:
     template<
       class EndpointBuilder,
@@ -35,7 +35,7 @@ namespace hw::pdctrl
         -> awaitable<void> { co_await handle(context); });
     }
 
-    DeviceIdCollection_t available_devices() const override;
+    DeviceCollection_t available_devices() const override;
 
   private:
     boost::asio::awaitable<void> handle(icon::MessageContext<pdci::hatch::GetStatusReq>&);
