@@ -4,39 +4,6 @@
 #include <hw/platform_device/probe_context.hpp>
 #include <common/traits/tuple_traits.hpp>
 
-namespace {
-namespace {
-boost::json::value load_from_file(const std::string& file_path) //Todo: Move to .cpp
-{
-  auto file = std::ifstream{file_path};
-
-  if (file.bad()) {
-    throw std::runtime_error(fmt::format("Cannot open platform device file: {}", file_path));
-  }
-
-  auto parser = boost::json::stream_parser{};
-  auto ec = boost::json::error_code{};
-
-  do {
-    auto buffer = std::array<char, 4096>{};
-    file.read(buffer.begin(), buffer.size());
-    parser.write(buffer.data(), file.gcount(), ec);
-  } while(!file.eof());
-
-  if (ec) {
-    return nullptr;
-  }
-  parser.finish(ec);
-
-  if (ec) {
-    return nullptr;
-  }
-  return parser.release();
-}
-}
-}
-
-
 namespace hw::platform_device
 {
   template<class T>
@@ -45,8 +12,6 @@ namespace hw::platform_device
     typename T::Compatible_t;
 
     { T::compatible() };
-    // { T::probe() } -> std::same_as<std::add_pointer_t<typename T::Compatible_t>>;
-    // -> std::convertible_to<std::string>;
   };
 
   template<common::traits::IsTupleLike Loaders, class DevManager>
@@ -62,15 +27,15 @@ namespace hw::platform_device
 
     void load(const std::string& pd_file_path)
     {
-      auto data = load_from_file(pd_file_path);
-      const auto& array = data.as_array();
+      auto pdtree_content = load_pdtree_file(pd_file_path);
+      const auto& pdtree_array = pdtree_content.as_array();
       auto context = ProbeContext<Loaders_t, DevManager_t>{devm_};
 
-      spdlog::get("hw")->info("Platform devices to load: {}", array.size());
+      spdlog::get("hw")->info("Platform devices to load: {}", pdtree_array.size());
 
-      for (const auto& entry : array) {
+      for (const auto& entry : pdtree_array) {
         const auto& device_descriptor = entry.as_object();
-        auto driver = context.probe(device_descriptor);
+        const auto driver = context.probe(device_descriptor);
 
         if (not driver) {
           throw std::runtime_error("Cannot load device driver");

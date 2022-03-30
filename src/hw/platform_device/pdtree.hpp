@@ -10,8 +10,9 @@ namespace hw::platform_device
   using PdTreeArray_t = boost::json::array;
   using PdTreeValue_t = boost::json::value;
 
-  std::string pdtree_to_string(const PdTreeValue_t& val);
+  boost::json::value load_pdtree_file(const std::string& file_path);
 
+  std::string pdtree_to_string(const PdTreeValue_t& val);
   template<class T, class Key>
   T pdtree_get(const PdTreeObject_t& object, const Key& key)
   {

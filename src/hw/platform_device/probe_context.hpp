@@ -4,7 +4,22 @@
 
 namespace hw::platform_device
 {
-  template<class TLoaders, class TDevManager>
+  template<class DriverInterface, class Loader>
+  constexpr bool is_loader_binary_compatible_match()
+  {
+    using Compatible_t = typename Loader::Compatible_t;
+
+    return std::is_same_v<DriverInterface, Compatible_t> ||
+          std::is_base_of_v<DriverInterface, Compatible_t>;
+  }
+
+  template<class Loader>
+  bool is_loader_string_compatible_match(const std::string& compatible)
+  {
+    return Loader::compatible() == compatible;
+  }
+
+  template<common::traits::IsTupleLike TLoaders, class TDevManager>
   class ProbeContext
   {
     using Loaders_t = TLoaders;
@@ -21,43 +36,33 @@ namespace hw::platform_device
     }
 
     template<class DriverInterface = hw::drivers::Driver>
-    auto probe(const PdTreeObject_t& object)
+    DriverInterface* probe(const PdTreeObject_t& device_description)
     {
-      return find_and_probe<DriverInterface>(object, std::make_index_sequence<std::tuple_size_v<Loaders_t>>{});
+      auto driver_out = static_cast<DriverInterface*>(nullptr);
+
+      common::traits::TupleForEachType<Loaders_t>::invoke([this, &driver_out, &device_description]<class Loader>(common::traits::TypeTag<Loader>){
+        if constexpr (not is_loader_binary_compatible_match<DriverInterface, Loader>()) {
+          return;
+        } else {
+          driver_out = probe_driver<DriverInterface, Loader>(device_description);
+        }
+      });
+
+      return driver_out;
     }
 
   private:
-    template<class DriverInterface, size_t... Is>
-    auto find_and_probe(const PdTreeObject_t& object, std::index_sequence<Is...>)
+    template<class DriverInterface, class Loader>
+    DriverInterface* probe_driver(const PdTreeObject_t& device_description)
     {
-      auto driver_ptr = static_cast<DriverInterface*>(nullptr);
+      const auto loader_compatible_match = pdtree_to_string(device_description.at("compatible"));
 
-      (do_find_and_probe<DriverInterface, Is>(object, driver_ptr) || ...);
-
-      return driver_ptr;
-    }
-
-    template<class DriverInterface, size_t Idx>
-    auto do_find_and_probe(const PdTreeObject_t& object, DriverInterface*& driver_ptr)
-    {
-      using SelectedLoader_t = std::tuple_element_t<Idx, Loaders_t>;
-      using SelectedLoaderCompatible_t = typename SelectedLoader_t::Compatible_t;
-
-      if constexpr (not (std::is_same_v<DriverInterface, SelectedLoaderCompatible_t> ||
-            std::is_base_of_v<DriverInterface, SelectedLoaderCompatible_t>)) {
-          return false;
+      if (not is_loader_string_compatible_match<Loader>(loader_compatible_match)) {
+        return nullptr;
       }
-      else {
-        if ((SelectedLoader_t::compatible() == object.at("compatible").as_string())) {
-            driver_ptr = SelectedLoader_t::probe(*this, object);
-          return driver_ptr != nullptr;
-        }
-        else {
-          return false;
-        }
-      }
-    }
 
+      return Loader::probe(*this, device_description);
+    }
   private:
     DevManager_t& devm_;
   };

@@ -41,7 +41,6 @@ namespace hw::pdctrl
     for (const auto& handler : handlers_) {
       for (const auto& device : handler->available_devices()) {
         response.add_device_id(device.get().id());
-
       }
     }
 
@@ -51,18 +50,18 @@ namespace hw::pdctrl
   boost::asio::awaitable<void> PlatformDeviceCtrlServer::handle(icon::MessageContext<pdci::GetDeviceAttributesReq>& context) const
   {
     auto response = pdci::GetDeviceAttributesCfm{};
-    const auto& dev_id = context.message().device_id();
+    const auto& device_id = context.message().device_id();
 
-    auto device = find_device(handlers_, dev_id);
+    auto device = find_device(handlers_, device_id);
     if (not device) {
       throw std::runtime_error("Cannot find device with requested id");
     }
 
     using std::to_string;
-    auto& cfm_attributes = *response.mutable_attribute();
+    auto& attributes_map = *response.mutable_attribute();
 
     for (auto&& [key, val] : device->get().attributes()) {
-      cfm_attributes[std::forward<decltype(key)>(key)] = to_string(std::forward<decltype(val)>(val));
+      attributes_map[std::forward<decltype(key)>(key)] = to_string(std::forward<decltype(val)>(val));
     }
 
     co_await context.async_respond(std::move(response));

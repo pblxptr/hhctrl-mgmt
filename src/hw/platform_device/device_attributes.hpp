@@ -1,16 +1,11 @@
 #pragma once
 
+#include <common/traits/variant_traits.hpp>
 #include <variant>
 
 namespace hw::platform_device
 {
-
-template<class V, class T> //Todo: move to utility
-concept VariantContains = requires(V v, T t)
-{
-  v = t;
-};
-
+#
 class DeviceAttribute
 {
   using Value_t = std::variant<
@@ -45,21 +40,6 @@ public:
   T get() const
   {
     return std::get<T>(value_);
-  }
-
-  friend std::string to_string(const DeviceAttribute& attribute) //TODO: MOve out of class perhaps?
-  {
-    using std::to_string;
-
-    if (attribute.is<std::string>()) {
-      return attribute.get<std::string>();
-    }
-    else if (attribute.is<std::uint32_t>()) {
-      return to_string(attribute.get<std::uint32_t>());
-    }
-    else {
-      return "";
-    }
   }
 
 private:
@@ -125,4 +105,19 @@ public:
 private:
   std::unordered_map<std::string, DeviceAttribute> attributes_;
 };
+
+inline std::string to_string(const DeviceAttribute& attribute)
+{
+  using std::to_string;
+
+  if (attribute.is<std::string>()) {
+    return attribute.get<std::string>();
+  }
+  else if (attribute.is<std::uint32_t>()) {
+    return to_string(attribute.get<std::uint32_t>());
+  }
+  else {
+    return "";
+  }
+}
 }

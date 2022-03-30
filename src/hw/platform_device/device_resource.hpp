@@ -10,7 +10,7 @@ namespace hw::platform_device
     using Device_t = GenericDevice<DriverInterface>;
     using DriverPtr_t = std::unique_ptr<DriverInterface>;
   public:
-    const Device_t* device(const std::string& device_id) const
+    const Device_t* device(const Device::DeviceId_t& device_id) const
     {
       auto device_it = std::find_if(devices_.begin(), devices_.end(), [&device_id](auto& dev)
       {
