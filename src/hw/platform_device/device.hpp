@@ -11,7 +11,8 @@ namespace hw::platform_device
   {
   public:
     using DeviceId_t = std::string;
-    ~Device() = default;
+
+    virtual ~Device() = default;
     Device(const Device&) = default;
     Device(Device&&) = default;
     Device& operator=(const Device&) = default;
