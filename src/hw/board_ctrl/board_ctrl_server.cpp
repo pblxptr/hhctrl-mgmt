@@ -16,12 +16,10 @@ using namespace boost::asio;
 namespace hw::board_ctrl
 {
 BoardControlServer::BoardControlServer(
-  hw::services::LedService& led_service,
   boost::asio::io_context& bctx,
   zmq::context_t& zctx,
   std::string address
 )
-  : led_service_{led_service}
 {
   spdlog::get("hw")->info("BoardControlServer: ctor, endpoint will be set on addr: {}", address);
 
@@ -50,26 +48,26 @@ awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::GetVisualIn
 {
   spdlog::get("hw")->info("BoardControlServer: handle GetVisualIndicationReq");
 
-  auto& message = context.message();
-  const auto indicator_type = common::mapper::IndicatorTypeMapper_t::map_safe<common::data::IndicatorType>(message.indicator());
-  const auto indicator_state = led_service_.get_state(indicator_type);
+  // auto& message = context.message();
+  // const auto indicator_type = common::mapper::IndicatorTypeMapper_t::map_safe<common::data::IndicatorType>(message.indicator());
+  // const auto indicator_state = led_service_.get_state(indicator_type);
 
-  auto response = bci::GetVisualIndicationCfm{};
-  response.set_indicator(message.indicator());
-  response.set_state(common::mapper::IndicatorStateMapper_t::map_safe<bci::IndicatorState>(indicator_state));
+  // auto response = bci::GetVisualIndicationCfm{};
+  // response.set_indicator(message.indicator());
+  // response.set_state(common::mapper::IndicatorStateMapper_t::map_safe<bci::IndicatorState>(indicator_state));
 
-  co_await context.async_respond(std::move(response));
+  co_await context.async_respond(bci::GetVisualIndicationCfm{});
 }
 
 awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::SetVisualIndicationReq>& context)
 {
   spdlog::get("hw")->info("BoardControlServer: handle SetVisualIndicationReq");
 
-  auto& message = context.message();
-  const auto indicator_type = common::mapper::IndicatorTypeMapper_t::map_safe<common::data::IndicatorType>(message.indicator());
-  const auto indicator_state = common::mapper::IndicatorStateMapper_t::map_safe<common::data::IndicatorState>(message.state());
+  // auto& message = context.message();
+  // const auto indicator_type = common::mapper::IndicatorTypeMapper_t::map_safe<common::data::IndicatorType>(message.indicator());
+  // const auto indicator_state = common::mapper::IndicatorStateMapper_t::map_safe<common::data::IndicatorState>(message.state());
 
-  led_service_.set_state(indicator_type, indicator_state);
+  // led_service_.set_state(indicator_type, indicator_state);
 
   co_await context.async_respond(bci::SetVisualIndicationCfm{});
 }

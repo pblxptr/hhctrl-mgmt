@@ -17,7 +17,7 @@
 #include <hw/platform_device/loaders/hatch2sr_driver_loader.hpp>
 #include <hw/platform_device/loaders/sysfsled_driver_loader.hpp>
 #include <hw/platform_device/loaders/rgb3led_driver_loader.hpp>
-#include <hw/platform_device_ctrl/pdctrl_server.hpp>
+#include <hw/platform_device_server/pdctrl_server.hpp>
 
 
 void create_pdtree_for_tests()

@@ -8,8 +8,8 @@
 #include <icon/endpoint/message_context.hpp>
 #include <iconnect/pdci/pdci.pb.h>
 
-#include <hw/platform_device_ctrl/pdctrl_hatch_handler.hpp>
-#include <hw/platform_device_ctrl/pdctrl_rgbled_handler.hpp>
+#include <hw/platform_device_server/hatch_request_handler.hpp>
+#include <hw/platform_device_server/rgbled_request_handler.hpp>
 
 namespace hw::pdctrl
 {
@@ -31,8 +31,8 @@ namespace hw::pdctrl
         icon::consumer<pdci::GetDeviceAttributesReq>([this](auto& context) -> awaitable<void> { co_await handle(context); })
       );
 
-      create_ctrl_adapter<PlatformDeviceHatchCtrlHandler>(builder, devm);
-      create_ctrl_adapter<PlatformDeviceRgbLedCtrlHandler>(builder, devm);
+      create_ctrl_adapter<HatchRequestHandler>(builder, devm);
+      create_ctrl_adapter<RgbLedRequestHandler>(builder, devm);
 
       endpoint_ = builder.build();
     }

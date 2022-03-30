@@ -6,17 +6,17 @@
 
 namespace hw::platform_device
 {
-  template<class DeviceInterface>
-  class DeviceAccess
+  template<class DriverInterface>
+  class DeviceFinder
   {
   public:
-    using DeviceCollection_t = std::vector<GenericDevice<DeviceInterface>>;
-    using Device_t = GenericDevice<DeviceInterface>;
+    using DeviceCollection_t = std::vector<GenericDevice<DriverInterface>>;
+    using Device_t = GenericDevice<DriverInterface>;
 
     template<class DeviceManager>
-    explicit DeviceAccess(DeviceManager& devm)
-      : get_devices_{[&devm]() -> const DeviceCollection_t& { return devm.template devices<DeviceInterface>(); }}
-      , find_device_{[&devm](const Device::DeviceId_t& devid) { return devm.template device<DeviceInterface>(devid); }}
+    explicit DeviceFinder(DeviceManager& devm)
+      : get_devices_{[&devm]() -> const DeviceCollection_t& { return devm.template devices<DriverInterface>(); }}
+      , find_device_{[&devm](const Device::DeviceId_t& devid) { return devm.template device<DriverInterface>(devid); }}
     {}
 
     decltype(auto) devices() const

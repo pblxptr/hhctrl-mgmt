@@ -5,29 +5,29 @@
 #include <boost/asio/awaitable.hpp>
 
 #include <hw/drivers/led/rgb_led.hpp>
-#include <hw/platform_device_ctrl/pdctrl_handler.hpp>
-#include <hw/platform_device/device_access.hpp>
+#include <hw/platform_device_server/request_handler.hpp>
+#include <hw/platform_device/device_finder.hpp>
 
 namespace hw::pdctrl
 {
-  class PlatformDeviceRgbLedCtrlHandler : public PlatformDeviceCtrlHandler
+  class RgbLedRequestHandler : public PlatformDeviceCtrlHandler
   {
-    using DeviceAccess_t = hw::platform_device::DeviceAccess<hw::drivers::RGBLedDriver>;
+    using DeviceFinder_t = hw::platform_device::DeviceFinder<hw::drivers::RGBLedDriver>;
     using PlatformDeviceCtrlHandler::DeviceCollection_t;
   public:
     template<
       class EndpointBuilder,
       class DeviceManager
     >
-    PlatformDeviceRgbLedCtrlHandler(
+    RgbLedRequestHandler(
         EndpointBuilder& builder,
         DeviceManager& devm
       )
-      : dev_access_{DeviceAccess_t{devm}}
+      : dev_access_{DeviceFinder_t{devm}}
     {}
 
     DeviceCollection_t available_devices() const override;
   private:
-    DeviceAccess_t dev_access_;
+    DeviceFinder_t dev_access_;
   };
 }

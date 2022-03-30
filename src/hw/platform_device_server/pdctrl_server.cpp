@@ -1,7 +1,7 @@
 #include <icon/endpoint/endpoint_config.hpp>
 #include <spdlog/spdlog.h>
 
-#include <hw/platform_device_ctrl/pdctrl_server.hpp>
+#include <hw/platform_device_server/pdctrl_server.hpp>
 
 namespace {
   template<class Collection, class DeviceId>
