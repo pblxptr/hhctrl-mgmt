@@ -26,33 +26,33 @@ void create_pdtree_for_tests()
 const char* json = R"(
 [
   {
+    "model" : "hatch",
+    "compatible" : "sysfs_hatch2sr",
+    "sysfs_path" : "/tmp/misc/hatch2sr"
+  },
+  {
     "model" : "rgb_led",
     "compatible" : "rgb3led",
     "leds" : [
       {
-        "name"      : "led",
+        "model"      : "led",
         "compatible" : "sysfs_led",
         "sysfs_path" : "/tmp/leds/red",
         "color" : "red"
       },
       {
-        "name"      : "led",
+        "model"      : "led",
         "compatible" : "sysfs_led",
         "sysfs_path" : "/tmp/leds/green",
         "color" : "green"
       },
       {
-        "name"      : "led",
+        "model"      : "led",
         "compatible" : "sysfs_led",
         "sysfs_path" : "/tmp/leds/blue",
         "color" : "blue"
       }
     ]
-  },
-  {
-    "model" : "hatch",
-    "compatible" : "sysfs_hatch2sr",
-    "sysfs_path" : "/tmp/misc/hatch2sr"
   }
 ]
 )";
@@ -101,15 +101,21 @@ void bootstrap()
     hw::platform_device::Hatch2srDriverLoader
   >;
 
+  //Platform device
   auto devm = hw::platform_device::DeviceManager<SupportedDeviceInterfaces_t>{};
   auto pd_loader_ctrl = hw::platform_device::DeviceLoaderCtrl<SupportedDeviceLoaders_t, decltype(devm)>{devm};
   pd_loader_ctrl.load("/tmp/pdtree.json");
 
+  //Platform device server
   hw::pdctrl::PlatformDeviceCtrlServer pdctrl_server = hw::pdctrl::PlatformDeviceCtrlServer{
       bctx, zctx, devm, PlatformDeviceControlServerAddress
   };
+  boost::asio::co_spawn(bctx, pdctrl_server.async_run(), common::coro::rethrow);
 
-  boost::asio::co_spawn(bctx, pdctrl_server.run(), common::coro::rethrow);
+  //Board control server
+  auto board_ctrl_server = hw::board_ctrl::BoardControlServer{bctx, zctx, BoardControlServerAddress};
+  boost::asio::co_spawn(bctx, board_ctrl_server.async_run(), common::coro::rethrow);
+  
 
   bctx.run();
 }

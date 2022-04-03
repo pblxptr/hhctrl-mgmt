@@ -41,6 +41,8 @@ namespace hw::platform_device
     template<class Driver>
     decltype(auto) register_device(Driver&& driver, DeviceAttributes attrs = {})
     {
+      spdlog::get("hw")->debug("DeviceManager: register_device");
+
       //TODO: Add checks that verify if device manager supports driver
 
       return register_dev_resource(generate_id(), std::forward<Driver>(driver), std::move(attrs));

@@ -25,7 +25,7 @@ namespace {
 
 namespace hw::pdctrl
 {
-  boost::asio::awaitable<void> PlatformDeviceCtrlServer::run()
+  boost::asio::awaitable<void> PlatformDeviceCtrlServer::async_run()
   {
     spdlog::get("hw")->info("PlatformDeviceCtrlServer: run");
 

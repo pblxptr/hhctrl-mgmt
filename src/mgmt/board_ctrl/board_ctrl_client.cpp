@@ -12,7 +12,7 @@ namespace {
   template<class ExpectedMessage, class Response>
   bool response_valid(const Response& response)
   {
-    return response.error_code() || not response.template is<ExpectedMessage>();
+    return not response.error_code() || response.template is<ExpectedMessage>();
   }
 }
 
@@ -30,7 +30,7 @@ boost::asio::awaitable<BoardInfo> BoardControlClient::async_board_info()
 
   auto response = co_await async_send(bci::GetBoardInfoReq{}, RequestTimeout);
   if (not response_valid<bci::GetBoardInfoCfm>(response)) {
-    spdlog::get("mgmt")->info("BoardControlClient: received invalid response messsage");
+    spdlog::get("mgmt")->error("BoardControlClient: received invalid response messsage");
     co_return BoardInfo{};
   }
 

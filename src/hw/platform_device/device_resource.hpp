@@ -1,5 +1,7 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <hw/platform_device/device.hpp>
 
 namespace hw::platform_device
@@ -31,6 +33,10 @@ namespace hw::platform_device
 
     DriverInterface* register_dev_resource(Device::DeviceId_t dev_id, DriverPtr_t driver, DeviceAttributes attrs)
     {
+      spdlog::get("hw")->debug("DeviceResource: register_dev_resource");
+
+      assert(driver != nullptr);
+
       devices_.emplace_back(std::move(dev_id), std::move(attrs), std::move(driver));
 
       return devices_.back().driver();

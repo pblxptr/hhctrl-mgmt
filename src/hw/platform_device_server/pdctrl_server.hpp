@@ -37,7 +37,7 @@ namespace hw::pdctrl
       endpoint_ = builder.build();
     }
 
-    boost::asio::awaitable<void> run();
+    boost::asio::awaitable<void> async_run();
 
   private:
     template<

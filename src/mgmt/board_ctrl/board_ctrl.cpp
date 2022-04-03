@@ -43,6 +43,11 @@ namespace mgmt::board_ctrl
     }
     else
     {
+      spdlog::get("mgmt")->debug("Received board info -> model: {}, hardware revision: {}, serial number: {}",
+        board_info.model,
+        board_info.hardware_revision,
+        board_info.serial_number
+      );
       //raise event
     }
   }

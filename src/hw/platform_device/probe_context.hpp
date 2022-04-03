@@ -16,6 +16,8 @@ namespace hw::platform_device
   template<class Loader>
   bool is_loader_string_compatible_match(const std::string& compatible)
   {
+    spdlog::get("hw")->debug("Checking compatible string(expected: {}, current:{})", compatible, Loader::compatible());
+
     return Loader::compatible() == compatible;
   }
 
@@ -30,7 +32,7 @@ namespace hw::platform_device
     {}
 
     template<class...Args>
-    auto register_device(Args&&...args)
+    auto* register_device(Args&&...args)
     {
       return devm_.register_device(std::forward<Args>(args)...);
     }
@@ -40,11 +42,29 @@ namespace hw::platform_device
     {
       auto driver_out = static_cast<DriverInterface*>(nullptr);
 
+      // common::traits::TupleForEachType<Loaders_t>::invoke([this, &driver_out, &device_description]<class Loader>(common::traits::TypeTag<Loader>){
+      //   if constexpr (not is_loader_binary_compatible_match<DriverInterface, Loader>()) {
+      //     return;
+      //   } else {
+      //     const auto ret_driver = probe_driver<DriverInterface, Loader>(device_description);
+      //     assert (ret_driver != nullptr);
+      //   }
+      // });
+
       common::traits::TupleForEachType<Loaders_t>::invoke([this, &driver_out, &device_description]<class Loader>(common::traits::TypeTag<Loader>){
-        if constexpr (not is_loader_binary_compatible_match<DriverInterface, Loader>()) {
-          return;
-        } else {
-          driver_out = probe_driver<DriverInterface, Loader>(device_description);
+        const auto driver_compatible_string = pdtree_to_string(device_description.at("compatible"));
+
+        if (not is_loader_string_compatible_match<Loader>(driver_compatible_string)) {
+          spdlog::get("hw")->debug("Driver string compatible does not match");
+        }
+        else {
+          if constexpr (not is_loader_binary_compatible_match<DriverInterface, Loader>()) {
+            spdlog::get("hw")->debug("Driver binary compatiblilty does not match");
+          }
+          else {
+            driver_out = probe_driver<DriverInterface, Loader>(device_description);
+            assert(driver_out != nullptr);
+          }
         }
       });
 

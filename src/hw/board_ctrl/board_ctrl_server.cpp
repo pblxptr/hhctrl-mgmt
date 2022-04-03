@@ -29,12 +29,12 @@ BoardControlServer::BoardControlServer(
     icon::consumer<bci::RestartBoardFwd>([this](auto& context) -> awaitable<void>  { co_await handle(context); }))
   .build();
 
-  spdlog::get("hw")->info("BoardControlServer: ctor, endpoint built");
+  spdlog::get("hw")->debug("BoardControlServer: ctor, endpoint built");
 }
 
-awaitable<void> BoardControlServer::run()
+awaitable<void> BoardControlServer::async_run()
 {
-  spdlog::get("hw")->info("BoardControlServer: run");
+  spdlog::get("hw")->debug("BoardControlServer: run");
 
   co_await endpoint_->run();
 
@@ -44,19 +44,19 @@ awaitable<void> BoardControlServer::run()
 
 awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::GetBoardInfoReq>& context)
 {
-  spdlog::get("hw")->info("BoardControlServer: handle GetBoardInfoReq");
+  spdlog::get("hw")->debug("BoardControlServer: handle GetBoardInfoReq");
 
   auto response = bci::GetBoardInfoCfm{};
-  response.set_model("Dummy model");
-  response.set_hardware_revision("Dummy hardware revision");
-  response.set_serial_number("Dummy serial number");
+  response.set_model("Dummy_Model");
+  response.set_hardware_revision("Dummy_Rev");
+  response.set_serial_number("Dummy_Serial");
 
   co_await context.async_respond(std::move(response));
 }
 
 awaitable<void> BoardControlServer::handle(icon::MessageContext<bci::RestartBoardFwd>& context)
 {
-  spdlog::get("hw")->info("BoardControlServer: handle RestartBoardFwd");
+  spdlog::get("hw")->debug("BoardControlServer: handle RestartBoardFwd");
 
   co_return;
 }

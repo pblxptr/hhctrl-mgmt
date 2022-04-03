@@ -22,8 +22,9 @@ namespace hw::platform_device
     {
       constexpr auto sysfs_path_atrr = "sysfs_path";
       constexpr auto color_attr = "color";
+      constexpr auto model_attr = "model";
 
-      spdlog::get("hw")->info("LedDriverLoader: probe");
+      spdlog::get("hw")->debug("SysfsLedDriverLoader: probe driver '{}'", pdtree_to_string(object.at(model_attr)));
 
       if (not object.contains(sysfs_path_atrr)) {
         spdlog::get("hw")->error("Missing attribute 'sysfs_path' in pdtree for led driver descriptor");
@@ -36,11 +37,12 @@ namespace hw::platform_device
       }
 
       return ctx.template register_device(
-        std::make_unique<hw::drivers::SysfsLedDriver>(
-            pdtree_to_string(object.at(sysfs_path_atrr))
-        ),
-        DeviceAttributes{std::pair{color_attr, pdtree_to_string(object.at(color_attr))}
-      });
+        std::make_unique<hw::drivers::SysfsLedDriver>(pdtree_to_string(object.at(sysfs_path_atrr))),
+        DeviceAttributes {
+          std::pair { model_attr, pdtree_to_string(object.at(model_attr)) },
+          std::pair { color_attr, pdtree_to_string(object.at(color_attr)) }
+        }
+      );
     }
   };
 }

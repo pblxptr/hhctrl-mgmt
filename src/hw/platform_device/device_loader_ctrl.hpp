@@ -40,6 +40,8 @@ namespace hw::platform_device
         if (not driver) {
           throw std::runtime_error("Cannot load device driver");
         }
+
+        spdlog::get("hw")->info("Driver loaded successfully");
       }
     }
   private:

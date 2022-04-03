@@ -18,7 +18,7 @@ namespace hw::board_ctrl
       zmq::context_t&,
       std::string
     );
-    boost::asio::awaitable<void> run();
+    boost::asio::awaitable<void> async_run();
   private:
     boost::asio::awaitable<void> handle(icon::MessageContext<bci::GetBoardInfoReq>&);
     boost::asio::awaitable<void> handle(icon::MessageContext<bci::RestartBoardFwd>&);

@@ -23,7 +23,7 @@ namespace hw::platform_device
       constexpr auto sysfs_path_atrr = "sysfs_path";
       constexpr auto model_attr = "model";
 
-      spdlog::get("hw")->debug("Hatch2srDriverLoader: probe");
+      spdlog::get("hw")->debug("Hatch2srDriverLoader: probe driver '{}'", pdtree_to_string(object.at(model_attr)));
 
       if (not object.contains("sysfs_path")) {
         spdlog::get("hw")->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
@@ -32,7 +32,9 @@ namespace hw::platform_device
 
       return ctx.template register_device(
           std::make_unique<hw::drivers::SysfsHatchDriver>(pdtree_get<std::string>(object, sysfs_path_atrr)),
-          DeviceAttributes { std::pair{ model_attr, pdtree_get<std::string>(object, model_attr) }}
+          DeviceAttributes {
+            std::pair{ model_attr, pdtree_get<std::string>(object, model_attr) }
+          }
       );
     }
   };
