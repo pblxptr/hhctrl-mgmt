@@ -4,7 +4,7 @@ project(hhctrl-mgmt CXX)
 
 set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
-OPTION(BUILD_TESTS, "Build tests" OFF)
+option(ENABLE_TESTING "Enable building and executing tests" OFF)
 
 add_compile_options("-Wno-deprecated")
 
@@ -21,8 +21,9 @@ include(${CMAKE_ADDONS}/iconnect.cmake)
 
 add_subdirectory(src)
 
-if (BUILD_TESTS)
+if (ENABLE_TESTING)
+  enable_testing()
   include(${CMAKE_ADDONS}/catch2_ext_lib.cmake)
-  include(${CMAKE_ADDONS}/gtest_ext_lib.cmake)
+  #include(${CMAKE_ADDONS}/gtest_ext_lib.cmake)
   add_subdirectory(test)
-endif(BUILD_TESTS)
+endif(ENABLE_TESTING)

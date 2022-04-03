@@ -5,6 +5,7 @@
 #include <boost/asio/co_spawn.hpp>
 #include <zmq.hpp>
 
+#include <common/coro/co_spawn.hpp>
 #include <mgmt/board_ctrl/board_ctrl_client.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -26,13 +27,6 @@ void bootstrap()
   console_logger->info("Booststrap: mgmt");
   console_logger->info("Booststrap: {}", BoardControlServerAddress);
 
-  auto handle_coroutine = [](auto eptr)
-  {
-    if (eptr) {
-      std::rethrow_exception(eptr);
-    }
-  };
-
   //Messaging services
   auto bctx = boost::asio::io_context{};
   auto zctx = zmq::context_t{};
@@ -45,6 +39,8 @@ void bootstrap()
   auto bc_addr = std::string{BoardControlServerAddress};
   auto pdctrl_addr = std::string{PlatformDeviceControlServerAddress};
 
+  //Run
+  // boost::asio::co_spawn(bctx, mgmt::board_ctrl::async_run(bc_client));
 
   bctx.run();
 }
