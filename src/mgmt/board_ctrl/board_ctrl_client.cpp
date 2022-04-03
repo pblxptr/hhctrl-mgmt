@@ -1,19 +1,18 @@
 #include "board_ctrl_client.hpp"
 
-#include <common/mapper/indicator_mapper_config.hpp>
+#include <iconnect/bci/bci.pb.h>
 #include <spdlog/spdlog.h>
+
 
 using boost::asio::awaitable;
 
 namespace {
   constexpr auto RequestTimeout = std::chrono::seconds(0);
 
-  template<class ResponseMessage, class Response>
-  void check_if_valid(const Response& response)
+  template<class ExpectedMessage, class Response>
+  bool response_valid(const Response& response)
   {
-    if (response.error_code() || !response.template is<ResponseMessage>()) {
-      throw std::runtime_error("Response contains error code or invalid message.");
-    }
+    return response.error_code() || not response.template is<ExpectedMessage>();
   }
 }
 
@@ -25,32 +24,29 @@ BoardControlClient::BoardControlClient(boost::asio::io_context& bctx, zmq::conte
   spdlog::get("mgmt")->info("BoardControlClient: ctor");
 }
 
-awaitable<void> BoardControlClient::set_visual_indication(
-  const common::data::IndicatorType& indicator_type,
-  const common::data::IndicatorState& state
-)
+boost::asio::awaitable<BoardInfo> BoardControlClient::async_board_info()
 {
-  spdlog::get("mgmt")->info("BoardControlClient: set_visual_indication");
+  spdlog::get("mgmt")->info("BoardControlClient: async_board_info");
 
-  auto req = bci::SetVisualIndicationReq{};
-  req.set_indicator(common::mapper::IndicatorTypeMapper_t::map_safe<bci::IndicatorType>(indicator_type));
-  req.set_state(common::mapper::IndicatorStateMapper_t::map_safe<bci::IndicatorState>(state));
+  auto response = co_await async_send(bci::GetBoardInfoReq{}, RequestTimeout);
+  if (not response_valid<bci::GetBoardInfoCfm>(response)) {
+    spdlog::get("mgmt")->info("BoardControlClient: received invalid response messsage");
+    co_return BoardInfo{};
+  }
 
-  auto response = co_await async_send(std::move(req), RequestTimeout);
+  const auto& message = response.get_safe<bci::GetBoardInfoCfm>();
 
-  check_if_valid<bci::SetVisualIndicationCfm>(response);
+  co_return BoardInfo {
+    .model = message.model(),
+    .hardware_revision = message.hardware_revision(),
+    .serial_number = message.serial_number()
+  };
 }
 
-awaitable<common::data::IndicatorState> BoardControlClient::get_visual_indication(const common::data::IndicatorType& indicator_type)
+boost::asio::awaitable<void> BoardControlClient::async_restart()
 {
-  spdlog::get("mgmt")->info("BoardControlClient: get_visual_indication");
+  spdlog::get("mgmt")->info("BoardControlClient: async_restart");
 
-  auto req = bci::GetVisualIndicationReq{};
-  req.set_indicator(common::mapper::IndicatorTypeMapper_t::map_safe<bci::IndicatorType>(indicator_type));
-
-  const auto response = co_await async_send(std::move(req), RequestTimeout);
-  const auto message = response.get_safe<bci::GetVisualIndicationCfm>();
-
-  co_return common::mapper::IndicatorStateMapper_t::map_safe<common::data::IndicatorState>(message.state());
+  co_await async_send(bci::RestartBoardFwd{}, RequestTimeout);
 }
 }

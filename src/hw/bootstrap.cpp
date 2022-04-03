@@ -18,6 +18,7 @@
 #include <hw/platform_device/loaders/sysfsled_driver_loader.hpp>
 #include <hw/platform_device/loaders/rgb3led_driver_loader.hpp>
 #include <hw/platform_device_server/pdctrl_server.hpp>
+#include <common/coro/co_spawn.hpp>
 
 
 void create_pdtree_for_tests()
@@ -76,23 +77,15 @@ void bootstrap()
 {
   auto icon_logger = icon::utils::setup_logger();
   auto hw_logger = spdlog::stdout_color_mt("hw");
-  
+
   spdlog::set_level(spdlog::level::debug);
 
   hw_logger->info("Booststrap: hw");
-
-  auto handle_coroutine = [](auto eptr)
-  {
-    if (eptr) {
-      std::rethrow_exception(eptr);
-    }
-  };
 
   //Messaging services
   auto bctx = boost::asio::io_context{};
   auto zctx = zmq::context_t{};
   work_guard_type work_guard(bctx.get_executor());
-
 
   //new
   create_pdtree_for_tests();
@@ -116,24 +109,7 @@ void bootstrap()
       bctx, zctx, devm, PlatformDeviceControlServerAddress
   };
 
-  boost::asio::co_spawn(bctx, pdctrl_server.run(), handle_coroutine);
-
-  // //Hw services
-
-  // auto hatch = hw::drivers::SysfsHatchDriver{"/sys/class/hatch2sr/hatch2sr"};
-  // auto red = hw::drivers::SysfsLedDriver{"/sys/class/leds/red"};
-  // auto green = hw::drivers::SysfsLedDriver{"/sys/class/leds/green"};
-  // auto blue = hw::drivers::SysfsLedDriver{"/sys/class/leds/blue"};
-  // auto led_service = hw::services::RgbLedService{red, green, blue};
-
-  // //Serves
-  // auto bci_server = hw::board_ctrl::BoardControlServer{
-  //   led_service,
-  //   bctx,
-  //   zctx,
-  //   BoardControlServerAddress
-  // };
-  // boost::asio::co_spawn(bctx, bci_server.run(), handle_coroutine);
+  boost::asio::co_spawn(bctx, pdctrl_server.run(), common::coro::rethrow);
 
   bctx.run();
 }

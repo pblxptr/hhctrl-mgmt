@@ -10,46 +10,21 @@ import "icon/metadata/metadata.proto";
 
 package bci;
 
-enum IndicatorType {
-  Status = 0;
-  Warning = 1;
-  Maintenance = 2;
-  Fault = 3;
-}
-enum IndicatorState {
-  SteadyOff = 0;
-  SteadyOn = 1;
-  Blink = 2;
-};
-
-message GetVisualIndicationReq
+message GetBoardInfoReq
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000030;
-  IndicatorType indicator = 1;
 }
 
-message GetVisualIndicationCfm
+message GetBoardInfoCfm
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000031;
 
-  IndicatorType indicator = 1;
-  IndicatorState state = 2;
-}
-
-message SetVisualIndicationReq
-{
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000032;
-
-  IndicatorType indicator = 1;
-  IndicatorState state = 2;
-}
-
-message SetVisualIndicationCfm
-{
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000033;
+  string model = 1;
+  string hardware_revision = 2;
+  string serial_number = 3;
 }
 
 message RestartBoardFwd
 {
-  option (icon.metadata.MESSAGE_NUMBER) = 0x10000034;
+  option (icon.metadata.MESSAGE_NUMBER) = 0x10000032;
 }

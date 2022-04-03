@@ -20,8 +20,7 @@ namespace hw::board_ctrl
     );
     boost::asio::awaitable<void> run();
   private:
-    boost::asio::awaitable<void> handle(icon::MessageContext<bci::GetVisualIndicationReq>&);
-    boost::asio::awaitable<void> handle(icon::MessageContext<bci::SetVisualIndicationReq>&);
+    boost::asio::awaitable<void> handle(icon::MessageContext<bci::GetBoardInfoReq>&);
     boost::asio::awaitable<void> handle(icon::MessageContext<bci::RestartBoardFwd>&);
 
   private:
