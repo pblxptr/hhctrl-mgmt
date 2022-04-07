@@ -3,6 +3,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
+#include <boost/asio/this_coro.hpp>
 #include <zmq.hpp>
 
 #include <common/coro/co_spawn.hpp>
@@ -10,8 +11,11 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <common/command/dispatcher.hpp>
+#include <common/event/event_bus.hpp>
 #include <mgmt/board_ctrl/board_ctrl.hpp>
 #include <mgmt/board_ctrl/settings.hpp>
+
+
 namespace {
   constexpr auto BoardControlServerAddress = "tcp://127.0.0.1:9595";
   constexpr auto PlatformDeviceControlServerAddress = "tcp://127.0.0.1:9596";
@@ -24,6 +28,13 @@ using work_guard_type =
 
 namespace mgmt {
 
+
+struct Event1 : public common::event::GenericEvent<Event1> {};
+struct Event2 : public common::event::GenericEvent<Event2> {};
+struct Event3 : public common::event::GenericEvent<Event3> {};
+
+
+
 void bootstrap()
 {
   static auto console_logger = spdlog::stdout_color_mt("mgmt");
@@ -35,6 +46,7 @@ void bootstrap()
   auto zctx = zmq::context_t{};
   work_guard_type work_guard(bctx.get_executor());
   auto command_dispatcher = common::command::AsyncCommandDispatcher{};
+  auto event_bus = common::event::AsyncEventBus{bctx};
 
   //Board Control
   auto bc_client = mgmt::board_ctrl::BoardControlClient{bctx, zctx};

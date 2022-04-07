@@ -29,9 +29,6 @@ namespace mgmt::board_ctrl
     const Settings& settings
   )
   {
-    //Setup
-    setup_command_handlers(command_dispatcher, client);
-
     //Connect
     if (const auto connected = co_await client.async_connect(settings.server_address.c_str()); not connected) {
       throw std::runtime_error("Cannot connect to main board");
@@ -41,14 +38,15 @@ namespace mgmt::board_ctrl
     if (const auto board_info = co_await client.async_board_info(); not is_board_info_valid(board_info)) {
       throw std::runtime_error("Invalid board info");
     }
-    else
-    {
+    else {
       spdlog::get("mgmt")->debug("Received board info -> model: {}, hardware revision: {}, serial number: {}",
         board_info.model,
         board_info.hardware_revision,
         board_info.serial_number
       );
-      //raise event
     }
+
+
+    //publish event
   }
 }
