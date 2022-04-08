@@ -64,7 +64,7 @@ const char* json = R"(
 
 
 namespace {
-  constexpr auto BoardControlServerAddress = "tcp://127.0.0.1:9595";
+  constexpr auto BoardControlServerAddress = "tcp://127.0.0.1:9590";
   constexpr auto PlatformDeviceControlServerAddress = "tcp://127.0.0.1:9596";
 }
 
@@ -78,8 +78,7 @@ void bootstrap()
   auto icon_logger = icon::utils::setup_logger();
   auto hw_logger = spdlog::stdout_color_mt("hw");
 
-  spdlog::set_level(spdlog::level::debug);
-
+  hw_logger->set_level(spdlog::level::debug);
   hw_logger->info("Booststrap: hw");
 
   //Messaging services

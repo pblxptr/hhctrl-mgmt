@@ -11,7 +11,7 @@ namespace mgmt::device
   public:
     explicit HatchDevice(DeviceId_t device_id) : Device(std::move(device_id))
       {}
-    virtual boost::asio::awaitable<void> async_open() const = 0;
-    virtual boost::asio::awaitable<void> async_close() const = 0;
+    virtual boost::asio::awaitable<void> async_open() = 0;
+    virtual boost::asio::awaitable<void> async_close() = 0;
   };
 }

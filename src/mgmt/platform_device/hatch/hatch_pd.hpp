@@ -1,17 +1,17 @@
 #pragma once
 
 #include <mgmt/device/hatch_device.hpp>
-#include <mgmt/platform_device/hatch/hatch_pd_client.hpp>
+#include <common/utils/client.hpp>
 
 namespace mgmt::platform_device
 {
   class HatchPlatformDevice : public mgmt::device::HatchDevice
   {
   public:
-    HatchPlatformDevice(mgmt::device::Device::DeviceId_t, std::unique_ptr<mgmt::platform_device::HatchPlatformDeviceClient>);
-    boost::asio::awaitable<void> async_open() const override;
-    boost::asio::awaitable<void> async_close() const override;
+    HatchPlatformDevice(mgmt::device::DeviceId_t, common::utils::Client);
+    boost::asio::awaitable<void> async_open() override;
+    boost::asio::awaitable<void> async_close() override;
   private:
-    std::unique_ptr<mgmt::platform_device::HatchPlatformDeviceClient> client_;
+    common::utils::Client client_;
   };
 }

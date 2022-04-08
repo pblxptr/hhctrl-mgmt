@@ -7,17 +7,21 @@
 #include <zmq.hpp>
 
 #include <common/coro/co_spawn.hpp>
-#include <mgmt/board_ctrl/board_ctrl_client.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <common/command/dispatcher.hpp>
 #include <common/event/event_bus.hpp>
 #include <mgmt/board_ctrl/board_ctrl.hpp>
+#include <mgmt/device/device_registry.hpp>
+#include <mgmt/device/hatch_device.hpp>
+#include <mgmt/device/led_device.hpp>
+#include <mgmt/device/board_device.hpp>
+#include <mgmt/board_ctrl/board.hpp>
+#include <common/utils/client.hpp>
 #include <mgmt/board_ctrl/settings.hpp>
 
-
 namespace {
-  constexpr auto BoardControlServerAddress = "tcp://127.0.0.1:9595";
+  constexpr auto BoardControlServerAddress = "tcp://127.0.0.1:9590";
   constexpr auto PlatformDeviceControlServerAddress = "tcp://127.0.0.1:9596";
 }
 
@@ -28,18 +32,12 @@ using work_guard_type =
 
 namespace mgmt {
 
-
-struct Event1 : public common::event::GenericEvent<Event1> {};
-struct Event2 : public common::event::GenericEvent<Event2> {};
-struct Event3 : public common::event::GenericEvent<Event3> {};
-
-
-
 void bootstrap()
 {
-  static auto console_logger = spdlog::stdout_color_mt("mgmt");
-  console_logger->info("Booststrap: mgmt");
-  console_logger->info("Booststrap: {}", BoardControlServerAddress);
+  static auto mgmt_logger = spdlog::stdout_color_mt("mgmt");
+  mgmt_logger->set_level(spdlog::level::debug);
+  mgmt_logger->info("Booststrap: mgmt");
+  mgmt_logger->info("Booststrap: {}", BoardControlServerAddress);
 
   //Messaging services
   auto bctx = boost::asio::io_context{};
@@ -49,10 +47,21 @@ void bootstrap()
   auto event_bus = common::event::AsyncEventBus{bctx};
 
   //Board Control
-  auto bc_client = mgmt::board_ctrl::BoardControlClient{bctx, zctx};
-  auto settings = mgmt::board_ctrl::Settings { .server_address = BoardControlServerAddress };
-  boost::asio::co_spawn(bctx, mgmt::board_ctrl::async_run(command_dispatcher, bc_client, settings), common::coro::rethrow);
+  // auto bc_client = mgmt::board_ctrl::BoardControlClient{bctx, zctx};
+  // auto settings = mgmt::board_ctrl::Settings { .server_address = BoardControlServerAddress };
+  // boost::asio::co_spawn(bctx, mgmt::board_ctrl::async_run(command_dispatcher, bc_client, settings), common::coro::rethrow);
 
+  boost::asio::co_spawn(bctx, mgmt::board_ctrl::async_run(
+    common::utils::Client{bctx, zctx, BoardControlServerAddress}
+  ), common::coro::rethrow);
+
+  // auto client = common::utils::Client{zctx, bctx, BoardControlServerAddress};
+  // boost::asio::co_spawn(bctx, mgmt::board_ctrl::async_run(client),
+  //   common::coro::rethrow);
+
+  auto hatch_dev_registry = mgmt::device::DeviceRegistry<mgmt::device::HatchDevice>{};
+  auto led_dev_registry = mgmt::device::DeviceRegistry<mgmt::device::LedDevice>{};
+  auto board_dev_registry = mgmt::device::DeviceRegistry<mgmt::device::BoardDevice>{};
 
   bctx.run();
 }

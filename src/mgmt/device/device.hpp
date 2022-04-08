@@ -7,10 +7,11 @@
 
 namespace mgmt::device
 {
+  using DeviceId_t = std::string;
+
   class Device
   {
   public:
-    using DeviceId_t = std::string;
 
     Device(DeviceId_t device_id)
       : id_{std::move(device_id)}

@@ -7,7 +7,7 @@ namespace common::event
 {
   class BaseEvent
   {
-  public:
+  protected:
     explicit BaseEvent(EventId_t event_id)
       : event_id_{event_id}
     {}

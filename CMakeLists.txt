@@ -7,6 +7,12 @@ set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 option(ENABLE_TESTING "Enable building and executing tests" OFF)
 
 add_compile_options("-Wno-deprecated")
+# add_compile_options("-fsanitize=address")
+# add_link_options("-fsanitize=address")
+
+# add_compile_options("-fsanitize=undefined")
+# add_link_options("-fsanitize=undefined")
+
 
 ### Protobuf ###
 include_directories(${CMAKE_BINARY_DIR})

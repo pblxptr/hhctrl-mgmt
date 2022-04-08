@@ -3,7 +3,11 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/system_executor.hpp>
 #include <functional>
+#include <variant>
 
 #include <common/event/base_event.hpp>
 #include <common/event/requirements.hpp>

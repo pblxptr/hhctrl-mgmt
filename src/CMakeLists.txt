@@ -28,9 +28,8 @@ set(COMMON_SOURCES
 
 set(MGMT_SOURCES
   mgmt/bootstrap.cpp
-  mgmt/board_ctrl/board_ctrl_client.cpp
   mgmt/board_ctrl/board_ctrl.cpp
-  mgmt/platform_device/hatch/hatch_pd_client.cpp
+  mgmt/board_ctrl/board.cpp
   mgmt/platform_device/hatch/hatch_pd.cpp
 )
 
