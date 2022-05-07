@@ -33,8 +33,8 @@ namespace common::utils
       endpoint_addresss_ = std::move(src.endpoint_addresss_);
     }
 
-    template<class Message>
-    boost::asio::awaitable<Response_t> async_send(Message&& message)
+    template<class Message, class Timeout = std::chrono::seconds>
+    boost::asio::awaitable<Response_t> async_send(Message&& message, Timeout timeout = Timeout{ 0 } )
     {
       spdlog::get("mgmt")->debug("Address: {}", endpoint_addresss_);
 
@@ -43,7 +43,7 @@ namespace common::utils
         co_await BasicClient::async_connect(endpoint_addresss_.c_str());
       }
 
-      co_return co_await BasicClient::async_send(std::forward<Message>(message));
+      co_return co_await BasicClient::async_send(std::forward<Message>(message), timeout);
     }
   private:
     std::string endpoint_addresss_;

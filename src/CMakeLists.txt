@@ -9,17 +9,17 @@ find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Protobuf REQUIRED)
 
-set(HW_SOURCES
-  hw/bootstrap.cpp
-  hw/board_ctrl/board_ctrl_server.cpp
-  hw/drivers/misc/sysfs_hatch.cpp
-  hw/drivers/led/sysfs_led.cpp
-  hw/drivers/led/rgb3led.cpp
-  hw/platform_device/pdtree.cpp
-  hw/platform_device_server/pdctrl_server.cpp
-  hw/platform_device_server/hatch_request_handler.cpp
-  hw/platform_device_server/rgbled_request_handler.cpp
-)
+# set(HW_SOURCES
+#   hw/bootstrap.cpp
+#   hw/board_ctrl/board_ctrl_server.cpp
+#   hw/drivers/misc/sysfs_hatch.cpp
+#   hw/drivers/led/sysfs_led.cpp
+#   hw/drivers/led/rgb3led.cpp
+#   hw/platform_device/pdtree.cpp
+#   hw/platform_device_server/pdctrl_server.cpp
+#   hw/platform_device_server/hatch_request_handler.cpp
+#   hw/platform_device_server/rgbled_request_handler.cpp
+# )
 
 set(COMMON_SOURCES
   common/scheduler/scheduler.cpp
@@ -27,21 +27,26 @@ set(COMMON_SOURCES
 )
 
 set(MGMT_SOURCES
-  mgmt/bootstrap.cpp
-  mgmt/board_ctrl/board_ctrl.cpp
-  mgmt/board_ctrl/board.cpp
-  mgmt/platform_device/hatch/hatch_pd.cpp
+  app/main.cpp
+  newnew/device_id.cpp
+  newnew/sysfs_hatch.cpp
+  newnew/sysfs_led.cpp
+  newnew/rgb3_led.cpp
+  newnew/platform_device_scanner.cpp
+  newnew/pdtree.cpp
+  newnew/device_pooling_manager.cpp
+  newnew/hatch_pooler.cpp
 )
 
-set(BOOTSTRAP_SOURCES
-  main.cpp
-)
+# set(BOOTSTRAP_SOURCES
+#   main.cpp
+# )
 
 set(SOURCES
-  ${HW_SOURCES}
+  # ${HW_SOURCES}
   ${COMMON_SOURCES}
   ${MGMT_SOURCES}
-  ${BOOTSTRAP_SOURCES}
+  # ${BOOTSTRAP_SOURCES}
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})

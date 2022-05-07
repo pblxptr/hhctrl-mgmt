@@ -76,6 +76,7 @@
     "future": "cpp",
     "variant": "cpp",
     "regex": "cpp",
-    "strstream": "cpp"
+    "strstream": "cpp",
+    "forward_list": "cpp"
   }
 }
