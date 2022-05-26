@@ -12,6 +12,39 @@
 #include <newnew/device_ref_registry.hpp>
 #include <newnew/disposable_device.hpp>
 
+enum class IndicatorType { Status, Fault, Maintenance, Operational };
+enum class IndicatorState { On, Off, Blinking };
+struct Indicator
+{
+  virtual Type type() const;
+  virtual void set();
+};
+
+//led
+//indicator
+//hatch
+//switch
+//sensor
+//board
+//bus
+// --- complex ---
+// HCU
+// 
+
+indicator_service.add(led_dev_id, )
+
+class Indicator : public Device<Indicator>
+{
+public:
+  IndicatorType type() const;
+  IndicatorState() const;
+};
+
+//auto id1 = std::make_unique<Indicator>(Fault);
+//auto id2 = std::make_unique<Indicator>(Status);
+
+
+
 // #include <common/utils/disposable.hpp>
 
 // class HatchCreator
@@ -53,6 +86,27 @@
 //     parent.add_device(std::move(dev));
 //   }
 // };
+
+
+creator->pre_create();
+creator->create();
+create->post_create();
+
+board_ctrl::run()
+{
+  auto board = MainBoard{}
+  pd_scanner.scan(parent, );
+
+
+  publish(IndicatorCreated{})
+
+  // check compatible
+  // create
+  // add to store
+  // add to parent
+  // publish event
+
+}
 
 
 int main()

@@ -20,7 +20,6 @@
 #include <hw/platform_device_server/pdctrl_server.hpp>
 #include <common/coro/co_spawn.hpp>
 
-
 void create_pdtree_for_tests()
 {
 const char* json = R"(
@@ -31,23 +30,25 @@ const char* json = R"(
     "sysfs_path" : "/tmp/misc/hatch2sr"
   },
   {
-    "model" : "rgb_led",
-    "compatible" : "rgb3led",
+    "compatible" : "sysfs_rgb3led_indicator",
+    "indicators" : [
+      "fault",
+      "status",
+      "maintenance",
+      "operational"
+    ],
     "leds" : [
       {
-        "model"      : "led",
         "compatible" : "sysfs_led",
         "sysfs_path" : "/tmp/leds/red",
         "color" : "red"
       },
       {
-        "model"      : "led",
         "compatible" : "sysfs_led",
         "sysfs_path" : "/tmp/leds/green",
         "color" : "green"
       },
       {
-        "model"      : "led",
         "compatible" : "sysfs_led",
         "sysfs_path" : "/tmp/leds/blue",
         "color" : "blue"
