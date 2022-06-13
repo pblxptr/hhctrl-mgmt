@@ -1,113 +1,155 @@
 
+#include <cassert>
+
+#include <filesystem>
+#include <vector>
+#include <variant>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <boost/asio/executor_work_guard.hpp>
 
-#include <newnew/main_board.hpp>
-#include <newnew/sysfs_hatch.hpp>
-#include <newnew/sysfs_led.hpp>
-#include <newnew/rgb3_led.hpp>
-#include <newnew/platform_device_scanner.hpp>
-#include <newnew/platform_device_loader.hpp>
-#include <newnew/device_pooling_manager.hpp>
-#include <newnew/device_ref_registry.hpp>
-#include <newnew/disposable_device.hpp>
+#include <common/event/event_bus.hpp>
 
-enum class IndicatorType { Status, Fault, Maintenance, Operational };
-enum class IndicatorState { On, Off, Blinking };
-struct Indicator
-{
-  virtual Type type() const;
-  virtual void set();
-};
+#include <static/devicetree.hpp>
+#include <static/device_register.hpp>
+#include <static/main_board.hpp>
+#include <static/sysfs_led.hpp>
+#include <static/sysfs_hatch.hpp>
 
-//led
-//indicator
-//hatch
-//switch
-//sensor
-//board
-//bus
-// --- complex ---
-// HCU
-// 
+#include <static/events/device_created.hpp>
+#include <static/events/device_removed.hpp>
+#include <static/pdtree.hpp>
+#include <static/device_id.hpp>
+#include <static/devicetree.hpp>
 
-indicator_service.add(led_dev_id, )
+using WorkGuard_t =
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
-class Indicator : public Device<Indicator>
+namespace mgmt::device {
+class SysfsHatchLoader
 {
 public:
-  IndicatorType type() const;
-  IndicatorState() const;
+  SysfsHatchLoader(mgmt::device::DeviceTree& dtree, common::event::AsyncEventBus& bus)
+    : dtree_{ dtree }
+    , bus_{ bus }
+  {}
+
+  bool load(const mgmt::device::DeviceId_t& parent_dev_id) const
+  {
+    const auto id = mgmt::device::register_device<mgmt::device::SysfsHatch>("sysfs_path");
+
+    auto on_parent_removed = [id, this]() {
+      mgmt::device::deregister_device<mgmt::device::SysfsHatch>(id);
+      // bus_.publish(mgmt::event::DeviceRemoved<SysfsHatch>{id});
+    };
+
+    dtree_.add_child(parent_dev_id, id, std::move(on_parent_removed));
+    // bus_.publish(mgmt::event::DeviceCreated<mgmt::device::SysfsHatch>{id});
+
+    return true;
+  }
+
+  constexpr auto compatible() const
+  {
+    return "sysfs_hatch";
+  }
+private:
+  common::event::AsyncEventBus& bus_;
+  mgmt::device::DeviceTree& dtree_;
 };
-
-//auto id1 = std::make_unique<Indicator>(Fault);
-//auto id2 = std::make_unique<Indicator>(Status);
-
-
-
-// #include <common/utils/disposable.hpp>
-
-// class HatchCreator
-// {
-// public:
-//   HatchCreator(mgmt::pooler::DevicePoolingManager& pooling_manager)
-//     : pooling_manager_{pooling_manager}
-//   {}
-
-//   template<class T, class...Args>
-//   void create(Args&&... args)
-//   {
-//     auto device = common::utils::make_disposable<>();
-//   }
-// private:
-//   mgmt::pooler::DevicePoolingManager pooling_manager_;
-// };
-
-// class PlatformDeviceHatchLoader : public mgmt::platform_device::DeviceLoader
-// {
-// public:
-//   constexpr static inline auto SysfsPathAttr { "sysfs_path" };
-
-//   bool is_compatible(const std::string& compatible) const
-//   {
-//     return compatible == "sysfs_hatch";
-//   }
-//   void load(mgmt::device::Device& parent, const mgmt::platform_device::PdTreeObject_t& descriptor) const
-//   {
-//     if (not descriptor.contains(SysfsPathAttr)) {
-//       throw std::runtime_error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
-//     }
-
-//     auto dev = creator_.create<mgmt::device::SysfsHatch>(
-//       mgmt::device::DeviceId::new_id(),
-//       pdtree_get<std::string>(descriptor->as_object(), SysfsPathAttr)
-//     );
-
-//     parent.add_device(std::move(dev));
-//   }
-// };
-
-
-creator->pre_create();
-creator->create();
-create->post_create();
-
-board_ctrl::run()
-{
-  auto board = MainBoard{}
-  pd_scanner.scan(parent, );
-
-
-  publish(IndicatorCreated{})
-
-  // check compatible
-  // create
-  // add to store
-  // add to parent
-  // publish event
-
 }
 
+namespace mgmt::device {
+class SysfsLedLoader
+{
+public:
+  SysfsLedLoader(mgmt::device::DeviceTree& dtree, common::event::AsyncEventBus& bus)
+    : dtree_{ dtree }
+    , bus_{ bus }
+  {}
+
+  bool load(const mgmt::device::DeviceId_t&) const
+  {
+    const auto id = mgmt::device::register_device<mgmt::device::SysfsLed>("sysfs_path");
+
+    // bus_.publish(mgmt::event::DeviceCreated<mgmt::device::SysfsLedLoader>{
+    //   .device_id = id
+    // });
+
+    return true;
+  }
+
+  constexpr auto compatible() const
+  {
+    return "sysfs_led";
+  }
+private:
+  common::event::AsyncEventBus& bus_;
+  mgmt::device::DeviceTree& dtree_;
+};
+}
+
+using PlatformDeviceLoader_t = std::variant<
+  mgmt::device::SysfsHatchLoader,
+  mgmt::device::SysfsLedLoader
+>;
+
+template<class T>
+concept Loader = requires(T v)
+{
+  { v.compatible() } -> std::same_as<const char*>;
+  { v.load(std::declval<const mgmt::device::DeviceId_t&>()) } -> std::same_as<bool>;
+};
+
+class PlatformDeviceLoader
+{
+public:
+  PlatformDeviceLoader(
+    std::string pdtree_file_path,
+    std::vector<PlatformDeviceLoader_t> loaders
+  )
+    : pdtree_file_path_ { std::move(pdtree_file_path) }
+    , loaders_ { std::move(loaders) }
+  {}
+
+  bool load_devices(const mgmt::device::DeviceId_t& parent_id) const
+  {
+    const auto compatibles = std::vector<std::string> {
+      "sysfs_hatch",
+      "sysfs_led"
+    };
+
+    for (const auto& compatible : compatibles) {
+      auto loader = std::ranges::find_if(loaders_, [&compatible](auto&& l) {
+        return std::visit([](Loader auto&& l) { return l.compatible(); }, l) == compatible;
+      });
+
+      if (loader == loaders_.end()) {
+        fmt::print("Cannot find loader compatible with: {}\n", compatible);
+
+        return false;
+      }
+
+      const auto loaded = std::visit([parent_id](Loader auto& l) { return l.load(parent_id); }, *loader);
+      if (not loaded) {
+        fmt::print("Device cannot be loaded\n");
+      }
+    }
+    return true;
+  }
+private:
+  std::string pdtree_file_path_;
+  std::vector<PlatformDeviceLoader_t> loaders_;
+};
+
+void board_init(common::event::AsyncEventBus& bus, const PlatformDeviceLoader& platform_dev_loader)
+{
+  const auto id = mgmt::device::register_device<mgmt::device::MainBoard>();
+  
+  bus.publish(mgmt::event::DeviceCreated<mgmt::device::MainBoard>{id}); 
+
+  platform_dev_loader.load_devices(id);
+}
 
 int main()
 {
@@ -116,33 +158,34 @@ int main()
   mgmt_logger->info("Booststrap: mgmt");
 
   // //Messaging services
-  // auto bctx = boost::asio::io_context{};
+  auto bctx = boost::asio::io_context{};
   // auto zctx = zmq::context_t{};
-  // auto work_guard = work_guard_type{bctx.get_executor()};
+  auto work_guard = WorkGuard_t{bctx.get_executor()};
   // auto command_dispatcher = common::command::AsyncCommandDispatcher{};
-  // auto event_bus = common::event::AsyncEventBus{bctx};
+  auto event_bus = common::event::AsyncEventBus{bctx};
+  auto dtree = mgmt::device::DeviceTree{};
 
-
-  auto devreg = mgmt::device::DeviceRefRegistry{};
-  auto obj_deleter = [&devreg](const auto& dev) {
-    if (devreg.exists(dev.id()))
-      devreg.remove(dev.id());
-  };
-
-  //Main board
-  auto main_board = mgmt::device::make_disposable_device<mgmt::device::MainBoard>(
-    obj_deleter,
-    mgmt::device::DeviceId::new_id()
+  event_bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::MainBoard>>(
+    [](auto&& event) -> boost::asio::awaitable<void> {
+      spdlog::get("mgmt")->debug("MainBoard device created, device id: {}", event.device_id);
+      co_return;
+    }
   );
-  devreg.add(*main_board);
 
-  //Hatch
-  auto hatch = mgmt::device::make_disposable_device<mgmt::device::SysfsHatch>(obj_deleter,
-    mgmt::device::DeviceId::new_id(),
-    "sysfs_hatch"
+  event_bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::SysfsHatch>>(
+    [](auto&& event) -> boost::asio::awaitable<void> {
+      spdlog::get("mgmt")->debug("SysfsHatch device created, device id: {}", event.device_id);
+      co_return;
+    }
   );
-  devreg.add(*hatch);
 
-  main_board->add_device(std::move(hatch));
+  board_init(event_bus, PlatformDeviceLoader{
+    "pdtree.json",
+    std::vector<PlatformDeviceLoader_t>{
+      mgmt::device::SysfsLedLoader{dtree, event_bus},
+      mgmt::device::SysfsHatchLoader{dtree, event_bus}
+    }
+  });
 
-  }
+  bctx.run();
+}

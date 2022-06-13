@@ -6,11 +6,13 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/system_executor.hpp>
+#include <boost/asio/co_spawn.hpp>
 #include <functional>
 #include <variant>
 
+#include <common/coro/co_spawn.hpp>
 #include <common/event/base_event.hpp>
-#include <common/event/requirements.hpp>
+#include <common/event/event.hpp>
 #include <common/utils/overloaded.hpp>
 
 namespace common::event
@@ -39,49 +41,55 @@ namespace common::event
     AsyncEventBus& operator=(const AsyncEventBus&) = delete;
     AsyncEventBus& operator=(AsyncEventBus&&) = default;
 
-    template<EventCompatible Event, class Handler>
-      requires AsyncHandlerCompatible<Handler, Event> && EventCompatible<Event>
-    Connection_t subscribe(Handler&& handler)
+
+    /*TODO: Once the event is going to be dispatched, there will created separate coroutine for every subscriber.
+    Maybe it would be better to call all subscribers for the particular event in single coroutine?
+    It could avoid copying event object for each subscriber just before the handler is invoked.
+    Current:
+      - dispatch event 1
+      - dispatch_in_coro(event_1_sub_1 (copy event))
+      - dispatch_in_coro(event_1_sub_2 (copy event))
+      - dispatch_in_coro(event_1_sub_3 (copy event))
+    Proposed:
+      - dispatch event 1 (copy event)
+        - dispatch_in_coro(event1_sub1, event1_sub2, event1_sub3);
+    */
+    template<Event E, class Handler>
+      requires AsyncEventHandler<Handler, E> && Event<E>
+    auto subscribe(Handler&& handler)
     {
-      using Event_t = std::decay_t<Event>;
+      using Event_t = std::decay_t<E>;
 
-      auto async_wrapper = [handler = std::forward<Handler>(handler)](const BaseEvent& event)
-        -> boost::asio::awaitable<void> {
-        if (event.id() != EventIdGenerator::get<Event_t>()) {
-          throw std::runtime_error("Event cannot be handled by handler");
+      const auto event_id = EventIdGenerator::get<Event_t>();
+
+      auto slot_wrapper = [this, handler = std::forward<Handler>(handler), event_id](const BaseEvent& base_event) mutable {
+        if (event_id != base_event.event_id()) {
+          throw std::runtime_error("E cannot be handled");
         }
+        const auto& event = static_cast<const Event_t&>(base_event);
+        auto call_spawn = [handler = std::forward<Handler>(handler), &event](auto&& executor) mutable {
+          auto h = [handler = std::forward<Handler>(handler)](Event_t event) -> boost::asio::awaitable<void> { //Take event by copy
+            co_await handler(event);
+          };
 
-        //TODO: Consider taking a value of BaseEvent after cast.
-
-        co_await handler(static_cast<const Event&>(event));
+          boost::asio::co_spawn(executor.get(), h(event), common::coro::rethrow);
+        };
+        std::visit(call_spawn, executor_);
       };
 
-      auto slot_wrapper = [this, async_wrapper = std::move(async_wrapper)](const BaseEvent& event) {
-        std::visit(common::utils::overloaded {
-          [&event, async_wrapper = std::move(async_wrapper)](std::reference_wrapper<IoContex_t> executor) {
-            boost::asio::co_spawn(executor.get(), async_wrapper(event), boost::asio::detached);
-          },
-          [&event, async_wrapper = std::move(async_wrapper)](std::reference_wrapper<ThreadPool_t> executor) {
-            boost::asio::co_spawn(executor.get(), async_wrapper(event), boost::asio::detached);
-          },
-          [&event, async_wrapper = std::move(async_wrapper)](std::reference_wrapper<System_t> executor) {
-            boost::asio::co_spawn(executor.get(), async_wrapper(event), boost::asio::detached);
-          }
-        },
-        executor_);
-      };
-
-      auto& slot = handlers_[EventIdGenerator::get<Event_t>()];
+      auto& slot = handlers_[event_id];
       return slot.connect(std::move(slot_wrapper));
     }
 
-    template<EventCompatible Event>
-    void publish(Event&& event)
+    template<Event E>
+    void publish(const E& event)
     {
-      using Event_t = std::decay_t<Event>;
+      using Event_t = std::decay_t<E>;
 
-      auto& handler = handlers_[EventIdGenerator::get<Event_t>()];
-      handler(std::forward<Event>(event));
+      spdlog::get("mgmt")->debug("Publishing event with id: {}", event.event_id());
+
+      auto& handler = handlers_[event.event_id()];
+      handler(event);
     }
 
   private:

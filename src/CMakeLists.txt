@@ -27,15 +27,20 @@ set(COMMON_SOURCES
 )
 
 set(MGMT_SOURCES
-  app/main.cpp
-  newnew/device_id.cpp
-  newnew/sysfs_hatch.cpp
-  newnew/sysfs_led.cpp
-  newnew/rgb3_led.cpp
-  newnew/platform_device_scanner.cpp
-  newnew/pdtree.cpp
-  newnew/device_pooling_manager.cpp
-  newnew/hatch_pooler.cpp
+  app/main2.cpp
+  static/src/pdtree.cpp
+  static/src/sysfs_hatch.cpp
+  static/src/sysfs_led.cpp
+  static/src/devicetree.cpp
+  # static/src/main_board.cpp
+  # newnew/device_id.cpp
+  # newnew/sysfs_hatch.cpp
+  # newnew/sysfs_led.cpp
+  # newnew/rgb3_led.cpp
+  # newnew/platform_device_scanner.cpp
+  # newnew/pdtree.cpp
+  # newnew/device_pooling_manager.cpp
+  # newnew/hatch_pooler.cpp
 )
 
 # set(BOOTSTRAP_SOURCES

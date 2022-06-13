@@ -10,7 +10,7 @@ namespace common::command
   {
   public:
     template<class Command, class Handler>
-      requires AsyncHandlerCompatible<Handler, Command> && CommandCompatible<Command>
+      requires AsyncEventHandler<Handler, Command> && CommandCompatible<Command>
     AsyncHandlerWrapper(common::traits::TypeTag<Command>, Handler&& handler)
     {
       static_assert(std::is_base_of_v<GenericCommand<Command>, Command>, "Command must derive from GenericCommand<>");

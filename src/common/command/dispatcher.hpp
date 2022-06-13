@@ -12,7 +12,7 @@ namespace common::command
   {
   public:
     template<class Command, class Handler>
-      requires AsyncHandlerCompatible<Handler, Command> && CommandCompatible<Command>
+      requires AsyncEventHandler<Handler, Command> && CommandCompatible<Command>
     void add_handler(Handler&& handler)
     {
       using Command_t = std::decay_t<Command>;
