@@ -1,0 +1,65 @@
+#include <device/rgb_indicator.hpp>
+#include <common/utils/static_map.hpp>
+
+#include <spdlog/spdlog.h>
+
+namespace {
+  using namespace mgmt::device;
+
+  struct RGBbrightnessProxy
+  {
+    uint8_t red {};
+    uint8_t green {};
+    uint8_t blue {};
+  };
+
+  constexpr auto IndicatorMapping = common::utils::StaticMap<IndicatorType, RGBbrightnessProxy, 4> {
+    std::pair(IndicatorType::Status, RGBbrightnessProxy{0, 255, 0}),
+    std::pair(IndicatorType::Warning, RGBbrightnessProxy{255, 255, 0}),
+    std::pair(IndicatorType::Maintenance, RGBbrightnessProxy{0, 0, 255}),
+    std::pair(IndicatorType::Fault, RGBbrightnessProxy{255, 0, 0})
+  };
+}
+
+namespace mgmt::device
+{
+  RGBIndicator::RGBIndicator(IndicatorType type, std::shared_ptr<RGBLed_t> rgbled)
+    : type_{type}
+    , rgbled_{std::move(rgbled)}
+  {}
+
+  IndicatorType RGBIndicator::type() const
+  {
+    return type_;
+  }
+
+  IndicatorState RGBIndicator::state() const
+  {
+    return IndicatorState::NotAvailable;
+  }
+
+  void RGBIndicator::set_state(IndicatorState state)
+  {
+    spdlog::get("mgmt")->debug("Setting state: '{}' on indicator: '{}'", to_string(state), to_string(type_));
+
+      const auto& config = IndicatorMapping.at(type_);
+
+      switch (state)
+      {
+        case IndicatorState::On:
+          rgbled_->set_brightness({
+            .red = config.red,
+            .green = config.green,
+            .blue = config.blue
+          });
+          break;
+        case IndicatorState::Off:
+          rgbled_->set_brightness({
+            .red = 0,
+            .green = 0,
+            .blue = 0
+          });
+          break;
+      }
+  }
+}

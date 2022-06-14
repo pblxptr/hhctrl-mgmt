@@ -13,13 +13,13 @@ set(COMMON_SOURCES
 )
 
 set(MGMT_SOURCES
-  app/main2.cpp
-  static/src/main_board.cpp
-  static/src/pdtree.cpp
-  static/src/sysfs_hatch.cpp
-  static/src/sysfs_led.cpp
-  static/src/devicetree.cpp
-  static/src/rgb_indicator.cpp
+  app/main.cpp
+  main_board.cpp
+  pdtree.cpp
+  sysfs_hatch.cpp
+  sysfs_led.cpp
+  devicetree.cpp
+  rgb_indicator.cpp
 )
 
 set(SOURCES

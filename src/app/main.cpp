@@ -4,158 +4,101 @@
 #include <filesystem>
 #include <vector>
 #include <variant>
+#include <fstream>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/use_awaitable.hpp>
 
 #include <common/event/event_bus.hpp>
+#include <common/coro/co_spawn.hpp>
 
-#include <static/devicetree.hpp>
-#include <static/device_register.hpp>
-#include <static/main_board.hpp>
-#include <static/sysfs_led.hpp>
-#include <static/sysfs_hatch.hpp>
+#include <cstdlib>
+#include <inventory/devicetree.hpp>
+#include <inventory/device_register.hpp>
+#include <main_board/main_board.hpp>
+#include <device/device_id.hpp>
+#include <device/sysfs_led.hpp>
+#include <device/sysfs_hatch.hpp>
+#include <platform_device/platform_builder.hpp>
+#include <platform_device/pdtree.hpp>
+#include <platform_device/platform_device_provider.hpp>
+#include <platform_device/hatch2sr_provider.hpp>
+#include <platform_device/sysfs_rgb_indicator_provider.hpp>
+#include <events/device_created.hpp>
+#include <events/device_removed.hpp>
 
-#include <static/events/device_created.hpp>
-#include <static/events/device_removed.hpp>
-#include <static/pdtree.hpp>
-#include <static/device_id.hpp>
-#include <static/devicetree.hpp>
 
 using WorkGuard_t =
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
-namespace mgmt::device {
-class SysfsHatchLoader
+struct GenericDeviceLoaderHandler
 {
-public:
-  SysfsHatchLoader(mgmt::device::DeviceTree& dtree, common::event::AsyncEventBus& bus)
-    : dtree_{ dtree }
-    , bus_{ bus }
-  {}
+  mgmt::device::DeviceId_t board_id;
+  mgmt::device::DeviceTree& dtree;
+  common::event::AsyncEventBus& event_bus;
 
-  bool load(const mgmt::device::DeviceId_t& parent_dev_id) const
+  template<class D, class Loader>
+  bool handle(Loader&& loader) const
   {
-    const auto id = mgmt::device::register_device<mgmt::device::SysfsHatch>("sysfs_path");
+    spdlog::get("mgmt")->debug("Loading generic device under board");
 
-    auto on_parent_removed = [id, this]() {
-      mgmt::device::deregister_device<mgmt::device::SysfsHatch>(id);
-      // bus_.publish(mgmt::event::DeviceRemoved<SysfsHatch>{id});
-    };
-
-    dtree_.add_child(parent_dev_id, id, std::move(on_parent_removed));
-    // bus_.publish(mgmt::event::DeviceCreated<mgmt::device::SysfsHatch>{id});
+    auto device_id = loader.load();
+    dtree.add_child(board_id, device_id);
+    event_bus.publish(mgmt::event::DeviceCreated<D>{
+      device_id
+    });
 
     return true;
   }
-
-  constexpr auto compatible() const
-  {
-    return "sysfs_hatch";
-  }
-private:
-  common::event::AsyncEventBus& bus_;
-  mgmt::device::DeviceTree& dtree_;
 };
+
+
+template<
+  class PlatformBuilder,
+  class PlatformDeviceLoader
+>
+void board_init(
+  PlatformBuilder builder,
+  PlatformDeviceLoader platform_device_provider,
+  common::event::AsyncEventBus& event_bus,
+  mgmt::device::DeviceTree& dtree
+)
+{
+  platform_device_provider.setup(builder);
+
+  //Handle board
+  auto board = std::move(builder).build_board();
+  auto board_id = mgmt::device::register_device(std::move(board));
+  event_bus.publish(mgmt::event::DeviceCreated<mgmt::device::MainBoard> {
+    board_id
+  });
+
+  //Handler board devices
+  auto generic_dev_loader_handler = GenericDeviceLoaderHandler{
+    board_id,
+    dtree,
+    event_bus
+  };
+  auto generic_dev_loaders = std::move(builder).build_generic_loaders();
+  for (auto&& loader : generic_dev_loaders) {
+    loader(generic_dev_loader_handler);
+  }
 }
 
-namespace mgmt::device {
-class SysfsLedLoader
-{
-public:
-  SysfsLedLoader(mgmt::device::DeviceTree& dtree, common::event::AsyncEventBus& bus)
-    : dtree_{ dtree }
-    , bus_{ bus }
-  {}
-
-  bool load(const mgmt::device::DeviceId_t&) const
-  {
-    const auto id = mgmt::device::register_device<mgmt::device::SysfsLed>("sysfs_path");
-
-    // bus_.publish(mgmt::event::DeviceCreated<mgmt::device::SysfsLedLoader>{
-    //   .device_id = id
-    // });
-
-    return true;
-  }
-
-  constexpr auto compatible() const
-  {
-    return "sysfs_led";
-  }
-private:
-  common::event::AsyncEventBus& bus_;
-  mgmt::device::DeviceTree& dtree_;
-};
-}
-
-using PlatformDeviceLoader_t = std::variant<
-  mgmt::device::SysfsHatchLoader,
-  mgmt::device::SysfsLedLoader
->;
-
-template<class T>
-concept Loader = requires(T v)
-{
-  { v.compatible() } -> std::same_as<const char*>;
-  { v.load(std::declval<const mgmt::device::DeviceId_t&>()) } -> std::same_as<bool>;
-};
-
-class PlatformDeviceLoader
-{
-public:
-  PlatformDeviceLoader(
-    std::string pdtree_file_path,
-    std::vector<PlatformDeviceLoader_t> loaders
-  )
-    : pdtree_file_path_ { std::move(pdtree_file_path) }
-    , loaders_ { std::move(loaders) }
-  {}
-
-  bool load_devices(const mgmt::device::DeviceId_t& parent_id) const
-  {
-    const auto compatibles = std::vector<std::string> {
-      "sysfs_hatch",
-      "sysfs_led"
-    };
-
-    for (const auto& compatible : compatibles) {
-      auto loader = std::ranges::find_if(loaders_, [&compatible](auto&& l) {
-        return std::visit([](Loader auto&& l) { return l.compatible(); }, l) == compatible;
-      });
-
-      if (loader == loaders_.end()) {
-        fmt::print("Cannot find loader compatible with: {}\n", compatible);
-
-        return false;
-      }
-
-      const auto loaded = std::visit([parent_id](Loader auto& l) { return l.load(parent_id); }, *loader);
-      if (not loaded) {
-        fmt::print("Device cannot be loaded\n");
-      }
-    }
-    return true;
-  }
-private:
-  std::string pdtree_file_path_;
-  std::vector<PlatformDeviceLoader_t> loaders_;
-};
-
-void board_init(common::event::AsyncEventBus& bus, const PlatformDeviceLoader& platform_dev_loader)
-{
-  const auto id = mgmt::device::register_device<mgmt::device::MainBoard>();
-  
-  bus.publish(mgmt::event::DeviceCreated<mgmt::device::MainBoard>{id}); 
-
-  platform_dev_loader.load_devices(id);
-}
-
-int main()
+int main(int argc, char** argv)
 {
   static auto mgmt_logger = spdlog::stdout_color_mt("mgmt");
   mgmt_logger->set_level(spdlog::level::debug);
   mgmt_logger->info("Booststrap: mgmt");
+
+  if (argc != 2) {
+    mgmt_logger->error("Too few arguments");
+    return EXIT_FAILURE;
+  }
+
+  auto pdtree_path = argv[1];
 
   // //Messaging services
   auto bctx = boost::asio::io_context{};
@@ -179,13 +122,49 @@ int main()
     }
   );
 
-  board_init(event_bus, PlatformDeviceLoader{
-    "pdtree.json",
-    std::vector<PlatformDeviceLoader_t>{
-      mgmt::device::SysfsLedLoader{dtree, event_bus},
-      mgmt::device::SysfsHatchLoader{dtree, event_bus}
+  board_init(
+    mgmt::platform_device::PlatformBuilder<GenericDeviceLoaderHandler>{},
+    mgmt::platform_device::PlatformDeviceProvider {
+      pdtree_path,
+      mgmt::platform_device::RGBIndicatorProvider{},
+      mgmt::platform_device::HatchProvider{}
+    },
+    event_bus,
+    dtree
+  );
+
+  boost::asio::co_spawn(bctx, []() -> boost::asio::awaitable<void> {
+    auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(1);
+    auto coro = co_await boost::asio::this_coro::executor;
+    auto timer = boost::asio::steady_timer{coro};
+    auto indicator = mgmt::device::IndicatorType::Status;
+
+    while (true) {
+      timer.expires_after(std::chrono::seconds(5));
+      co_await timer.async_wait(boost::asio::use_awaitable);
+
+      board.set_indicator_state(indicator, mgmt::device::IndicatorState::On);
+
+      switch(indicator) {
+        case mgmt::device::IndicatorType::Status:
+          indicator = mgmt::device::IndicatorType::Maintenance;
+        break;
+
+        case mgmt::device::IndicatorType::Maintenance:
+          indicator = mgmt::device::IndicatorType::Warning;
+        break;
+
+        case mgmt::device::IndicatorType::Warning:
+          indicator = mgmt::device::IndicatorType::Fault;
+        break;
+
+        case mgmt::device::IndicatorType::Fault:
+          indicator = mgmt::device::IndicatorType::Status;
+        break;
+      }
     }
-  });
+  }, common::coro ::rethrow);
+
 
   bctx.run();
 }
