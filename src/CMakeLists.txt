@@ -14,6 +14,7 @@ set(COMMON_SOURCES
 
 set(MGMT_SOURCES
   app/main2.cpp
+  static/src/main_board.cpp
   static/src/pdtree.cpp
   static/src/sysfs_hatch.cpp
   static/src/sysfs_led.cpp

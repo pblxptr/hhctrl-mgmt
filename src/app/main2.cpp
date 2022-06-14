@@ -14,6 +14,7 @@
 #include <common/event/event_bus.hpp>
 #include <common/coro/co_spawn.hpp>
 
+#include <cstdlib>
 #include <static/inventory/devicetree.hpp>
 #include <static/inventory/device_register.hpp>
 #include <static/main_board/main_board.hpp>
@@ -23,53 +24,14 @@
 #include <static/platform_device/platform_builder.hpp>
 #include <static/platform_device/pdtree.hpp>
 #include <static/platform_device/platform_device_provider.hpp>
-#include <static/platform_device/hatch_provider.hpp>
-#include <static/platform_device/rgb_indicator_provider.hpp>
+#include <static/platform_device/hatch2sr_provider.hpp>
+#include <static/platform_device/sysfs_rgb_indicator_provider.hpp>
 #include <static/events/device_created.hpp>
 #include <static/events/device_removed.hpp>
 
 
 using WorkGuard_t =
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
-
-
-void create_pdtree_for_tests()
-{
-const char* json = R"(
-[
-  {
-    "model" : "hatch",
-    "compatible" : "sysfs_hatch2sr",
-    "sysfs_path" : "/tmp/misc/hatch2sr"
-  },
-  {
-    "compatible" : "sysfs_rgbled_indicator",
-    "leds" : [
-      {
-        "model"      : "led",
-        "sysfs_path" : "/sys/class/leds/red",
-        "color" : "red"
-      },
-      {
-        "model"      : "led",
-        "sysfs_path" : "/sys/class/leds/green",
-        "color" : "green"
-      },
-      {
-        "model"      : "led",
-        "sysfs_path" : "/sys/class/leds/blue",
-        "color" : "blue"
-      }
-    ]
-  }
-]
-)";
-
-  auto file = std::ofstream{"/tmp/pdtree.json"};
-
-  file << json << '\n';
-}
-
 
 struct GenericDeviceLoaderHandler
 {
@@ -125,11 +87,18 @@ void board_init(
   }
 }
 
-int main()
+int main(int argc, char** argv)
 {
   static auto mgmt_logger = spdlog::stdout_color_mt("mgmt");
   mgmt_logger->set_level(spdlog::level::debug);
   mgmt_logger->info("Booststrap: mgmt");
+
+  if (argc != 2) {
+    mgmt_logger->error("Too few arguments");
+    return EXIT_FAILURE;
+  }
+
+  auto pdtree_path = argv[1];
 
   // //Messaging services
   auto bctx = boost::asio::io_context{};
@@ -153,11 +122,10 @@ int main()
     }
   );
 
-  create_pdtree_for_tests();
   board_init(
     mgmt::platform_device::PlatformBuilder<GenericDeviceLoaderHandler>{},
     mgmt::platform_device::PlatformDeviceProvider {
-      "/tmp/pdtree.json",
+      pdtree_path,
       mgmt::platform_device::RGBIndicatorProvider{},
       mgmt::platform_device::HatchProvider{}
     },
@@ -195,8 +163,6 @@ int main()
         break;
       }
     }
-
-
   }, common::coro ::rethrow);
 
 

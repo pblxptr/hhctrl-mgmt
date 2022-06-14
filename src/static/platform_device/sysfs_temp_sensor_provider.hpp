@@ -15,7 +15,8 @@ namespace mgmt::platform_device
     template<class BoardBuilder>
     bool load(BoardBuilder& builder)
     {
-      builder.add_device(mgmt::device::TempSensor_t{});
+      // builder.add_device(mgmt::device::TempSensor_t{});
+      throw std::runtime_error("Not implemented");
 
       return true;
     }
