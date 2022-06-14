@@ -8,8 +8,11 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/use_awaitable.hpp>
 
 #include <common/event/event_bus.hpp>
+#include <common/coro/co_spawn.hpp>
 
 #include <static/inventory/devicetree.hpp>
 #include <static/inventory/device_register.hpp>
@@ -44,17 +47,17 @@ const char* json = R"(
     "leds" : [
       {
         "model"      : "led",
-        "sysfs_path" : "/tmp/leds/red",
+        "sysfs_path" : "/sys/class/leds/red",
         "color" : "red"
       },
       {
         "model"      : "led",
-        "sysfs_path" : "/tmp/leds/green",
+        "sysfs_path" : "/sys/class/leds/green",
         "color" : "green"
       },
       {
         "model"      : "led",
-        "sysfs_path" : "/tmp/leds/blue",
+        "sysfs_path" : "/sys/class/leds/blue",
         "color" : "blue"
       }
     ]
@@ -161,6 +164,41 @@ int main()
     event_bus,
     dtree
   );
+
+  boost::asio::co_spawn(bctx, []() -> boost::asio::awaitable<void> {
+    auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(1);
+    auto coro = co_await boost::asio::this_coro::executor;
+    auto timer = boost::asio::steady_timer{coro};
+    auto indicator = mgmt::device::IndicatorType::Status;
+
+    while (true) {
+      timer.expires_after(std::chrono::seconds(5));
+      co_await timer.async_wait(boost::asio::use_awaitable);
+
+      board.set_indicator_state(indicator, mgmt::device::IndicatorState::On);
+
+      switch(indicator) {
+        case mgmt::device::IndicatorType::Status:
+          indicator = mgmt::device::IndicatorType::Maintenance;
+        break;
+
+        case mgmt::device::IndicatorType::Maintenance:
+          indicator = mgmt::device::IndicatorType::Warning;
+        break;
+
+        case mgmt::device::IndicatorType::Warning:
+          indicator = mgmt::device::IndicatorType::Fault;
+        break;
+
+        case mgmt::device::IndicatorType::Fault:
+          indicator = mgmt::device::IndicatorType::Status;
+        break;
+      }
+    }
+
+
+  }, common::coro ::rethrow);
+
 
   bctx.run();
 }

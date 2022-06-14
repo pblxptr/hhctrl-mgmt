@@ -18,7 +18,8 @@ namespace mgmt::device
     ) : indicators_{std::move(indicators)}
       , temp_sensors_{std::move(temp_sensors)}
     {
-      set_indicator_state(IndicatorType::Status, IndicatorState::On);
+      set_indicator_state(IndicatorType::Maintenance, IndicatorState::Off);
+      set_indicator_state(IndicatorType::Maintenance, IndicatorState::On);
     }
 
     std::string hardware_identity() const
@@ -41,6 +42,7 @@ namespace mgmt::device
 
     void set_indicator_state(IndicatorType type, IndicatorState state)
     {
+      //TODO: Add concepts
       auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
         return std::visit([](auto&& i) { return i.type(); }, i) == type;
       });

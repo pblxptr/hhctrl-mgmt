@@ -9,25 +9,10 @@ namespace mgmt::device
   class RGBIndicator
   {
   public:
-    RGBIndicator(IndicatorType type, std::shared_ptr<RGBLed_t> rgbled)
-      : type_{type}
-      , rgbled_{std::move(rgbled)}
-    {}
-
-    constexpr IndicatorType type() const
-    {
-      return type_;
-    }
-
-    IndicatorState state() const
-    {
-      return IndicatorState::NotAvailable;
-    }
-
-    void set_state(IndicatorState state)
-    {
-      spdlog::get("mgmt")->debug("Setting state: {} on indicator: {}", to_string(state), to_string(type_));
-    }
+    RGBIndicator(IndicatorType, std::shared_ptr<RGBLed_t>);
+    IndicatorType type() const;
+    IndicatorState state() const;
+    void set_state(IndicatorState);
 
   private:
     IndicatorType type_;

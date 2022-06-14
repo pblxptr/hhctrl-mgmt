@@ -31,6 +31,15 @@ namespace mgmt::device {
 
     }
 
+    constexpr auto get(DeviceId_t id) -> D&
+    {
+      if (not exists(id)) {
+        throw std::runtime_error("Device does not exist");
+      }
+
+      return devices_.at(id);
+    }
+
     constexpr auto remove(const DeviceId_t& id)
     {
       devices_.erase(id);

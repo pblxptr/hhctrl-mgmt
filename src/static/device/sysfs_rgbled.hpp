@@ -1,5 +1,7 @@
 #pragma once
 
+#include <static/device/sysfs_led.hpp>
+
 namespace mgmt::device
 {
   class SysfsRGBLed
@@ -15,7 +17,7 @@ namespace mgmt::device
       : red_{std::move(red)}
       , green_{std::move(green)}
       , blue_{std::move(blue)}
-    {}  
+    {}
 
     SysfsRGBLed(const SysfsRGBLed&) = delete;
     SysfsRGBLed& operator=(const SysfsRGBLed&) = delete;

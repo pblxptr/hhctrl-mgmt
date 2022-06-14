@@ -44,6 +44,12 @@ namespace mgmt::device {
   }
 
   template<class D>
+  decltype(auto) get_device(const DeviceId_t& id)
+  {
+    return inventory<D>.get(id);
+  }
+
+  template<class D>
   auto deregister_device(const DeviceId_t& id)
   {
     spdlog::get("mgmt")->debug("Deregister device with id: {}", id);
