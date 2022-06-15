@@ -2,7 +2,7 @@
 
 #include <concepts>
 #include <device/device.hpp>
-#include <device/sysfs_led.hpp>
+#include <main_board/device/sysfs_led.hpp>
 
 namespace mgmt::device {
   template<class T>

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <platform_device/device_loader.hpp>
-#include <platform_device/pdtree.hpp>
+#include <main_board/platform/device_loader.hpp>
+#include <main_board/platform/pdtree.hpp>
+#include <main_board/device/sysfs_hatch.hpp>
 #include <inventory/device_register.hpp>
 
 namespace mgmt::platform_device

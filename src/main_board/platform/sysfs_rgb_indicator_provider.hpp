@@ -1,6 +1,6 @@
 #pragma once
 
-#include <platform_device/pdtree.hpp>
+#include <main_board/platform/pdtree.hpp>
 
 #include <device/indicator.hpp>
 #include <device/rgb_led.hpp>

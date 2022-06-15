@@ -1,6 +1,6 @@
 #pragma once
 
-#include <temp_sensor.hpp>
+#include <device/temp_sensor.hpp>
 
 namespace mgmt::platform_device
 {

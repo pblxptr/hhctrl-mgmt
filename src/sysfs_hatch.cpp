@@ -1,4 +1,4 @@
-#include <device/sysfs_hatch.hpp>
+#include <main_board/device/sysfs_hatch.hpp>
 
 #include <filesystem>
 #include <string_view>

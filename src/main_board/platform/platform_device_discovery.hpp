@@ -2,17 +2,17 @@
 
 #include <filesystem>
 
-#include <platform_device/pdtree.hpp>
+#include <main_board/platform/pdtree.hpp>
 
 namespace mgmt::platform_device
 {
   template<class... Provider>
-  class PlatformDeviceProvider //device discovery
+  class PlatformDeviceDiscovery //device discovery
   {
     using DeviceProvider_t = std::variant<Provider...>;
   public:
     template<class...P>
-    PlatformDeviceProvider(std::string pdtree_file, P... providers)
+    PlatformDeviceDiscovery(std::string pdtree_file, P... providers)
       : pdtree_file_{std::move(pdtree_file)}
       , providers_{DeviceProvider_t{std::move(providers)}...}
     {
@@ -49,5 +49,5 @@ namespace mgmt::platform_device
   };
 
   template<class...T>
-  PlatformDeviceProvider(std::string, T...) -> PlatformDeviceProvider<T...>;
+  PlatformDeviceDiscovery(std::string, T...) -> PlatformDeviceDiscovery<T...>;
 }

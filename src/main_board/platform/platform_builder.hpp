@@ -4,8 +4,8 @@
 
 #include <device/temp_sensor.hpp>
 #include <device/indicator.hpp>
-#include <main_board/main_board.hpp>
-#include <platform_device/device_loader.hpp>
+#include <main_board/device/main_board.hpp>
+#include <main_board/platform/device_loader.hpp>
 
 namespace mgmt::platform_device
 {

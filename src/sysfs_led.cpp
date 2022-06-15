@@ -1,4 +1,4 @@
-#include <device/sysfs_led.hpp>
+#include <main_board/device/sysfs_led.hpp>
 
 #include <common/utils/sysfs.hpp>
 

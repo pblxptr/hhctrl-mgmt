@@ -5,7 +5,7 @@
 #include <concepts>
 
 #include <device/device.hpp>
-#include <device/sysfs_temp_sensor.hpp>
+#include <main_board/device/sysfs_temp_sensor.hpp>
 
 namespace mgmt::device {
   template<class T>

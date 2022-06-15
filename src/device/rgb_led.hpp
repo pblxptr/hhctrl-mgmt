@@ -1,6 +1,6 @@
 #pragma once
 
-#include <device/sysfs_rgbled.hpp>
+#include <main_board/device/sysfs_rgbled.hpp>
 
 namespace mgmt::device
 {
