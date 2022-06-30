@@ -32,14 +32,14 @@ namespace mgmt::device
     spdlog::get("mgmt")->debug("{}", __FUNCTION__);
 
     auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
-      return std::visit([](auto&& i) { return i.type(); }, i) == type;
+      return i.type() == type;
     });
 
     if (indicator == indicators_.end()) {
       return IndicatorState::NotAvailable;
     }
 
-    return std::visit([](auto&& i) { return i.state(); }, *indicator);
+    return indicator->state();
   }
 
   void MainBoard::set_indicator_state(IndicatorType type, IndicatorState state)
@@ -48,14 +48,14 @@ namespace mgmt::device
 
     //TODO: Add concepts to constraint auto&&
     auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
-      return std::visit([](auto&& i) { return i.type(); }, i) == type;
+      return i.type() == type;
     });
 
     if (indicator == indicators_.end()) {
       return;
     }
 
-    std::visit([state](auto&& i) { return i.set_state(state); }, *indicator);
+    indicator->set_state(state);
   }
 
   void MainBoard::restart()

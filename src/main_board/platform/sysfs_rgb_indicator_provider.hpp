@@ -2,7 +2,7 @@
 
 #include <main_board/platform/pdtree.hpp>
 
-#include <device/indicator.hpp>
+#include <device/indicator_t.hpp>
 #include <device/rgb_led.hpp>
 
 namespace mgmt::platform_device

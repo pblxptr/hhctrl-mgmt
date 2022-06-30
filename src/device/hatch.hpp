@@ -1,16 +1,17 @@
 #pragma once
 
 #include <concepts>
-
+#include <device/device.hpp>
 namespace mgmt::device
 {
   enum class HatchStatus { Undefined, Open, Closed, ChangingPosition, Faulty };
 
   template<class T>
-  concept Hatch = requires(T t)
+  concept Hatch = Device<T>
+  and requires(T v)
   {
-    t.open();
-    t.close();
-    { t.status() } -> std::same_as<HatchStatus>;
+    v.open();
+    v.close();
+    { v.status() } -> std::same_as<HatchStatus>;
   };
 }

@@ -19,55 +19,48 @@
 #include <events/device_removed.hpp>
 #include <app/main_board_init.hpp>
 #include <app/indicator_switcher_init.hpp>
+#include <iostream>
+#include <common/utils/static_map.hpp>
+
+
+#include <home_assistant/mqtt/entity_config.hpp>
+#include <home_assistant/mqtt/availibility.hpp>
+#include <home_assistant/mqtt/device.hpp>
+#include <home_assistant/mqtt/entity_client.hpp>
+#include <home_assistant/hatch_dev_handler.hpp>
+#include <home_assistant/mqtt/entity_client_factory.hpp>
 
 
 using WorkGuard_t =
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
-int main(int argc, char** argv)
+auto setup_logger()
 {
   static auto mgmt_logger = spdlog::stdout_color_mt("mgmt");
   mgmt_logger->set_level(spdlog::level::debug);
-  mgmt_logger->info("Booststrap: mgmt");
+}
+
+int main(int argc, char** argv)
+{
+  setup_logger();
+  spdlog::get("mgmt")->info("Bootstrap mgmt");
 
   if (argc != 2) {
-    mgmt_logger->error("Too few arguments");
+    spdlog::get("mgmt")->error("Too few arguments");
     return EXIT_FAILURE;
+
   }
 
   auto pdtree_path = argv[1];
 
   // //Messaging services
   auto bctx = boost::asio::io_context{};
-  // auto zctx = zmq::context_t{};
   auto work_guard = WorkGuard_t{bctx.get_executor()};
-  // auto command_dispatcher = common::command::AsyncCommandDispatcher{};
-  auto event_bus = common::event::AsyncEventBus{bctx};
-  auto dtree = mgmt::device::DeviceTree{};
 
-  event_bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::MainBoard>>(
-    [](auto&& event) -> boost::asio::awaitable<void> {
-      spdlog::get("mgmt")->debug("MainBoard device created, device id: {}", event.device_id);
-      co_return;
-    }
-  );
+  auto entity_client_factory = mgmt::home_assistant::mqttc::EntityClientFactory { bctx, "172.17.0.5", 1883 };
 
-  event_bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::MainBoard>>(
-    [](auto&& event) -> boost::asio::awaitable<void> {
-      spdlog::get("mgmt")->debug("MainBoard device created2222, device id: {}", event.device_id);
-      co_return;
-    }
-  );
+  auto hatch_dev_handler = mgmt::home_assistant::HatchDeviceHandler{entity_client_factory};
 
-  event_bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::SysfsHatch>>(
-    [](auto&& event) -> boost::asio::awaitable<void> {
-      spdlog::get("mgmt")->debug("SysfsHatch device created, device id: {}", event.device_id);
-      co_return;
-    }
-  );
-
-  mgmt::app::indicator_switcher_init(event_bus);
-  mgmt::app::main_board_init(pdtree_path, dtree, event_bus);
 
   bctx.run();
 }

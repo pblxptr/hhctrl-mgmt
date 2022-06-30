@@ -6,6 +6,7 @@ find_package(icon CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(mqtt_cpp_iface REQUIRED)
 
 set(COMMON_SOURCES
   common/scheduler/scheduler.cpp
@@ -34,8 +35,8 @@ add_dependencies(${CMAKE_PROJECT_NAME}
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
-  ${protobuf_INCLUDES}
-  ${iconnect_INCLUDES}
+#   ${protobuf_INCLUDES}
+#   ${iconnect_INCLUDES}
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
@@ -46,12 +47,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
   boost_json
   spdlog::spdlog
   fmt::fmt
-  zmq
-  icon::icon
+  # zmq
+  # icon::icon
   ${Protobuf_LIBRARIES}
   sodium
   ${DATE_TZ_LIBRARY}
   ${iconnect_LIBRARY}
+  mqtt_cpp_iface::mqtt_cpp_iface
 )
 
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)

@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <device/temp_sensor.hpp>
-#include <device/indicator.hpp>
+#include <device/indicator_t.hpp>
 #include <main_board/device/main_board.hpp>
 #include <main_board/platform/device_loader.hpp>
 

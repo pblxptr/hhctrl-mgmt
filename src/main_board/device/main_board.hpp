@@ -5,7 +5,7 @@
 #include <ranges>
 
 #include <device/hardware_identity.hpp>
-#include <device/indicator.hpp>
+#include <device/indicator_t.hpp>
 #include <device/temp_sensor.hpp>
 #include <device/hardware_identity.hpp>
 

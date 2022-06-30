@@ -1,7 +1,6 @@
 #pragma once
 
-#include <device/indicator_type.hpp>
-#include <device/indicator_state.hpp>
+#include <device/indicator.hpp>
 #include <device/led.hpp>
 
 namespace mgmt::device
