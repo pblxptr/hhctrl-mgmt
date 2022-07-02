@@ -7,9 +7,9 @@
 namespace mgmt::event
 {
   template<mgmt::device::Device D>
-  struct DeviceRemoved : public common::event::GenericEvent<DeviceRemoved<D>>
+  struct DeviceStateChanged : public common::event::GenericEvent<DeviceStateChanged<D>>
   {
-    explicit DeviceRemoved(mgmt::device::DeviceId_t devid)
+    explicit DeviceStateChanged(mgmt::device::DeviceId_t devid)
       : device_id { devid }
     {}
     mgmt::device::DeviceId_t device_id;

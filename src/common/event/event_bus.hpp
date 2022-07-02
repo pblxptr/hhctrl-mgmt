@@ -14,6 +14,7 @@
 #include <common/event/base_event.hpp>
 #include <common/event/event.hpp>
 #include <common/utils/overloaded.hpp>
+#include <common/utils/capture_fwd.hpp>
 
 namespace common::event
 {
@@ -41,7 +42,6 @@ namespace common::event
     AsyncEventBus& operator=(const AsyncEventBus&) = delete;
     AsyncEventBus& operator=(AsyncEventBus&&) = default;
 
-
     /*TODO: Once the event is going to be dispatched, there will created separate coroutine for every subscriber.
     Maybe it would be better to call all subscribers for the particular event in single coroutine?
     It could avoid copying event object for each subscriber just before the handler is invoked.
@@ -56,25 +56,31 @@ namespace common::event
     */
     template<Event E, class Handler>
       requires AsyncEventHandler<Handler, E> && Event<E>
-    auto subscribe(Handler&& handler)
+    auto subscribe(Handler&& handler) //TODO: Add check that verifies that object passsed by value is copyable
     {
       using Event_t = std::decay_t<E>;
 
       const auto event_id = EventIdGenerator::get<Event_t>();
 
-      auto slot_wrapper = [this, handler = std::forward<Handler>(handler), event_id](const BaseEvent& base_event) mutable {
+      //TODO: These are just a few wrappers, that wrap slot callable needed by boost::signals, coroutine spawning, and finally event handler invocation.
+      //std::forward_as_tuple is needed in order to preserve value category of handler that has passed. Otherwise it would be taken by value.
+      auto slot_wrapper = [this, handler_as_tuple = common::utils::capture_fwd(std::forward<Handler>(handler)), event_id]
+        (const BaseEvent& base_event) mutable {
         if (event_id != base_event.event_id()) {
-          throw std::runtime_error("E cannot be handled");
+          throw std::runtime_error("Event cannot be handled");
         }
         const auto& event = static_cast<const Event_t&>(base_event);
-        auto call_spawn = [handler = std::forward<Handler>(handler), &event](auto&& executor) mutable {
-          auto h = [handler = std::forward<Handler>(handler)](Event_t event) -> boost::asio::awaitable<void> { //Take event by copy
-            co_await handler(event);
+        auto spawn_coro_wrapper = [handler_as_tuple = std::forward<decltype(handler_as_tuple)>(handler_as_tuple), &event](auto&& executor) mutable {
+          //TODO: Why mutable below? Explanation:
+          //Without mutable, handler is taken by const Handler& thus it's required that the function call operator() needs to have const in signature
+          //what is not always applicable. Possible enhancement???
+          auto event_handler_wrapper = [handler_as_tuple = std::forward<decltype(handler_as_tuple)>(handler_as_tuple)](Event_t event) mutable -> boost::asio::awaitable<void> { //Take event by copy
+            co_await std::invoke(std::get<0>(handler_as_tuple), event);
           };
 
-          boost::asio::co_spawn(executor.get(), h(event), common::coro::rethrow);
+          boost::asio::co_spawn(executor.get(), event_handler_wrapper(event), common::coro::rethrow);
         };
-        std::visit(call_spawn, executor_);
+        std::visit(spawn_coro_wrapper, executor_);
       };
 
       auto& slot = handlers_[event_id];
