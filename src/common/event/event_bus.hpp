@@ -63,7 +63,7 @@ namespace common::event
       const auto event_id = EventIdGenerator::get<Event_t>();
 
       //TODO: These are just a few wrappers, that wrap slot callable needed by boost::signals, coroutine spawning, and finally event handler invocation.
-      //std::forward_as_tuple is needed in order to preserve value category of handler that has passed. Otherwise it would be taken by value.
+      //capture_fwd is needed in order to preserve value category of handler that has passed. Otherwise it would be taken by value.
       auto slot_wrapper = [this, handler_as_tuple = common::utils::capture_fwd(std::forward<Handler>(handler)), event_id]
         (const BaseEvent& base_event) mutable {
         if (event_id != base_event.event_id()) {
