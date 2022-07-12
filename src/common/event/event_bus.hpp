@@ -64,30 +64,6 @@ namespace common::event
 
       common::logger::get(common::event::Logger)->debug("AsyncEventBus::{}, event id: {}", __FUNCTION__, event_id);
 
-      // //TODO: These are just a few wrappers, that wrap slot callable needed by boost::signals, coroutine spawning, and finally event handler invocation.
-      // //capture_fwd is needed in order to preserve value category of handler that has passed. Otherwise it would be taken by value.
-      //   auto slot_wrapper = [this, handler = std::forward<Handler>(handler), event_id]
-      //   (const BaseEvent& base_event) mutable {
-      //   if (event_id != base_event.event_id()) {
-      //     throw std::runtime_error("Event cannot be handled");
-      //   }
-      //   const auto& event = static_cast<const Event_t&>(base_event);
-      //   auto spawn_coro_wrapper = [handler = std::forward<Handler>(handler), &event](auto&& executor) mutable {
-      //     //TODO: Why mutable below? Explanation:
-      //     //Without mutable, handler is taken by const Handler& thus it's required that the function call operator() needs to have const in signature
-      //     //what is not always applicable. Possible enhancement???
-      //     auto event_handler_wrapper = [handler = std::forward<Handler>(handler)](Event_t event) mutable -> boost::asio::awaitable<void> { //Take event by copy
-      //       common::logger::get(common::event::Logger)->debug("AsyncEventBus::{}, before dispatch handler id: {}", __FUNCTION__, event.event_id());
-      //       co_await std::invoke(handler, event);
-      //       common::logger::get(common::event::Logger)->debug("AsyncEventBus::{}, after dispatch handler id: {}", __FUNCTION__, event.event_id());
-      //     };
-
-      //     boost::asio::co_spawn(executor.get(), event_handler_wrapper(event), common::coro::rethrow);
-      //   };
-      //   std::visit(spawn_coro_wrapper, executor_);
-      // };
-
-
       //TODO: These are just a few wrappers, that wrap slot callable needed by boost::signals, coroutine spawning, and finally event handler invocation.
       //capture_fwd is needed in order to preserve value category of handler that has passed. Otherwise it would be taken by value.
         auto slot_wrapper = [this, handler_as_tuple = common::utils::capture_fwd(std::forward<Handler>(handler)), event_id]

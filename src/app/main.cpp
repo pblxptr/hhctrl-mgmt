@@ -76,10 +76,12 @@ int main(int argc, char** argv)
   auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory { bctx, "172.17.0.2", 1883 };
   auto entity_factory = mgmt::home_assistant::EntityFactory { client_factory };
   auto hatch_dev_event_handler = mgmt::home_assistant::device::HatchEventHandler{entity_factory};
-  bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>([&hatch_dev_event_handler](const auto& e) ->boost::asio::awaitable<void> {
-    co_await hatch_dev_event_handler(e);
-  });
-  // bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
+  // bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>([&hatch_dev_event_handler](const auto& e) ->boost::asio::awaitable<void> {
+  //   co_await hatch_dev_event_handler(e);
+  // });
+
+  bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
+  bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
   // bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
 
 

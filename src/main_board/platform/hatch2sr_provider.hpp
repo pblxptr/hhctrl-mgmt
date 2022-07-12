@@ -26,7 +26,7 @@ namespace mgmt::platform_device
       if (not object.contains("sysfs_path")) {
         common::logger::get(mgmt::device::Logger)->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
         return false;
-      } 
+      }
 
       auto sysfs_path = pdtree_get<std::string>(object, sysfs_path_atrr);
 
