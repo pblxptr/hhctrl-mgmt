@@ -30,9 +30,7 @@ namespace mgmt::home_assistant::device
 
       auto unique_id = "q1231asd_uid";
 
-      // handler.set_on_error([this]() { on_error(); });
       hatches_.push_back(HatchHandler{event.device_id, factory_.create_cover(unique_id)});
-      // hatches_.emplace_back(event.device_id, factory_.create_cover(unique_id));
 
       auto& h = hatches_.back();
       h.connect();

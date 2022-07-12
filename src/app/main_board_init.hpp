@@ -29,8 +29,8 @@ namespace mgmt::app
     platform_device_discovery.setup(builder);
 
     //Handle main board
-    auto board = std::move(builder).build_board();
-    auto board_id = mgmt::device::register_device(std::move(board));
+    auto board_id = mgmt::device::register_device(std::move(builder).build_board());
+
     bus.publish(mgmt::event::DeviceCreated<mgmt::device::MainBoard> {
       board_id
     });

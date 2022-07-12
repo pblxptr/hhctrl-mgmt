@@ -25,3 +25,5 @@ namespace mgmt::home_assistant
     const mgmt::home_assistant::mqttc::EntityClientFactory& client_factory_;
   };
 }
+
+

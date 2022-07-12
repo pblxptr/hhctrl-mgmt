@@ -76,35 +76,15 @@ int main(int argc, char** argv)
   auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory { bctx, "172.17.0.2", 1883 };
   auto entity_factory = mgmt::home_assistant::EntityFactory { client_factory };
   auto hatch_dev_event_handler = mgmt::home_assistant::device::HatchEventHandler{entity_factory};
-  // bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>([&hatch_dev_event_handler](const auto& e) ->boost::asio::awaitable<void> {
-  //   co_await hatch_dev_event_handler(e);
-  // });
-
   bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
   bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
-  // bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
+  bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
 
-
-  // boost::asio::co_spawn(bctx, hatch_dev_event_handler(mgmt::event::DeviceCreated<mgmt::device::Hatch_t>(1)), common::coro::rethrow);
-
-  // mgmt::app::main_board_init(pdtree_path, dtree, bus);
   boost::asio::co_spawn(bctx, [&pdtree_path, &dtree, &bus]() -> boost::asio::awaitable<void> {
     mgmt::app::main_board_init(pdtree_path, dtree, bus);
 
     co_return;
   }, common::coro::rethrow);
-
-
-  // boost::asio::co_spawn(bctx, [&]() -> boost::asio::awaitable<void> {
-  //   co_await hatch_dev_event_handler(mgmt::event::DeviceCreated<mgmt::device::Hatch_t>(1));
-  // }, common::coro::rethrow);
-
-  // auto cover = entity_factory.create_cover("unique_id_for_cover");
-  // cover.set_ack_handler([&cover]() {
-  //   auto config = mgmt::home_assistant::mqttc::EntityConfig{"unique_id_for_cover"};
-  //   cover.async_set_config(config);
-  // });
-  // cover.connect();
 
   bctx.run();
 }

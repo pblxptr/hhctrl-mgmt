@@ -6,8 +6,8 @@ set(CMAKE_ADDONS ${CMAKE_SOURCE_DIR}/cmake)
 
 option(ENABLE_TESTING "Enable building and executing tests" OFF)
 
-add_compile_options(-Wno-deprecated -Wall -fsanitize=undefined -save-temps)
-add_link_options(-fsanitize=undefined)
+# add_compile_options(-Wno-deprecated -Wall -fsanitize=undefined -save-temps)
+# add_link_options(-fsanitize=undefined)
 
 ### Protobuf ###
 include_directories(${CMAKE_BINARY_DIR})
