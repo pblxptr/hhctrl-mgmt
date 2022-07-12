@@ -7,7 +7,7 @@
 #include <main_board/platform/sysfs_rgb_indicator_provider.hpp>
 #include <main_board/platform/sysfs_temp_sensor_provider.hpp>
 #include <common/event/event_bus.hpp>
-#include <inventory/devicetree.hpp>
+#include <device/devicetree.hpp>
 
 namespace mgmt::app
 {

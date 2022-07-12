@@ -1,13 +1,14 @@
-#include <inventory/devicetree.hpp>
+#include <device/devicetree.hpp>
 
 #include <ranges>
 #include <algorithm>
-#include <spdlog/spdlog.h>
+
+#include <device/logger.hpp>
 
 namespace mgmt::device {
   bool DeviceTree::add_child(const DeviceId_t& parent, const DeviceId_t& child, OnNodeRemoved_t on_parent_removed)
   {
-    spdlog::get("mgmt")->info("DeviceTree add child {} for parent {}", child, parent);
+    common::logger::get(mgmt::device::Logger)->info("DeviceTree add child {} for parent {}", child, parent);
 
     if (auto node = std::ranges::find_if(nodes_, [child](auto&& n) {
       return n.child_ == child;
@@ -29,7 +30,7 @@ namespace mgmt::device {
 
   bool DeviceTree::remove_child(const DeviceId_t& parent, const DeviceId_t& child)
   {
-    spdlog::get("mgmt")->info("DeviceTree remove child {} from parent {}", child, parent);
+    common::logger::get(mgmt::device::Logger)->info("DeviceTree remove child {} from parent {}", child, parent);
 
     auto node = std::ranges::find_if(nodes_, [parent, child](auto&& n) {
       return n.parent_ == parent && n.child_ == child;
@@ -47,7 +48,7 @@ namespace mgmt::device {
 
   bool DeviceTree::remove(const DeviceId_t& parent)
   {
-    spdlog::get("mgmt")->info("DeviceTree all nodes with parent: ", parent);
+    common::logger::get(mgmt::device::Logger)->info("DeviceTree all nodes with parent: ", parent);
 
     return std::erase_if(nodes_, [parent](auto&& n) {
       return n.parent_ == parent;
@@ -56,7 +57,7 @@ namespace mgmt::device {
 
   std::optional<DeviceId_t> DeviceTree::parent(const DeviceId_t& child)
   {
-    spdlog::get("mgmt")->info("DeviceTree get parent for {}", child);
+    common::logger::get(mgmt::device::Logger)->info("DeviceTree get parent for {}", child);
 
     if (auto node = std::ranges::find_if(nodes_, [child](auto&& n) {
       return n.child_ == child;
@@ -69,7 +70,7 @@ namespace mgmt::device {
 
   std::vector<DeviceId_t> DeviceTree::all_children(const DeviceId_t& parent)
   {
-    spdlog::get("mgmt")->info("DeviceTree get all children for parent: {}", parent);
+    common::logger::get(mgmt::device::Logger)->info("DeviceTree get all children for parent: {}", parent);
 
     auto children = std::vector<DeviceId_t> {};
     auto push = [&children](auto&& e) {

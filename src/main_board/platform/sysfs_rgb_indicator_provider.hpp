@@ -56,20 +56,19 @@ namespace mgmt::platform_device
     std::optional<mgmt::device::SysfsLed> load_led(const PdTreeArray_t& leds, std::string_view led_label)
     {
       constexpr auto sysfs_path_atrr = "sysfs_path";
-      constexpr auto color_attr = "color";
       auto led_descriptor = std::find_if(leds.begin(), leds.end(), [&led_label](const auto& e) {
         const auto& e_obj = e.as_object();
-        return e_obj.contains(color_attr) && pdtree_to_string(e_obj.at(color_attr)) == led_label;
+        return e_obj.contains("color") && pdtree_to_string(e_obj.at("color")) == led_label;
       });
 
       if (led_descriptor == leds.end()) {
-        spdlog::get("mgmt")->debug("Cannot find led descriptor for label: {}", led_label);
+        common::logger::get(mgmt::device::Logger)->debug("Cannot find led descriptor for label: {}", led_label);
         return std::nullopt;
       }
 
       const auto descriptor_obj = led_descriptor->as_object();
       if (not descriptor_obj.contains(sysfs_path_atrr)) {
-        spdlog::get("mgmt")->error("Missing attribute 'sysfs_path' in pdtree for led driver descriptor");
+        common::logger::get(mgmt::device::Logger)->error("Missing attribute 'sysfs_path' in pdtree for led driver descriptor");
         return std::nullopt;
       }
       return mgmt::device::SysfsLed {pdtree_to_string(descriptor_obj.at(sysfs_path_atrr))};

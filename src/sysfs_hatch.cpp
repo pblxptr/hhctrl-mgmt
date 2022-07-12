@@ -4,8 +4,8 @@
 #include <string_view>
 #include <fstream>
 #include <tuple>
-#include <spdlog/spdlog.h>
 
+#include <device/logger.hpp>
 #include <common/utils/static_map.hpp>
 #include <common/utils/sysfs.hpp>
 
@@ -34,12 +34,12 @@ namespace {
     static constexpr const char* name { "status" };
   };
 
-  constexpr auto StatusMapping = StaticMap<mgmt::device::HatchStatus, std::string_view, 5> {
-    std::pair(mgmt::device::HatchStatus::Open, "open"sv),
-    std::pair(mgmt::device::HatchStatus::Closed, "closed"sv),
-    std::pair(mgmt::device::HatchStatus::ChangingPosition, "changing_position"sv),
-    std::pair(mgmt::device::HatchStatus::Faulty, "faulty"sv),
-    std::pair(mgmt::device::HatchStatus::Undefined, "undefined"sv)
+  constexpr auto StatusMapping = StaticMap<mgmt::device::HatchState, std::string_view, 5> {
+    std::pair(mgmt::device::HatchState::Open, "open"sv),
+    std::pair(mgmt::device::HatchState::Closed, "closed"sv),
+    std::pair(mgmt::device::HatchState::ChangingPosition, "changing_position"sv),
+    std::pair(mgmt::device::HatchState::Faulty, "faulty"sv),
+    std::pair(mgmt::device::HatchState::Undefined, "undefined"sv)
   };
 }
 
@@ -49,7 +49,7 @@ SysfsHatch::SysfsHatch(std::string sysfsdir)
   : sysfsdir_{common::utils::sysfs::get_path(sysfsdir)}
 {
   if (not fs::exists(sysfsdir_)) {
-    spdlog::get("mgmt")->error("Directory {} does not exist.", sysfsdir_.c_str());
+    common::logger::get(mgmt::device::Logger)->error("Directory {} does not exist.", sysfsdir_.c_str());
   }
 }
 
@@ -63,7 +63,7 @@ void SysfsHatch::close() const
   sysfs::write_attr(sysfsdir_ / ChangePositionAttr::name, ChangePositionAttr::close);
 }
 
-HatchStatus SysfsHatch::status() const
+HatchState SysfsHatch::status() const
 {
   const auto attr_val = sysfs::read_attr(sysfsdir_ / StatusAttr::name);
 

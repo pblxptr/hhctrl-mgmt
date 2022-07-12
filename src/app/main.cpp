@@ -26,53 +26,37 @@
 
 
 #include <home_assistant/mqtt/entity_config.hpp>
-#include <home_assistant/mqtt/availibility.hpp>
-#include <home_assistant/mqtt/device.hpp>
+#include <home_assistant/availibility.hpp>
+#include <home_assistant/device.hpp>
 #include <home_assistant/mqtt/entity_client.hpp>
-#include <home_assistant/hatch_dev_handler.hpp>
 #include <home_assistant/mqtt/entity_client_factory.hpp>
 #include <device/hatch_t.hpp>
+#include <mqtt/client.hpp>
 
 #include <boost/asio/awaitable.hpp>
+#include <home_assistant/device/hatch_event_handler.hpp>
 
-class HatchDeviceEventHandler
-{
-public:
-  HatchDeviceEventHandler() = default;
-  HatchDeviceEventHandler(const HatchDeviceEventHandler&) = delete;
-  HatchDeviceEventHandler& operator=(const HatchDeviceEventHandler&) = delete;
-  HatchDeviceEventHandler(HatchDeviceEventHandler&&) = default;
-  HatchDeviceEventHandler& operator=(HatchDeviceEventHandler&&) = default;
-
-  boost::asio::awaitable<void> operator()(const mgmt::event::DeviceCreated<mgmt::device::Hatch_t>& event)
-  {
-    co_return;
-  }
-
-  boost::asio::awaitable<void> operator()(const mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>& event)
-  {
-    co_return;
-  }
-
-  // boost::asio::awaitable<void> operator()()(const mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>& event)
-  // {
-  //   co_return;
-  // }
-};
+#include <app/logger.hpp>
+#include <device/logger.hpp>
+#include <home_assistant/logger.hpp>
 
 using WorkGuard_t =
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
-auto setup_logger()
+auto setup_logger(const std::string& logger_name, spdlog::level::level_enum level)
 {
-  static auto mgmt_logger = spdlog::stdout_color_mt("mgmt");
-  mgmt_logger->set_level(spdlog::level::debug);
+  auto logger = spdlog::stdout_color_mt(logger_name);
+  logger->set_level(level);
 }
 
 int main(int argc, char** argv)
 {
-  setup_logger();
-  spdlog::get("mgmt")->info("Bootstrap mgmt");
+  setup_logger("mgmt", spdlog::level::debug);
+  setup_logger(mgmt::app::Logger, spdlog::level::debug);
+  setup_logger(mgmt::device::Logger, spdlog::level::debug);
+  setup_logger(mgmt::home_assistant::Logger, spdlog::level::debug);
+
+  spdlog::get(mgmt::app::Logger)->info("Bootstrap mgmt");
 
   if (argc != 2) {
     spdlog::get("mgmt")->error("Too few arguments");
@@ -85,17 +69,40 @@ int main(int argc, char** argv)
   // //Messaging services
   auto bctx = boost::asio::io_context{};
   auto work_guard = WorkGuard_t{bctx.get_executor()};
-
-  auto entity_client_factory = mgmt::home_assistant::mqttc::EntityClientFactory { bctx, "172.17.0.5", 1883 };
+  auto dtree = mgmt::device::DeviceTree{};
   auto bus = common::event::AsyncEventBus{bctx};
 
+  // //Home Assistant
+  auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory { bctx, "172.17.0.2", 1883 };
+  auto entity_factory = mgmt::home_assistant::EntityFactory { client_factory };
+  auto hatch_dev_event_handler = mgmt::home_assistant::device::HatchEventHandler{entity_factory};
+  bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>([&hatch_dev_event_handler](const auto& e) ->boost::asio::awaitable<void> {
+    co_await hatch_dev_event_handler(e);
+  });
+  // bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
+  // bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
 
-  auto hatch_dev_event_handler = HatchDeviceEventHandler{};
-  bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
-  bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
 
-  // auto hatch_dev_handler = mgmt::home_assistant::HatchDeviceHandler{entity_client_factory};
+  // boost::asio::co_spawn(bctx, hatch_dev_event_handler(mgmt::event::DeviceCreated<mgmt::device::Hatch_t>(1)), common::coro::rethrow);
 
+  // mgmt::app::main_board_init(pdtree_path, dtree, bus);
+  boost::asio::co_spawn(bctx, [&pdtree_path, &dtree, &bus]() -> boost::asio::awaitable<void> {
+    mgmt::app::main_board_init(pdtree_path, dtree, bus);
+
+    co_return;
+  }, common::coro::rethrow);
+
+
+  // boost::asio::co_spawn(bctx, [&]() -> boost::asio::awaitable<void> {
+  //   co_await hatch_dev_event_handler(mgmt::event::DeviceCreated<mgmt::device::Hatch_t>(1));
+  // }, common::coro::rethrow);
+
+  // auto cover = entity_factory.create_cover("unique_id_for_cover");
+  // cover.set_ack_handler([&cover]() {
+  //   auto config = mgmt::home_assistant::mqttc::EntityConfig{"unique_id_for_cover"};
+  //   cover.async_set_config(config);
+  // });
+  // cover.connect();
 
   bctx.run();
 }

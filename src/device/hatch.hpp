@@ -4,7 +4,7 @@
 #include <device/device.hpp>
 namespace mgmt::device
 {
-  enum class HatchStatus { Undefined, Open, Closed, ChangingPosition, Faulty };
+  enum class HatchState { Undefined, Open, Closed, ChangingPosition, Faulty };
 
   template<class T>
   concept Hatch = Device<T>
@@ -12,6 +12,6 @@ namespace mgmt::device
   {
     v.open();
     v.close();
-    { v.status() } -> std::same_as<HatchStatus>;
+    { v.status() } -> std::same_as<HatchState>;
   };
 }

@@ -3,9 +3,8 @@
 #include <functional>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <home_assistant/mqtt/availibility.hpp>
+#include <home_assistant/availibility.hpp>
 #include <home_assistant/mqtt/entity_config.hpp>
-#include <home_assistant/mqtt/availibility.hpp>
 
 namespace mgmt::home_assistant::mqttc
 {
@@ -23,37 +22,79 @@ namespace mgmt::home_assistant::mqttc
     static constexpr inline auto AvailibilityTopic = "availibility";
     static constexpr inline auto JsonAttributesTopic = "json_attributes";
 
-    Cover(std::string unique_id, EntityClient client)
-      : unique_id_{std::move(unique_id)}
+    Cover() = delete;
+    Cover(std::string uid, EntityClient client)
+      : unique_id_{std::move(uid)}
       , client_{std::move(client)}
-    {}
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}, unique_id: {}", __FUNCTION__, unique_id_);
+    }
+
+    Cover(const Cover&) = delete;
+    Cover& operator=(const Cover&) = delete;
+    Cover(Cover&& rhs)
+      : unique_id_{std::move(rhs.unique_id_)}
+      , client_{std::move(rhs.client_)}
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::(Cover&&)");
+    }
+
+    Cover& operator=(Cover&&) = default;
+    ~Cover()
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+    }
 
     std::string unique_id() const
     {
       return unique_id_;
     }
 
-    void async_connect()
+    void connect()
     {
-      spdlog::debug("Cover::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
-      client_.async_connect();
+      client_.connect();
+    }
+
+    template<class Handler>
+    void set_ack_handler(Handler handler)
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+
+      client_.set_connack_handler(std::move(handler));
+    }
+
+    template<class Handler>
+    void set_error_handler(Handler handler)
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+
+      client_.set_error_handler(std::move(handler));
+    }
+
+    template<class Handler>
+    void set_close_handler(Handler handler)
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+
+      client_.set_close_handler(handler);
     }
 
     void on_command(CoverCommandHandler_t handler)
     {
-      spdlog::debug("Cover::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+
+      //TODO: Use mapper here
 
       subs_[fmt::format("cover_{}/{}", unique_id_, CommandTopic)] = [handler = std::move(handler)](auto&& content) {
-        const auto& content_str = content;
-
-        if (content_str == "open") {
+        if (content == "open") {
           handler(CoverCommand::Open);
         }
-        else if (content_str == "close") {
+        else if (content == "close") {
           handler(CoverCommand::Close);
         }
-        else if (content_str == "stop") {
+        else if (content == "stop") {
           handler(CoverCommand::Stop);
         }
       };
@@ -61,12 +102,12 @@ namespace mgmt::home_assistant::mqttc
 
     void async_set_config(EntityConfig config)
     {
-      spdlog::debug("Cover::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
       config.set("state_topic", fmt::format("cover_{}/{}", unique_id_, StateTopic));
       config.set("command_topic", fmt::format("cover_{}/{}", unique_id_, CommandTopic));
       config.set("availibility_topic", fmt::format("cover_{}/{}", unique_id_, AvailibilityTopic));
-      config.set("json_attributes_topic", fmt::format("cover-{}/{}", unique_id_, JsonAttributesTopic));
+      config.set("json_attributes_topic", fmt::format("cover_{}/{}", unique_id_, JsonAttributesTopic));
       config.set("state_opening", "opening");
       config.set("state_open", "open");
       config.set("state_closing", "closing");
@@ -85,7 +126,9 @@ namespace mgmt::home_assistant::mqttc
 
     void async_set_state(const CoverState& state)
     {
-      spdlog::debug("Cover::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+
+      //TODO: use mapper here
 
       auto state_str = std::string{};
 
@@ -109,7 +152,7 @@ namespace mgmt::home_assistant::mqttc
 
     void async_set_availibility(const Availibility& availibility)
     {
-      spdlog::debug("Cover::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
       auto availibility_str = std::string{};
 

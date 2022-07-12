@@ -2,7 +2,8 @@
 
 #include <ranges>
 #include <algorithm>
-#include <spdlog/spdlog.h>
+
+#include <device/logger.hpp>
 
 namespace mgmt::device
 {
@@ -12,13 +13,15 @@ namespace mgmt::device
   ) : indicators_{std::move(indicators)}
     , temp_sensors_{std::move(temp_sensors)}
   {
+    common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
+
     set_indicator_state(IndicatorType::Maintenance, IndicatorState::Off);
     set_indicator_state(IndicatorType::Maintenance, IndicatorState::On);
   }
 
   HardwareIdentity MainBoard::hardware_identity() const
   {
-    spdlog::get("mgmt")->debug("{}", __FUNCTION__);
+    common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
     return HardwareIdentity {
       .model = "HenhouseCtrl",
@@ -29,7 +32,7 @@ namespace mgmt::device
 
   IndicatorState MainBoard::indicator_state(IndicatorType type)
   {
-    spdlog::get("mgmt")->debug("{}", __FUNCTION__);
+    common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
     auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
       return i.type() == type;
@@ -44,7 +47,7 @@ namespace mgmt::device
 
   void MainBoard::set_indicator_state(IndicatorType type, IndicatorState state)
   {
-    spdlog::get("mgmt")->debug("{}", __FUNCTION__);
+    common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
     //TODO: Add concepts to constraint auto&&
     auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
@@ -60,6 +63,6 @@ namespace mgmt::device
 
   void MainBoard::restart()
   {
-    spdlog::get("mgmt")->debug("{}", __FUNCTION__);
+    common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
   }
 }

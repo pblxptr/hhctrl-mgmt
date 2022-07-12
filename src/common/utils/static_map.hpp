@@ -2,6 +2,7 @@
 
 #include <array>
 #include <algorithm>
+#include <common/logger/logger.hpp>
 
 namespace common::utils {
 
@@ -18,7 +19,7 @@ public:
     auto it = std::find_if(std::begin(data), std::end(data), [&k](const auto& x) { return k == x.first; });
 
     if (it == data.end()) {
-      throw std::range_error("Range error");
+      throw std::range_error(fmt::format("range error, details: {}", common::logger::source()));
     }
 
     return it->second;
@@ -31,7 +32,7 @@ public:
     auto it = std::find_if(std::begin(data), std::end(data), [&v](const auto& x) { return v == x.second; });
 
     if (it == data.end()) {
-      throw std::range_error("Range error");
+      throw std::range_error(fmt::format("range error, details: {}", common::logger::source()));
     }
 
     return it->first;

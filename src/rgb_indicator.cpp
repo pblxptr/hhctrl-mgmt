@@ -1,7 +1,7 @@
 #include <device/rgb_indicator.hpp>
-#include <common/utils/static_map.hpp>
 
-#include <spdlog/spdlog.h>
+#include <common/utils/static_map.hpp>
+#include <device/logger.hpp>
 
 namespace {
   using namespace mgmt::device;
@@ -40,9 +40,9 @@ namespace mgmt::device
 
   void RGBIndicator::set_state(IndicatorState state)
   {
-    spdlog::get("mgmt")->debug("Setting state: '{}' on indicator: '{}'", to_string(state), to_string(type_));
+    common::logger::get(mgmt::device::Logger)->debug("RGBIndicator::{}, indicator: {}, state: {}", __FUNCTION__, to_string(type_), to_string(state));
 
-      const auto& config = IndicatorMapping.at(type_);
+    const auto& config = IndicatorMapping.at(type_);
 
       switch (state)
       {
@@ -60,6 +60,9 @@ namespace mgmt::device
             .blue = 0
           });
           break;
+        case IndicatorState::NotAvailable:
+        case IndicatorState::Blinking:
+          common::logger::get(mgmt::device::Logger)->debug("State not applicable");
       }
   }
 }

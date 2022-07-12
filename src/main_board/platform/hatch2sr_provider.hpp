@@ -3,7 +3,7 @@
 #include <main_board/platform/device_loader.hpp>
 #include <main_board/platform/pdtree.hpp>
 #include <main_board/device/sysfs_hatch.hpp>
-#include <inventory/device_register.hpp>
+#include <device/device_register.hpp>
 
 namespace mgmt::platform_device
 {
@@ -21,10 +21,10 @@ namespace mgmt::platform_device
       constexpr auto sysfs_path_atrr = "sysfs_path";
       constexpr auto model_attr = "model";
 
-      spdlog::get("mgmt")->debug("Hatch2srDriverLoader: probe driver '{}'", pdtree_to_string(object.at(model_attr)));
+      common::logger::get(mgmt::device::Logger)->debug("Hatch2srDriverLoader: probe driver '{}'", pdtree_to_string(object.at(model_attr)));
 
       if (not object.contains("sysfs_path")) {
-        spdlog::get("mgmt")->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
+        common::logger::get(mgmt::device::Logger)->error("Missing attribute 'sysfs_path' id pdtree for hatch2sr driver descriptor");
         return false;
       } 
 

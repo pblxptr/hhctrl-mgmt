@@ -2,7 +2,7 @@
 
 #include <mqtt/client.hpp>
 #include <mqtt/buffer.hpp>
-#include <spdlog/spdlog.h>
+#include <home_assistant/logger.hpp>
 
 namespace mgmt::home_assistant::mqttc
 {
@@ -11,7 +11,7 @@ namespace mgmt::home_assistant::mqttc
   auto default_publish_handler() -> PublishHandler_t
   {
     return { [](auto&&) {
-      spdlog::debug("default_publish_handler");
+      common::logger::get(mgmt::home_assistant::Logger)->debug("default_publish_handler");
     }};
   }
 
@@ -19,6 +19,7 @@ namespace mgmt::home_assistant::mqttc
   class MqttEntityClient
   {
   public:
+    MqttEntityClient() = delete;
     MqttEntityClient(std::string uid, Impl impl)
       : impl_{std::move(impl)}
     {
@@ -27,9 +28,9 @@ namespace mgmt::home_assistant::mqttc
       impl_->set_keep_alive_sec(30);
     }
 
-    void async_connect()
+    void connect()
     {
-      spdlog::debug("MqttEntityClient::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
       impl_->connect();
     }
@@ -37,31 +38,37 @@ namespace mgmt::home_assistant::mqttc
     template<class Handler>
     void set_connack_handler(Handler&& handler)
     {
-      spdlog::debug("MqttEntityClient::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-      impl_->set_connack_handler(std::forward<Handler>(handler));
+      impl_->set_connack_handler([this, client_handler = std::forward<Handler>(handler)](bool sp, auto rc) mutable {
+        return on_ack(sp, rc, std::forward<Handler>(client_handler));
+      });
     }
 
     template<class Handler>
     void set_error_handler(Handler&& handler)
     {
-      spdlog::debug("MqttEntityClient::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-      impl_->set_error_handler(std::forward<Handler>(handler));
+      impl_->set_error_handler([this, client_handler = std::forward<Handler>(handler)](const auto& ec) mutable {
+        on_error(ec, std::forward<Handler>(client_handler));
+      });
     }
 
     template<class Handler>
     void set_close_handler(Handler&& handler)
     {
-      spdlog::debug("MqttEntityClient::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-      impl_->set_close_handler(std::forward<Handler>(handler));
+      impl_->set_close_handler([this, client_handler = std::forward<Handler>(handler)]() mutable {
+        on_close(std::forward<Handler>(client_handler));
+      });
     }
 
     template<class Payload>
     void async_publish(const std::string& topic, Payload&& payload)
     {
-      spdlog::debug("MqttEntityClient::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
       impl_->publish(topic, std::forward<Payload>(payload));
     }
@@ -69,22 +76,22 @@ namespace mgmt::home_assistant::mqttc
     template<class Iterator>
     void subscribe(Iterator begin, Iterator end)
     {
-      spdlog::debug("MqttEntityClient::{}", __FUNCTION__);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
       impl_->set_suback_handler([this, begin, end](auto packet_id, auto results){
-        spdlog::debug("suback_handler");
+        common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::suback_handler, packet_id: {}", packet_id);
         for (const auto& result : results) {
-          spdlog::debug("  - suback_return_code: {}", MQTT_NS::suback_return_code_to_str(result));
+          common::logger::get(mgmt::home_assistant::Logger)->debug("  - suback_return_code: {}", MQTT_NS::suback_return_code_to_str(result));
         }
 
         impl_->set_publish_handler([this, begin, end](
           mqtt::optional<std::uint16_t> packet_id,
-          mqtt::publish_options pubopts,
+          [[maybe_unused]] mqtt::publish_options pubopts,
           mqtt::buffer topic_name,
           mqtt::buffer contents
         )
         {
-          spdlog::debug("MqttEntityClient::{}::set_publish_handler", __FUNCTION__);
+          common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}::publish_handler, packet id: {}", __FUNCTION__, packet_id.value_or(0));
 
           auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& v) {
             auto& [topic, handler] = v;
@@ -106,14 +113,44 @@ namespace mgmt::home_assistant::mqttc
 
       using MqttSub_t = std::tuple<MQTT_NS::string_view, MQTT_NS::subscribe_options>;
 
-      const auto size = std::distance(begin, end);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, sending sub", __FUNCTION__);
+
       auto subs = std::vector<MqttSub_t>{};
       std::transform(begin, end, std::back_inserter(subs), [](auto&& sub) {
           const auto& [topic, _] = sub;
+          common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, subscribe topic: {}", __FUNCTION__, topic);
+
           return MqttSub_t { topic.c_str(), MQTT_NS::subscribe_options(MQTT_NS::qos::at_most_once) };
       });
       impl_->subscribe(subs);
+    }
+  private:
+    template<class Handler>
+    bool on_ack(bool sp, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, session present: {}, conack ret code: {}",
+        __FUNCTION__, sp, MQTT_NS::connect_return_code_to_str(connack_return_code)
+      );
 
+      client_handler();
+
+      return true;
+    }
+
+    template<class Handler>
+    void on_error(const boost::system::error_code& ec, Handler&& client_handler)
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
+
+      client_handler();
+    }
+
+    template<class Handler>
+    void on_close(Handler&& client_handler)
+    {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+
+      client_handler();
     }
 
   private:

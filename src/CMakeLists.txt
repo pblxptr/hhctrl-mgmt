@@ -45,6 +45,9 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
   pthread
   boost_date_time
   boost_json
+  boost_log
+  boost_log_setup
+  boost_thread
   spdlog::spdlog
   fmt::fmt
   # zmq

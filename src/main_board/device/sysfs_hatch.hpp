@@ -19,7 +19,7 @@ public:
 
   void open() const;
   void close() const;
-  HatchStatus status() const;
+  HatchState status() const;
 private:
   std::filesystem::path sysfsdir_;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <device/device_id.hpp>
-#include <inventory/devicetree.hpp>
+#include <device/devicetree.hpp>
 
 namespace mgmt::platform_device
 {
@@ -21,7 +21,7 @@ namespace mgmt::platform_device
     template<class D, class Loader>
     bool handle(Loader&& loader) const
     {
-      spdlog::get("mgmt")->debug("Loading generic device under board");
+      common::logger::get(mgmt::device::Logger)->debug("Loading generic device under board");
 
       auto device_id = loader.load();
       dtree_.add_child(board_id_, device_id);

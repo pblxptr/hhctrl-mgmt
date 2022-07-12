@@ -16,11 +16,11 @@ namespace mgmt::home_assistant::mqttc
       std::uint16_t server_port
     )
       : ioc_{ioc}
-      , server_address_ { std::move(server_address) }
-      , server_port_ { server_port }
+      , server_address_{ std::move(server_address) }
+      , server_port_{ server_port }
     {}
 
-    auto create(std::string unique_id)
+    auto create(std::string unique_id) const
     {
       return MqttEntityClient { std::move(unique_id),
         mqtt::make_client(ioc_, server_address_, server_port_)

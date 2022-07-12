@@ -3,8 +3,9 @@
 #include <atomic>
 #include <spdlog/spdlog.h>
 
-#include <inventory/inventory.hpp>
+#include <device/inventory.hpp>
 #include <device/device_id.hpp>
+#include <device/logger.hpp>
 
 namespace mgmt::device {
   namespace details {
@@ -24,7 +25,7 @@ namespace mgmt::device {
   {
     auto id = details::new_id();
 
-    spdlog::get("mgmt")->info("Register device with id: {}", id);
+    common::logger::get(mgmt::device::Logger)->debug("{}, device id: {}", __FUNCTION__, id);
 
     inventory<D>.add(id, std::forward<D>(device));
 
@@ -36,7 +37,7 @@ namespace mgmt::device {
   {
     auto id = details::new_id();
 
-    spdlog::get("mgmt")->debug("Register (emplace) device with id: {}", id);
+    common::logger::get(mgmt::device::Logger)->debug("{}, device id: {}", __FUNCTION__, id);
 
     inventory<D>.emplace(id, std::forward<Args>(args)...);
 
@@ -52,7 +53,7 @@ namespace mgmt::device {
   template<class D>
   auto deregister_device(const DeviceId_t& id)
   {
-    spdlog::get("mgmt")->debug("Deregister device with id: {}", id);
+    common::logger::get(mgmt::device::Logger)->debug("{}, device id: {}", __FUNCTION__, id);
 
     inventory<D>.remove(id);
   }
