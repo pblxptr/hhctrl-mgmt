@@ -9,10 +9,11 @@ namespace common::command
 {
   class BaseCommand
   {
-  public:
+  protected:
     explicit BaseCommand(CommandId_t command_id)
       : id_{command_id}
     {}
+  public:
     BaseCommand(const BaseCommand&) = delete;
     BaseCommand(BaseCommand&&) = default;
 

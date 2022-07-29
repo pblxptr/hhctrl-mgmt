@@ -9,7 +9,7 @@ import "icon/metadata/metadata.proto";
 
 package pdci.hatch;
 
-enum HatchStatus {
+enum HatchState {
   Undefined = 0;
   Open = 1;
   Closed = 2;
@@ -26,7 +26,7 @@ message GetStatusReq
 message GetStatusCfm
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000121;
-  HatchStatus status = 1;
+  HatchState status = 1;
 }
 
 message OpenHatchReq

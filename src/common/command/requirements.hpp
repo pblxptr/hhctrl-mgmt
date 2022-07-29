@@ -8,7 +8,7 @@
 namespace common::command
 {
   template<class Handler, class Arg>
-  concept AsyncHandlerCompatible = requires(Handler&& handler, const Arg& arg)
+  concept AsyncEventHandler = requires(Handler&& handler, const Arg& arg)
   {
     { std::invoke(std::forward<Handler>(handler), arg) } -> std::same_as<boost::asio::awaitable<void>>;
   };

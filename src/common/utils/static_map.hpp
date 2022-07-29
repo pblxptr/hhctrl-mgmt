@@ -2,6 +2,7 @@
 
 #include <array>
 #include <algorithm>
+#include <common/logger/logger.hpp>
 
 namespace common::utils {
 
@@ -13,12 +14,12 @@ public:
 
   // Find element by key
   // Throws if not found
-  constexpr auto at(const TKey& k) const
+  constexpr decltype(auto) at(const TKey& k) const
   {
     auto it = std::find_if(std::begin(data), std::end(data), [&k](const auto& x) { return k == x.first; });
 
     if (it == data.end()) {
-      throw std::range_error("Range error");
+      throw std::range_error(fmt::format("range error, details: {}", common::logger::source()));
     }
 
     return it->second;
@@ -26,12 +27,12 @@ public:
 
   // Find element by value
   // Throws if not found
-  constexpr auto at(const TValue& v) const
+  constexpr decltype(auto) at(const TValue& v) const
   {
     auto it = std::find_if(std::begin(data), std::end(data), [&v](const auto& x) { return v == x.second; });
 
     if (it == data.end()) {
-      throw std::range_error("Range error");
+      throw std::range_error(fmt::format("range error, details: {}", common::logger::source()));
     }
 
     return it->first;

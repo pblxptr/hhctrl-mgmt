@@ -30,5 +30,5 @@ message GetDeviceAttributesReq
 message GetDeviceAttributesCfm
 {
   option (icon.metadata.MESSAGE_NUMBER) = 0x10000103;
-  map<string, string> attribute = 1;
+  map<string, string> attributes = 1;
 }
