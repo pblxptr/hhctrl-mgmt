@@ -4,6 +4,7 @@
 #include <mqtt/buffer.hpp>
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 namespace mgmt::home_assistant::mqttc {
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
@@ -19,10 +20,19 @@ inline auto default_publish_handler() -> PublishHandler_t
 template<class Impl>
 class MqttEntityClient
 {
+  struct Reconnect {
+    int attempt {};
+    int max_attempts { 5 };
+    std::chrono::seconds reconnect_delay = { std::chrono::seconds(3) };
+    boost::asio::steady_timer timer;
+  };
 public:
   MqttEntityClient() = delete;
   MqttEntityClient(std::string uid, Impl impl)
     : impl_{ std::move(impl) }
+    , reconnect_{
+        .timer = boost::asio::steady_timer{ impl_->socket()->get_executor() }
+      }
   {
     impl_->set_client_id(uid);
     impl_->set_clean_session(true);
@@ -33,7 +43,12 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-    impl_->connect();
+    auto ec = boost::system::error_code{};
+    impl_->connect(ec);
+
+    if (ec && not reconnect()) {
+      on_error(ec);
+    }
   }
 
   template<class Handler>
@@ -120,11 +135,32 @@ public:
   }
 
 private:
+  bool reconnect()
+  {
+    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+
+    if (++reconnect_.attempt > reconnect_.max_attempts) {
+      return false;
+    }
+
+    reconnect_.timer.expires_after(reconnect_.reconnect_delay);
+    reconnect_.timer.async_wait([this](const auto& ec) {
+      if (!ec) {
+        common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::reconnect, attempt: {}/{}",
+          reconnect_.attempt, reconnect_.max_attempts
+        );
+        connect();
+      }
+    });
+    return true;
+  }
+
   template<class Handler>
   bool on_ack(bool sp, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, sp, MQTT_NS::connect_return_code_to_str(connack_return_code));
 
+    reconnect_.attempt = 0;
     client_handler();
 
     return true;
@@ -134,19 +170,24 @@ private:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
 
-    error_handler_(EntityError{ EntityError::Code::Undefined, ec.message() });
+    if (not reconnect()) {
+      error_handler_(EntityError{ EntityError::Code::Undefined, ec.message() });
+    }
   }
 
   void on_close()
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-    error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });
+    if (not reconnect()) {
+      error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });
+    }
   }
 
 private:
   Impl impl_;
   ErrorHandler_t error_handler_;
+  Reconnect reconnect_;
 };
 
 }// namespace mgmt::home_assistant::mqttc
