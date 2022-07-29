@@ -16,49 +16,45 @@
 #include <poller/poller_factory.hpp>
 #include <poller/main_board_poller.hpp>
 
-namespace mgmt::app
+namespace mgmt::app {
+void main_board_init(
+  std::string pdtree_path,
+  mgmt::device::DeviceTree& dtree,
+  mgmt::device::HardwareIdentityStore_t& hw_identity_store,
+  mgmt::device::PollingService& polling_service,
+  common::event::AsyncEventBus& bus)
 {
-  void main_board_init(
-    std::string pdtree_path,
-    mgmt::device::DeviceTree& dtree,
-    mgmt::device::HardwareIdentityStore_t& hw_identity_store,
-    mgmt::device::PollingService& polling_service,
-    common::event::AsyncEventBus& bus
-  )
-  {
-    using namespace mgmt::platform_device;
+  using namespace mgmt::platform_device;
 
-    //Prepare
-    auto poller_factory = mgmt::poller::PollerFactory{bus};
-    auto builder = PlatformBuilder<DefaultGenericDeviceLoadingStrategy>{};
-    auto platform_device_discovery = PlatformDeviceDiscovery{
-      pdtree_path,
-        RGBIndicatorProvider{},
-        HatchProvider{polling_service, poller_factory}
-    };
-    platform_device_discovery.setup(builder);
+  // Prepare
+  auto poller_factory = mgmt::poller::PollerFactory{ bus };
+  auto builder = PlatformBuilder<DefaultGenericDeviceLoadingStrategy>{};
+  auto platform_device_discovery = PlatformDeviceDiscovery{
+    pdtree_path,
+    RGBIndicatorProvider{},
+    HatchProvider{ polling_service, poller_factory }
+  };
+  platform_device_discovery.setup(builder);
 
-    //Handle main board
-    auto board_id = mgmt::device::register_device(std::move(builder).build_board());
-    const auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(board_id);
-    hw_identity_store.emplace(board_id, board.hardware_identity());
-    polling_service.add_poller(board_id,
-      std::chrono::seconds(5),
-      poller_factory.create_poller<mgmt::poller::MainBoardPoller>(board_id)
-    );
-    bus.publish(mgmt::event::DeviceCreated<mgmt::device::MainBoard> {
-      board_id
-    });
+  // Handle main board
+  auto board_id = mgmt::device::register_device(std::move(builder).build_board());
+  const auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(board_id);
+  hw_identity_store.emplace(board_id, board.hardware_identity());
+  polling_service.add_poller(board_id,
+    std::chrono::seconds(5),
+    poller_factory.create_poller<mgmt::poller::MainBoardPoller>(board_id));
+  bus.publish(mgmt::event::DeviceCreated<mgmt::device::MainBoard>{
+    board_id });
 
-    //Handle generic devices connected to board
-    auto generic_dev_loader_handler = DefaultGenericDeviceLoadingStrategy{
-      board_id,
-      dtree,
-      bus
-    };
-    auto generic_dev_loaders = std::move(builder).build_generic_loaders();
-    for (auto&& loader : generic_dev_loaders) {
-      loader(generic_dev_loader_handler);
-    }
+  // Handle generic devices connected to board
+  auto generic_dev_loader_handler = DefaultGenericDeviceLoadingStrategy{
+    board_id,
+    dtree,
+    bus
+  };
+  auto generic_dev_loaders = std::move(builder).build_generic_loaders();
+  for (auto&& loader : generic_dev_loaders) {
+    loader(generic_dev_loader_handler);
   }
 }
+}// namespace mgmt::app

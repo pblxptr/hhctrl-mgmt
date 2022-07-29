@@ -1,10 +1,9 @@
 #pragma once
 
-namespace common::traits
+namespace common::traits {
+template<class T>
+struct TypeTag
 {
-  template<class T>
-  struct TypeTag
-  {
-    using Type_t = T;
-  };
-}
+  using Type_t = T;
+};
+}// namespace common::traits

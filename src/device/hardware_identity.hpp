@@ -2,13 +2,12 @@
 
 #include <string>
 
-namespace mgmt::device
+namespace mgmt::device {
+struct HardwareIdentity
 {
-  struct HardwareIdentity
-  {
-    std::string manufacturer;
-    std::string model;
-    std::string revision;
-    std::string serial_number;
-  };
-}
+  std::string manufacturer;
+  std::string model;
+  std::string revision;
+  std::string serial_number;
+};
+}// namespace mgmt::device

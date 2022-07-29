@@ -7,20 +7,20 @@
 #include <device/device_id.hpp>
 #include <common/event/event_bus.hpp>
 
-namespace mgmt::poller
+namespace mgmt::poller {
+class PollerFactory
 {
-  class PollerFactory
+public:
+  explicit PollerFactory(common::event::AsyncEventBus& bus)
+    : bus_{ bus }
+  {}
+  template<class Poller>
+  auto create_poller(const mgmt::device::DeviceId_t& device_id)
   {
-  public:
-    explicit PollerFactory(common::event::AsyncEventBus& bus)
-      : bus_{bus}
-    {}
-    template<class Poller>
-    auto create_poller(const mgmt::device::DeviceId_t& device_id)
-    {
-      return Poller{device_id, bus_};
-    }
-  private:
-    common::event::AsyncEventBus& bus_;
-  };
-}
+    return Poller{ device_id, bus_ };
+  }
+
+private:
+  common::event::AsyncEventBus& bus_;
+};
+}// namespace mgmt::poller

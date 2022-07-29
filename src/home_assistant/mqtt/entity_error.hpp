@@ -7,30 +7,29 @@
 #include <string>
 #include <utility>
 
-namespace mgmt::home_assistant::mqttc
+namespace mgmt::home_assistant::mqttc {
+class EntityError
 {
-  class EntityError
+public:
+  enum class Code { Undefined,
+    Disconnected };
+
+  explicit EntityError(Code code, std::string message = {})
+    : code_{ code }, message_{ std::move(message) }
+  {}
+
+  Code code() const
   {
-  public:
-    enum class Code { Undefined, Disconnected };
+    return code_;
+  }
 
-    explicit EntityError(Code code, std::string  message = {})
-      : code_{code}
-      , message_{std::move(message)}
-    {}
+  const std::string& message() const
+  {
+    return message_;
+  }
 
-    Code code() const
-    {
-      return code_;
-    }
-
-    const std::string& message() const
-    {
-      return message_;
-    }
-
-  private:
-    Code code_;
-    std::string message_;
-  };
-}
+private:
+  Code code_;
+  std::string message_;
+};
+}// namespace mgmt::home_assistant::mqttc

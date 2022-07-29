@@ -1,13 +1,12 @@
 #pragma once
 
-namespace mgmt::device
+namespace mgmt::device {
+class SysfsTempSensor
 {
-  class SysfsTempSensor
+public:
+  float value() const
   {
-  public:
-    float value() const
-    {
-      return 123.0f;
-    }
-  };
-}
+    return 123.0f;
+  }
+};
+}// namespace mgmt::device

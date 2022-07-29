@@ -9,37 +9,36 @@
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>
 
-namespace mgmt::home_assistant::device
+namespace mgmt::home_assistant::device {
+class MainBoardHandler
 {
-  class MainBoardHandler
-  {
-  public:
-    MainBoardHandler(
-      mgmt::device::DeviceId_t device_id,
-      const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
-      const mgmt::home_assistant::EntityFactory& factory
-    );
+public:
+  MainBoardHandler(
+    mgmt::device::DeviceId_t device_id,
+    const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
+    const mgmt::home_assistant::EntityFactory& factory);
 
-    MainBoardHandler(const MainBoardHandler&) = delete;
-    MainBoardHandler& operator=(const MainBoardHandler&) = delete;
-    MainBoardHandler(MainBoardHandler&& rhs) noexcept;
-    MainBoardHandler& operator=(MainBoardHandler&& rhs) noexcept;
+  MainBoardHandler(const MainBoardHandler&) = delete;
+  MainBoardHandler& operator=(const MainBoardHandler&) = delete;
+  MainBoardHandler(MainBoardHandler&& rhs) noexcept;
+  MainBoardHandler& operator=(MainBoardHandler&& rhs) noexcept;
 
-    mgmt::device::DeviceId_t hardware_id() const;
-    void connect();
-    void async_sync_state();
+  mgmt::device::DeviceId_t hardware_id() const;
+  void connect();
+  void async_sync_state();
 
-  private:
-    void setup();
-    void set_config_indicator(const mgmt::device::IndicatorType&);
-    void set_config_restart_button();
-    void on_error(const mgmt::home_assistant::mqttc::EntityError& error);
+private:
+  void setup();
+  void set_config_indicator(const mgmt::device::IndicatorType&);
+  void set_config_restart_button();
+  void on_error(const mgmt::home_assistant::mqttc::EntityError& error);
 
-  private:
-    mgmt::device::DeviceId_t device_id_;
-    const mgmt::home_assistant::DeviceIdentityProvider& identity_provider_;
-    std::unordered_map<mgmt::device::IndicatorType,
-      mgmt::home_assistant::mqttc::BinarySensor_t> indicators_;
-    mgmt::home_assistant::mqttc::Button_t restart_button_;
-  };
-}
+private:
+  mgmt::device::DeviceId_t device_id_;
+  const mgmt::home_assistant::DeviceIdentityProvider& identity_provider_;
+  std::unordered_map<mgmt::device::IndicatorType,
+    mgmt::home_assistant::mqttc::BinarySensor_t>
+    indicators_;
+  mgmt::home_assistant::mqttc::Button_t restart_button_;
+};
+}// namespace mgmt::home_assistant::device

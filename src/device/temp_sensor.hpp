@@ -8,12 +8,13 @@
 #include <main_board/device/sysfs_temp_sensor.hpp>
 
 namespace mgmt::device {
-  template<class T>
-  concept TempSensor = Device<T>
-  and requires (T t)
+template<class T>
+concept TempSensor = Device<T> and requires(T t)
+{
   {
-    { t.value() } -> const std::same_as<int>;
-  };
+    t.value()
+    } -> const std::same_as<int>;
+};
 
-  using TempSensor_t = SysfsTempSensor;
-}
+using TempSensor_t = SysfsTempSensor;
+}// namespace mgmt::device

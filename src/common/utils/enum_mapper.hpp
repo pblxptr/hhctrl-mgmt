@@ -1,7 +1,6 @@
 #pragma once
 
-namespace common::utils
-{
+namespace common::utils {
 template<auto T1, auto T2>
 struct Tie
 {
@@ -16,10 +15,10 @@ template<class Config>
 class EnumMapper
 {
 public:
-  template<class...T>
+  template<class... T>
   using MakeConfig = std::tuple<T...>;
 
-  template<class...T>
+  template<class... T>
   using MakeMapper = EnumMapper<MakeConfig<T...>>;
 
   template<class Destination, class Source>
@@ -43,18 +42,18 @@ public:
   }
 
 private:
-  template<bool Flag = false> 
-  static constexpr void type_mismatch() 
-  { 
-    static_assert(Flag, "EnumMapper cannot perform mapping."); 
+  template<bool Flag = false>
+  static constexpr void type_mismatch()
+  {
+    static_assert(Flag, "EnumMapper cannot perform mapping.");
   }
 
-  template <class Destination, class Source, uint32_t... Is>
+  template<class Destination, class Source, uint32_t... Is>
   static auto mape_types(const Source& source, std::integer_sequence<uint32_t, Is...>)
   {
     auto destination = std::optional<Destination>{};
 
-    ( tryToMap<Is, Destination, Source>(destination, source) || ... );
+    (tryToMap<Is, Destination, Source>(destination, source) || ...);
 
     return destination;
   }
@@ -63,15 +62,13 @@ private:
   static bool tryToMap(std::optional<Destination>& ret_val, const Source& src)
   {
     using SelectedTie = std::tuple_element_t<Idx, Config>;
-    using RawDst_t    = std::decay_t<Destination>;
-    using RawSrc_t    = std::decay_t<Source>;
-    using RawT1_t     = std::decay_t<decltype(SelectedTie::t1)>;
-    using RawT2_t     = std::decay_t<decltype(SelectedTie::t2)>;
+    using RawDst_t = std::decay_t<Destination>;
+    using RawSrc_t = std::decay_t<Source>;
+    using RawT1_t = std::decay_t<decltype(SelectedTie::t1)>;
+    using RawT2_t = std::decay_t<decltype(SelectedTie::t2)>;
 
     static_assert(
-      std::is_same_v<RawDst_t, RawT1_t> ||
-      std::is_same_v<RawDst_t, RawT2_t>, "Destination type does not belong to the configuration."
-    );
+      std::is_same_v<RawDst_t, RawT1_t> || std::is_same_v<RawDst_t, RawT2_t>, "Destination type does not belong to the configuration.");
 
     if constexpr (std::is_same_v<RawSrc_t, RawT1_t>) {
       if (SelectedTie::t1 == src) {
@@ -83,12 +80,11 @@ private:
         ret_val.emplace(SelectedTie::t1);
         return true;
       }
-    }
-    else {
+    } else {
       type_mismatch();
     }
 
     return false;
   }
 };
-}
+}// namespace common::utils

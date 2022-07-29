@@ -2,16 +2,20 @@
 
 #include <concepts>
 #include <device/device.hpp>
-namespace mgmt::device
-{
-  enum class HatchState { Undefined, Open, Closed, ChangingPosition, Faulty };
+namespace mgmt::device {
+enum class HatchState { Undefined,
+  Open,
+  Closed,
+  ChangingPosition,
+  Faulty };
 
-  template<class T>
-  concept Hatch = Device<T>
-  and requires(T v)
+template<class T>
+concept Hatch = Device<T> and requires(T v)
+{
+  v.open();
+  v.close();
   {
-    v.open();
-    v.close();
-    { v.status() } -> std::same_as<HatchState>;
-  };
-}
+    v.status()
+    } -> std::same_as<HatchState>;
+};
+}// namespace mgmt::device

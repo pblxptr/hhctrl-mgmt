@@ -3,7 +3,7 @@
 #include <gmock/gmock.h>
 
 namespace {
-  using namespace common::scheduler;
+using namespace common::scheduler;
 }
 
 class GMockTaskStore : public common::scheduler::TaskStore

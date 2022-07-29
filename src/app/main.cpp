@@ -61,21 +61,21 @@ int main(int argc, char** argv)
 
   /* General Services */
   auto bctx = boost::asio::io_context{};
-  auto work_guard = WorkGuard_t{bctx.get_executor()};
+  auto work_guard = WorkGuard_t{ bctx.get_executor() };
   auto hw_identity_store = mgmt::device::HardwareIdentityStore_t{};
   auto dtree = mgmt::device::DeviceTree{};
-  auto bus = common::event::AsyncEventBus{bctx};
+  auto bus = common::event::AsyncEventBus{ bctx };
 
   /* Home Assistant Services */
-    auto device_identity_provider = mgmt::home_assistant::DeviceIdentityProvider{
+  auto device_identity_provider = mgmt::home_assistant::DeviceIdentityProvider{
     hw_identity_store,
     dtree
   };
-  auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory { bctx, "192.168.0.115", 1883 };
-  auto entity_factory = mgmt::home_assistant::EntityFactory { client_factory };
+  auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory{ bctx, "192.168.0.115", 1883 };
+  auto entity_factory = mgmt::home_assistant::EntityFactory{ client_factory };
 
-  //Main board dev handler
-  auto main_board_dev_event_handler = mgmt::home_assistant::device::MainBoardEventHandler {
+  // Main board dev handler
+  auto main_board_dev_event_handler = mgmt::home_assistant::device::MainBoardEventHandler{
     entity_factory,
     device_identity_provider
   };
@@ -83,8 +83,8 @@ int main(int argc, char** argv)
   bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::MainBoard>>(main_board_dev_event_handler);
   bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::MainBoard>>(main_board_dev_event_handler);
 
-  //Hatch dev handler
-  auto hatch_dev_event_handler = mgmt::home_assistant::device::HatchEventHandler {
+  // Hatch dev handler
+  auto hatch_dev_event_handler = mgmt::home_assistant::device::HatchEventHandler{
     entity_factory,
     device_identity_provider
   };
@@ -93,18 +93,19 @@ int main(int argc, char** argv)
   bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
 
   /* Device Services */
-  auto polling_service = mgmt::device::PollingService{std::ref(bctx)};
-  boost::asio::co_spawn(bctx, [&pdtree_path, &dtree, &hw_identity_store, &bus, &polling_service]() -> boost::asio::awaitable<void> {
-    mgmt::app::main_board_init(
-      pdtree_path,
-      dtree,
-      hw_identity_store,
-      polling_service,
-      bus
-    );
+  auto polling_service = mgmt::device::PollingService{ std::ref(bctx) };
+  boost::asio::co_spawn(
+    bctx, [&pdtree_path, &dtree, &hw_identity_store, &bus, &polling_service]() -> boost::asio::awaitable<void> {
+      mgmt::app::main_board_init(
+        pdtree_path,
+        dtree,
+        hw_identity_store,
+        polling_service,
+        bus);
 
-    co_return;
-  }, common::coro::rethrow);
+      co_return;
+    },
+    common::coro::rethrow);
 
   bctx.run();
 }

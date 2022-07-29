@@ -1,5 +1,5 @@
 #pragma once
 
 namespace mgmt::device {
-  using DeviceId_t = int;
+using DeviceId_t = int;
 }

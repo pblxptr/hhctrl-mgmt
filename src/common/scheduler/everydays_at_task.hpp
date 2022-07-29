@@ -8,8 +8,7 @@
 #include <common/utils/datetime.hpp>
 #include <common/scheduler/scheduler_durations.hpp>
 
-namespace common::scheduler
-{
+namespace common::scheduler {
 template<class THandler>
 class EverydayAtTask : public Task
 {
@@ -20,15 +19,10 @@ public:
     std::string owner,
     boost::asio::io_context& io,
     TDurationArg&& duration,
-    THandlerArg&& handler
-  )
-  : id_{std::move(id)}
-  , owner_{std::move(owner)}
-  , timer_{io}
-  , duration_{std::forward<TDurationArg>(duration)}
-  , handler_{std::forward<THandlerArg>(handler)}
+    THandlerArg&& handler)
+    : id_{ std::move(id) }, owner_{ std::move(owner) }, timer_{ io }, duration_{ std::forward<TDurationArg>(duration) }, handler_{ std::forward<THandlerArg>(handler) }
   {
-    //TODO: Add static_assert to check if duration property is constructible from provided argument.
+    // TODO: Add static_assert to check if duration property is constructible from provided argument.
 
     configure_expiry();
   }
@@ -52,8 +46,7 @@ public:
   {
     spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
       common::utils::datetime::to_string(timer_.expiry()),
-      common::utils::datetime::to_string(tp)
-    ));
+      common::utils::datetime::to_string(tp)));
     timer_.expires_at(std::move(tp));
   }
 
@@ -101,5 +94,5 @@ private:
   boost::asio::system_timer timer_;
   days_at duration_;
   THandler handler_;
-  };
-}
+};
+}// namespace common::scheduler

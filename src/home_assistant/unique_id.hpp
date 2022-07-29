@@ -10,10 +10,9 @@
 #include <device/device_id.hpp>
 #include <home_assistant/device_identity.hpp>
 
-namespace mgmt::home_assistant
+namespace mgmt::home_assistant {
+inline std::string get_unique_id(const mgmt::device::DeviceId_t& device_id, const mgmt::home_assistant::DeviceIdentity& identity)
 {
-  inline std::string get_unique_id(const mgmt::device::DeviceId_t& device_id, const mgmt::home_assistant::DeviceIdentity& identity)
-  {
-    return fmt::format("{}_{}", identity.serial_number, device_id);
-  };
-}
+  return fmt::format("{}_{}", identity.serial_number, device_id);
+};
+}// namespace mgmt::home_assistant

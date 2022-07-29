@@ -10,7 +10,7 @@
 struct TestCommand1 : common::command::GenericCommand<TestCommand1>
 {
   explicit TestCommand1(int num)
-    : number{num}
+    : number{ num }
   {}
 
   const int number{};
@@ -18,24 +18,28 @@ struct TestCommand1 : common::command::GenericCommand<TestCommand1>
 
 struct TestCommand2 : common::command::GenericCommand<TestCommand2>
 {
-
 };
 
-SCENARIO("Handlers can be added to dispatcher") {
-  GIVEN("An AsyncCommandDispatcher") {
+SCENARIO("Handlers can be added to dispatcher")
+{
+  GIVEN("An AsyncCommandDispatcher")
+  {
     auto dispatcher = common::command::AsyncCommandDispatcher{};
 
-    WHEN("adding a handler") {
+    WHEN("adding a handler")
+    {
       auto add_handler = [&dispatcher]() {
         dispatcher.add_handler<TestCommand1>([](const TestCommand1&) -> boost::asio::awaitable<void> { co_return; });
       };
 
-      THEN("no exception is thrown") {
+      THEN("no exception is thrown")
+      {
         REQUIRE_NOTHROW(add_handler());
       }
     }
 
-    WHEN("adding multiple handlers for different types of commands") {
+    WHEN("adding multiple handlers for different types of commands")
+    {
       auto add_handler1 = [&dispatcher]() {
         dispatcher.add_handler<TestCommand1>([](const TestCommand1&) -> boost::asio::awaitable<void> { co_return; });
       };
@@ -43,18 +47,21 @@ SCENARIO("Handlers can be added to dispatcher") {
         dispatcher.add_handler<TestCommand2>([](const TestCommand2&) -> boost::asio::awaitable<void> { co_return; });
       };
 
-      THEN("no exception is throw") {
+      THEN("no exception is throw")
+      {
         REQUIRE_NOTHROW(add_handler1());
         REQUIRE_NOTHROW(add_handler2());
       }
     }
 
-    WHEN("adding handler for the same type of command twice") {
+    WHEN("adding handler for the same type of command twice")
+    {
       auto add_handler = [&dispatcher]() {
         dispatcher.add_handler<TestCommand1>([](const TestCommand1&) -> boost::asio::awaitable<void> { co_return; });
       };
 
-      THEN("exception should be thrown") {
+      THEN("exception should be thrown")
+      {
         REQUIRE_NOTHROW(add_handler());
         REQUIRE_THROWS(add_handler());
       }
@@ -62,8 +69,10 @@ SCENARIO("Handlers can be added to dispatcher") {
   }
 }
 
-SCENARIO("Handlers should be executed") {
-  GIVEN("An AsyncCommandDispatcher with configured handlers") {
+SCENARIO("Handlers should be executed")
+{
+  GIVEN("An AsyncCommandDispatcher with configured handlers")
+  {
     auto dispatcher = common::command::AsyncCommandDispatcher{};
     auto ioc = boost::asio::io_context{};
     auto command_execution_result = 0;
@@ -72,12 +81,14 @@ SCENARIO("Handlers should be executed") {
       co_return;
     });
 
-    WHEN("dispatching a command that has appropriate handlers registered") {
-      constexpr auto command_value = 100; //it can be any value
-      boost::asio::co_spawn(ioc, dispatcher.async_dispatch(TestCommand1{  command_value  }), boost::asio::detached);
+    WHEN("dispatching a command that has appropriate handlers registered")
+    {
+      constexpr auto command_value = 100;// it can be any value
+      boost::asio::co_spawn(ioc, dispatcher.async_dispatch(TestCommand1{ command_value }), boost::asio::detached);
       ioc.run_one();
 
-      THEN("handler gets invoked") {
+      THEN("handler gets invoked")
+      {
         REQUIRE(command_execution_result == command_value);
       }
     }

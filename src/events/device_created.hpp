@@ -4,15 +4,14 @@
 #include <device/device_id.hpp>
 #include <device/device.hpp>
 
-namespace mgmt::event
+namespace mgmt::event {
+template<mgmt::device::Device D>
+struct DeviceCreated : public common::event::GenericEvent<DeviceCreated<D>>
 {
-  template<mgmt::device::Device D>
-  struct DeviceCreated : public common::event::GenericEvent<DeviceCreated<D>>
-  {
-    explicit DeviceCreated(mgmt::device::DeviceId_t devid)
-      : device_id { devid }
-    {}
+  explicit DeviceCreated(mgmt::device::DeviceId_t devid)
+    : device_id{ devid }
+  {}
 
-    mgmt::device::DeviceId_t device_id {};
-  };
-}
+  mgmt::device::DeviceId_t device_id{};
+};
+}// namespace mgmt::event

@@ -13,8 +13,7 @@
 #include <device/device_id.hpp>
 #include <device/device_register.hpp>
 
-namespace mgmt::home_assistant::device
-{
+namespace mgmt::home_assistant::device {
 
 class HatchHandler
 {
@@ -22,8 +21,7 @@ public:
   HatchHandler(
     mgmt::device::DeviceId_t device_id,
     const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
-    const mgmt::home_assistant::EntityFactory& factory
-  );
+    const mgmt::home_assistant::EntityFactory& factory);
 
   HatchHandler(const HatchHandler&) = delete;
   HatchHandler& operator=(const HatchHandler&) = delete;
@@ -45,4 +43,4 @@ private:
   const mgmt::home_assistant::DeviceIdentityProvider& identity_provider_;
   mgmt::home_assistant::mqttc::Cover_t cover_;
 };
-}
+}// namespace mgmt::home_assistant::device

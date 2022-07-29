@@ -40,4 +40,4 @@ public:
 
   value_type data;
 };
-}
+}// namespace common::utils

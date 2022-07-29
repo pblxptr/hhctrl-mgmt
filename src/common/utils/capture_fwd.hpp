@@ -2,11 +2,10 @@
 
 #include <tuple>
 
-namespace common::utils
+namespace common::utils {
+template<class... Args>
+auto capture_fwd(Args&&... args)
 {
-  template<class...Args>
-  auto capture_fwd(Args&&...args)
-  {
-    return std::tuple<Args...>(std::forward<Args...>(args)...);
-  }
+  return std::tuple<Args...>(std::forward<Args...>(args)...);
 }
+}// namespace common::utils

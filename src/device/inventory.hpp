@@ -4,53 +4,51 @@
 #include <device/device.hpp>
 
 namespace mgmt::device {
-  template<Device D>
-  class Inventory
+template<Device D>
+class Inventory
+{
+public:
+  template<class... Args>
+  constexpr auto emplace(const DeviceId_t& id, Args&&... args)
   {
-  public:
-    template<class... Args>
-    constexpr auto emplace(const DeviceId_t& id, Args&&... args)
-    {
-      if (exists(id)) {
-        throw std::runtime_error("Duplicate instance of the key");
-      }
-
-      devices_.emplace(std::piecewise_construct,
-        std::tuple(id),
-        std::forward_as_tuple(std::forward<Args>(args)...)
-      );
+    if (exists(id)) {
+      throw std::runtime_error("Duplicate instance of the key");
     }
 
-    constexpr auto add(DeviceId_t id, D device)
-    {
-      if (exists(id)) {
-        throw std::runtime_error("Duplicate instance of the key");
-      }
+    devices_.emplace(std::piecewise_construct,
+      std::tuple(id),
+      std::forward_as_tuple(std::forward<Args>(args)...));
+  }
 
-      devices_.insert({ id, std::move(device) });
-
+  constexpr auto add(DeviceId_t id, D device)
+  {
+    if (exists(id)) {
+      throw std::runtime_error("Duplicate instance of the key");
     }
 
-    constexpr auto get(DeviceId_t id) -> D&
-    {
-      if (not exists(id)) {
-        throw std::runtime_error("Device does not exist");
-      }
+    devices_.insert({ id, std::move(device) });
+  }
 
-      return devices_.at(id);
+  constexpr auto get(DeviceId_t id) -> D&
+  {
+    if (not exists(id)) {
+      throw std::runtime_error("Device does not exist");
     }
 
-    constexpr auto remove(const DeviceId_t& id)
-    {
-      devices_.erase(id);
-    }
+    return devices_.at(id);
+  }
 
-    constexpr bool exists(const DeviceId_t& id) const
-    {
-      return devices_.contains(id);
-    }
+  constexpr auto remove(const DeviceId_t& id)
+  {
+    devices_.erase(id);
+  }
 
-  private:
-    std::unordered_map<DeviceId_t, D> devices_;
-  };
-}
+  constexpr bool exists(const DeviceId_t& id) const
+  {
+    return devices_.contains(id);
+  }
+
+private:
+  std::unordered_map<DeviceId_t, D> devices_;
+};
+}// namespace mgmt::device

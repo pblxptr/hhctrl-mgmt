@@ -1,10 +1,10 @@
 #pragma once
 
-namespace mgmt::device
+namespace mgmt::device {
+struct RGBLedValue
 {
-  struct RGBLedValue {
-    int red {};
-    int green {};
-    int blue {};
-  };
-}
+  int red{};
+  int green{};
+  int blue{};
+};
+}// namespace mgmt::device

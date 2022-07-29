@@ -9,19 +9,18 @@
 #include <device/temp_sensor.hpp>
 #include <device/hardware_identity.hpp>
 
-namespace mgmt::device
+namespace mgmt::device {
+class MainBoard
 {
-  class MainBoard
-  {
-  public:
-    MainBoard(std::vector<Indicator_t>, std::vector<TempSensor_t>);
-    HardwareIdentity hardware_identity() const;
-    IndicatorState indicator_state(IndicatorType type) const;
-    void set_indicator_state(IndicatorType type, IndicatorState state);
-    void restart();
+public:
+  MainBoard(std::vector<Indicator_t>, std::vector<TempSensor_t>);
+  HardwareIdentity hardware_identity() const;
+  IndicatorState indicator_state(IndicatorType type) const;
+  void set_indicator_state(IndicatorType type, IndicatorState state);
+  void restart();
 
-  private:
-    std::vector<Indicator_t> indicators_;
-    std::vector<TempSensor_t> temp_sensors_;
-  };
-}
+private:
+  std::vector<Indicator_t> indicators_;
+  std::vector<TempSensor_t> temp_sensors_;
+};
+}// namespace mgmt::device

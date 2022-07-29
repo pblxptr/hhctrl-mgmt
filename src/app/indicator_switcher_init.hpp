@@ -18,7 +18,7 @@ struct IndicatorSwitcher
   {
     auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(board_id);
     auto coro = co_await boost::asio::this_coro::executor;
-    auto timer = boost::asio::steady_timer{coro};
+    auto timer = boost::asio::steady_timer{ coro };
     auto indicator = mgmt::device::IndicatorType::Status;
 
     while (true) {
@@ -27,45 +27,45 @@ struct IndicatorSwitcher
 
       board.set_indicator_state(indicator, mgmt::device::IndicatorState::On);
 
-      switch(indicator) {
-        case mgmt::device::IndicatorType::Status:
-          indicator = mgmt::device::IndicatorType::Maintenance;
+      switch (indicator) {
+      case mgmt::device::IndicatorType::Status:
+        indicator = mgmt::device::IndicatorType::Maintenance;
         break;
 
-        case mgmt::device::IndicatorType::Maintenance:
-          indicator = mgmt::device::IndicatorType::Warning;
+      case mgmt::device::IndicatorType::Maintenance:
+        indicator = mgmt::device::IndicatorType::Warning;
         break;
 
-        case mgmt::device::IndicatorType::Warning:
-          indicator = mgmt::device::IndicatorType::Fault;
+      case mgmt::device::IndicatorType::Warning:
+        indicator = mgmt::device::IndicatorType::Fault;
         break;
 
-        case mgmt::device::IndicatorType::Fault:
-          indicator = mgmt::device::IndicatorType::Status;
+      case mgmt::device::IndicatorType::Fault:
+        indicator = mgmt::device::IndicatorType::Status;
         break;
       }
     }
   }
 };
 
-namespace mgmt::app
+namespace mgmt::app {
+void indicator_switcher_init(common::event::AsyncEventBus& bus)
 {
-  void indicator_switcher_init(common::event::AsyncEventBus& bus)
-  {
-    bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::MainBoard>>(
-      [](auto&& event) -> boost::asio::awaitable<void> {
-        spdlog::get("mgmt")->debug("MainBoard device createdasdadsasd, device id: {}", event.device_id);
+  bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::MainBoard>>(
+    [](auto&& event) -> boost::asio::awaitable<void> {
+      spdlog::get("mgmt")->debug("MainBoard device createdasdadsasd, device id: {}", event.device_id);
 
-        auto executor = co_await boost::asio::this_coro::executor;
-        auto board_id = event.device_id;
+      auto executor = co_await boost::asio::this_coro::executor;
+      auto board_id = event.device_id;
 
-        spdlog::get("mgmt")->debug("Starting switcher");
+      spdlog::get("mgmt")->debug("Starting switcher");
 
-        boost::asio::co_spawn(executor, [board_id]() -> boost::asio::awaitable<void> {
-          auto switcher = IndicatorSwitcher{board_id};
+      boost::asio::co_spawn(
+        executor, [board_id]() -> boost::asio::awaitable<void> {
+          auto switcher = IndicatorSwitcher{ board_id };
           co_await switcher.run();
-        }, common::coro::rethrow);
-      }
-    );
-  }
+        },
+        common::coro::rethrow);
+    });
 }
+}// namespace mgmt::app

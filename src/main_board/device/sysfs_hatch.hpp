@@ -10,17 +10,18 @@ class SysfsHatch
 {
 public:
   explicit SysfsHatch(std::string);
-  //movable
+  // movable
   SysfsHatch(SysfsHatch&&) noexcept = default;
   SysfsHatch& operator=(SysfsHatch&&) noexcept = default;
-  //non-copyable
+  // non-copyable
   SysfsHatch(const SysfsHatch&) = delete;
   SysfsHatch& operator=(const SysfsHatch&) = delete;
 
   void open() const;
   void close() const;
   HatchState status() const;
+
 private:
   std::filesystem::path sysfsdir_;
 };
-}
+}// namespace mgmt::device

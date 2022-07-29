@@ -9,13 +9,13 @@
 #include <date/date.h>
 #include <date/tz.h>
 namespace {
-  using namespace std::literals;
-  namespace dt = date;
-}
+using namespace std::literals;
+namespace dt = date;
+}// namespace
 namespace common::utils::datetime {
-  constexpr auto DATE_FMT = "%Y-%m-%d"sv;
-  constexpr auto TIME_FMT = "%H:%M:%S"sv;
-  constexpr auto DATETIME_FMT = "%Y-%m-%d %H:%M:%S %Z"sv;
+constexpr auto DATE_FMT = "%Y-%m-%d"sv;
+constexpr auto TIME_FMT = "%H:%M:%S"sv;
+constexpr auto DATETIME_FMT = "%Y-%m-%d %H:%M:%S %Z"sv;
 
 using Precision_t = std::chrono::milliseconds;
 
@@ -33,7 +33,7 @@ auto parse_time(T&& time, TTimepoint&& base_timepoint = get_now())
   auto local = dt::local_seconds{};
   auto tmz = std::string{};
 
-  auto in = std::istringstream{datetime};
+  auto in = std::istringstream{ datetime };
   in >> dt::parse(DATETIME_FMT.data(), local, tmz);
 
   if (in.fail() || in.bad()) {
@@ -60,4 +60,4 @@ auto to_string(const TTimepoint& tp)
 {
   return date::format(DATETIME_FMT.data(), tp);
 }
-}
+}// namespace common::utils::datetime

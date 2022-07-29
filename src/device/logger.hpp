@@ -3,5 +3,5 @@
 #include <common/logger/logger.hpp>
 
 namespace mgmt::device {
-  constexpr auto Logger = "mgmt:device";
+constexpr auto Logger = "mgmt:device";
 }

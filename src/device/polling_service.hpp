@@ -16,31 +16,32 @@
 #include "device/device_id.hpp"
 
 
-namespace mgmt::device
+namespace mgmt::device {
+class PollingService
 {
-  class PollingService
+  using Poll_t = std::function<boost::asio::awaitable<void>()>;
+  using Timer_t = boost::asio::steady_timer;
+  using Interval_t = std::chrono::milliseconds;
+  struct Poller
   {
-    using Poll_t = std::function<boost::asio::awaitable<void>()>;
-    using Timer_t = boost::asio::steady_timer;
-    using Interval_t = std::chrono::milliseconds;
-    struct Poller {
-      mgmt::device::DeviceId_t device_id;
-      Interval_t interval;
-      Poll_t poll;
-      std::optional<Timer_t> timer_;
-    };
-  public:
-    explicit PollingService(common::executor::Executor_t);
-
-    void add_poller(const mgmt::device::DeviceId_t&,
-      const Interval_t& interval,
-      const Poll_t& poll
-    );
-
-  private:
-    void start_poller(Poller& poller);
-  private:
-    common::executor::Executor_t executor_;
-    std::list<Poller> pollers_;
+    mgmt::device::DeviceId_t device_id;
+    Interval_t interval;
+    Poll_t poll;
+    std::optional<Timer_t> timer_;
   };
-}
+
+public:
+  explicit PollingService(common::executor::Executor_t);
+
+  void add_poller(const mgmt::device::DeviceId_t&,
+    const Interval_t& interval,
+    const Poll_t& poll);
+
+private:
+  void start_poller(Poller& poller);
+
+private:
+  common::executor::Executor_t executor_;
+  std::list<Poller> pollers_;
+};
+}// namespace mgmt::device

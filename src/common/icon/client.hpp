@@ -2,10 +2,9 @@
 
 #include <icon/client/basic_client.hpp>
 
-namespace common::icon
+namespace common::icon {
+class Client : public icon::BasicClient
 {
-  class Client : public icon::BasicClient
-  {
   // public:
   //   Client(
   //     zmq::context_t& zctx,
@@ -27,5 +26,5 @@ namespace common::icon
   //   }
   // private:
   //   const std::string endpoint_addresss_;
-  };
-}
+};
+}// namespace common::icon

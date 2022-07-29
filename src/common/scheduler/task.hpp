@@ -5,11 +5,10 @@
 #include <memory>
 #include <chrono>
 
-//TODO: Consider changing to base class instead of interface, as all types share some similar methods to return 
-//e.g. id, owner and so on.
+// TODO: Consider changing to base class instead of interface, as all types share some similar methods to return
+// e.g. id, owner and so on.
 
-namespace common::scheduler
-{
+namespace common::scheduler {
 class Task
 {
 public:
@@ -31,4 +30,4 @@ struct TaskInfo
   const std::string owner;
   const Task::Timepoint_t expiry;
 };
-}
+}// namespace common::scheduler

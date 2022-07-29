@@ -2,8 +2,7 @@
 #include "task.hpp"
 
 
-namespace common::scheduler
-{
+namespace common::scheduler {
 template<class TDuration, class THandler>
 class GenericRepeatedTask : public Task
 {
@@ -14,13 +13,8 @@ public:
     std::string owner,
     boost::asio::io_context& io,
     TDurationArg&& interval,
-    THandlerArg&& handler
-  )
-  : id_{std::move(id)}
-  , owner_{std::move(owner)}
-  , timer_{io}
-  , duration_{std::forward<TDurationArg>(interval)}
-  , handler_{std::forward<THandlerArg>(handler)}
+    THandlerArg&& handler)
+    : id_{ std::move(id) }, owner_{ std::move(owner) }, timer_{ io }, duration_{ std::forward<TDurationArg>(interval) }, handler_{ std::forward<THandlerArg>(handler) }
   {
     configure_expiry();
   }
@@ -44,8 +38,7 @@ public:
   {
     spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
       common::utils::datetime::to_string(timer_.expiry()),
-      common::utils::datetime::to_string(tp)
-    ));
+      common::utils::datetime::to_string(tp)));
     timer_.expires_at(std::move(tp));
   }
 
@@ -70,6 +63,7 @@ public:
 
     return "GenericRepeatedTask - TaskId: " + to_string(id_) + " expires: " + common::utils::datetime::to_string(timer_.expiry());
   }
+
 private:
   void configure_expiry()
   {
@@ -83,4 +77,4 @@ private:
   TDuration duration_;
   THandler handler_;
 };
-}
+}// namespace common::scheduler

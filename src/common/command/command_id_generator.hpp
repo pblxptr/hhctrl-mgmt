@@ -14,6 +14,7 @@ public:
   {
     return id<std::decay_t<Command>>();
   }
+
 private:
   template<class Command>
   static CommandId_t id()
@@ -22,7 +23,8 @@ private:
 
     return id;
   }
+
 private:
-  static inline std::atomic<CommandId_t> ids_counter_ {};
+  static inline std::atomic<CommandId_t> ids_counter_{};
 };
-}
+}// namespace common::command
