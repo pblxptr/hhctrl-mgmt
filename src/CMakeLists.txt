@@ -16,11 +16,18 @@ set(COMMON_SOURCES
 
 set (HEADER_SOURCES
   home_assistant/device_identity_provider.hpp
-        home_assistant/availability.hpp
+  home_assistant/availability.hpp
   home_assistant/entity_factory.hpp
   home_assistant/device_identity.hpp
   home_assistant/unique_id.hpp
-  home_assistant/mqtt/binary_sensor.hpp home_assistant/mqtt/entity.hpp device/rgb_led_t.hpp home_assistant/mqtt/button.hpp device/polling_service.hpp poller/hatch_poller.hpp poller/poller_factory.hpp poller/main_board_poller.hpp)
+  home_assistant/mqtt/binary_sensor.hpp
+  home_assistant/mqtt/entity.hpp device/rgb_led_t.hpp
+  home_assistant/mqtt/button.hpp
+  device/polling_service.hpp
+  poller/hatch_poller.hpp
+  poller/poller_factory.hpp
+  poller/main_board_poller.hpp
+    )
 
 set(MGMT_SOURCES
   app/main.cpp
@@ -33,7 +40,9 @@ set(MGMT_SOURCES
   hatch_handler.cpp
   ha_hatch_event_handler.cpp
   ha_main_board_event_handler.cpp
-        main_board_handler.cpp sysfs_rgbled.cpp polling_service.cpp)
+        main_board_handler.cpp sysfs_rgbled.cpp polling_service.cpp
+        app_config.cpp
+        )
 
 
 set(SOURCES

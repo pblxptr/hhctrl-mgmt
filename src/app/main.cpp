@@ -3,6 +3,7 @@
 #include <app/indicator_switcher_init.hpp>
 #include <app/logger.hpp>
 #include <app/main_board_init.hpp>
+#include <app/app_config.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -57,7 +58,11 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
-  auto pdtree_path = argv[1];
+  auto config = mgmt::app::load_config(argv[1]);
+
+  using std::to_string;
+
+  spdlog::get("mgmt")->info("App config: \n {}", pretty_format_config(config));
 
   /* General Services */
   auto bctx = boost::asio::io_context{};
@@ -95,7 +100,7 @@ int main(int argc, char** argv)
   /* Device Services */
   auto polling_service = mgmt::device::PollingService{ std::ref(bctx) };
   boost::asio::co_spawn(
-    bctx, [&pdtree_path, &dtree, &hw_identity_store, &bus, &polling_service]() -> boost::asio::awaitable<void> {
+    bctx, [pdtree_path = config.dtree_file, &dtree, &hw_identity_store, &bus, &polling_service]() -> boost::asio::awaitable<void> {
       mgmt::app::main_board_init(
         pdtree_path,
         dtree,
