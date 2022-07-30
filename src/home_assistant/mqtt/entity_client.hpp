@@ -1,10 +1,12 @@
 #pragma once
 
+#include <boost/asio/steady_timer.hpp>
+
 #include <mqtt/client.hpp>
 #include <mqtt/buffer.hpp>
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>
-#include <boost/asio/steady_timer.hpp>
+#include <home_assistant/mqtt/client_config.hpp>
 
 namespace mgmt::home_assistant::mqttc {
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
@@ -28,15 +30,17 @@ class MqttEntityClient
   };
 public:
   MqttEntityClient() = delete;
-  MqttEntityClient(std::string uid, Impl impl)
+  MqttEntityClient(std::string uid, Impl impl, const EntityClientConfig& config)
     : impl_{ std::move(impl) }
     , reconnect_{
+        .max_attempts = config.max_reconnect_attempts,
+        .reconnect_delay = config.reconnect_delay,
         .timer = boost::asio::steady_timer{ impl_->socket()->get_executor() }
       }
   {
     impl_->set_client_id(uid);
     impl_->set_clean_session(true);
-    impl_->set_keep_alive_sec(30);
+    impl_->set_keep_alive_sec(config.keep_alive_interval);
   }
 
   void connect()

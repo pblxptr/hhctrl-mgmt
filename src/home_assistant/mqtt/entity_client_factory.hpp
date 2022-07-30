@@ -4,6 +4,7 @@
 #include <boost/asio/io_context.hpp>
 #include <mqtt/client.hpp>
 #include <home_assistant/mqtt/entity_client.hpp>
+#include <home_assistant/mqtt/client_config.hpp>
 #include <home_assistant/logger.hpp>
 
 namespace mgmt::home_assistant::mqttc {
@@ -12,22 +13,23 @@ class EntityClientFactory
 public:
   EntityClientFactory(
     boost::asio::io_context& ioc,
-    std::string server_address,
-    std::uint16_t server_port)
-    : ioc_{ ioc }, server_address_{ std::move(server_address) }, server_port_{ server_port }
+    mgmt::home_assistant::mqttc::EntityClientConfig config
+    )
+    : ioc_{ ioc }
+    , config_{ std::move(config) }
   {}
 
   auto create(std::string unique_id) const
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Creating client for unique_id: {}, server: {}, port: {}", unique_id, server_address_, server_port_);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Creating client for unique_id: {}, server: {}, port: {}",
+      unique_id, config_.server_address, config_.server_port);
 
     return MqttEntityClient{ std::move(unique_id),
-      mqtt::make_client(ioc_, server_address_, server_port_) };
+      mqtt::make_client(ioc_, config_.server_address, config_.server_port), config_ };
   }
 
 private:
   boost::asio::io_context& ioc_;
-  std::string server_address_;
-  std::uint16_t server_port_;
+  mgmt::home_assistant::mqttc::EntityClientConfig config_;
 };
 }// namespace mgmt::home_assistant::mqttc

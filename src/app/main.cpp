@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     hw_identity_store,
     dtree
   };
-  auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory{ bctx, "192.168.0.115", 1883 };
+  auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory{ bctx, config.entity_client_config };
   auto entity_factory = mgmt::home_assistant::EntityFactory{ client_factory };
 
   // Main board dev handler

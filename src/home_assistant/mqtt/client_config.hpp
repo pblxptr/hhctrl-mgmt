@@ -13,11 +13,11 @@ namespace mgmt::home_assistant::mqttc
 {
 struct EntityClientConfig
 {
-  std::string server_address;
-  int server_port;
-  int keep_alive_interval;
-  int max_reconnect_attempts;
-  std::chrono::seconds reconnect_delay;
+  std::string server_address { "default-address" };
+  int server_port { 0 };
+  int keep_alive_interval { 30 };
+  int max_reconnect_attempts { 5 };
+  std::chrono::seconds reconnect_delay { std::chrono::seconds(5) };
 };
 
 inline std::string to_string(const EntityClientConfig& config) {
