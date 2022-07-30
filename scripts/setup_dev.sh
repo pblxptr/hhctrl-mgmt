@@ -41,3 +41,7 @@ echo "
   }
 ]
 " > /tmp/dtree.json
+
+mkdir /tmp/temp_sensor
+touch /tmp/temp_sensor/w1_slave
+echo "33312" > /tmp/temp_sensor/w1_slave

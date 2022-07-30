@@ -42,6 +42,7 @@ set(MGMT_SOURCES
   ha_main_board_event_handler.cpp
         main_board_handler.cpp sysfs_rgbled.cpp polling_service.cpp
         app_config.cpp
+        sysfs_ds18b20.cpp
         )
 
 

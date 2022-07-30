@@ -6,9 +6,8 @@
 #include <device/logger.hpp>
 
 namespace mgmt::device {
-MainBoard::MainBoard(
-  std::vector<Indicator_t> indicators,
-  std::vector<TempSensor_t> temp_sensors) : indicators_{ std::move(indicators) }, temp_sensors_{ std::move(temp_sensors) }
+MainBoard::MainBoard(std::vector<Indicator_t> indicators)
+  : indicators_{ std::move(indicators) }
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 

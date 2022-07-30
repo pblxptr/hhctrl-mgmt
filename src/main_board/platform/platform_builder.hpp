@@ -13,13 +13,6 @@ template<class GenericDeviceProcessor>
 class PlatformBuilder
 {
 public:
-  void add_device(mgmt::device::TempSensor_t temp_sensor)
-  {
-    common::logger::get(mgmt::device::Logger)->debug("Add device TempSensor_t");
-
-    temp_sensors_.push_back(std::move(temp_sensor));
-  }
-
   void add_device(mgmt::device::Indicator_t indicator)
   {
     common::logger::get(mgmt::device::Logger)->debug("PlatformBuilder::{}(Indicator_t)", __FUNCTION__);
@@ -43,10 +36,7 @@ public:
   {
     common::logger::get(mgmt::device::Logger)->debug("PlatformBuilder::{}", __FUNCTION__);
 
-    return mgmt::device::MainBoard{
-      std::move(indicators_),
-      std::move(temp_sensors_)
-    };
+    return mgmt::device::MainBoard{std::move(indicators_)};
   }
 
   auto build_generic_loaders() &&
@@ -58,7 +48,6 @@ public:
 
 private:
   std::vector<mgmt::device::Indicator_t> indicators_;
-  std::vector<mgmt::device::TempSensor_t> temp_sensors_;
   std::vector<std::function<bool(const GenericDeviceProcessor&)>> generic_loaders_;
 };
 }// namespace mgmt::platform_device

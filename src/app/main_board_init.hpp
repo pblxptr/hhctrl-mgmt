@@ -13,6 +13,7 @@
 #include <main_board/platform/platform_device_discovery.hpp>
 #include <main_board/platform/sysfs_rgb_indicator_provider.hpp>
 #include <main_board/platform/sysfs_temp_sensor_provider.hpp>
+#include <main_board/platform/sysfs_ds18b20_provider.hpp>
 #include <poller/poller_factory.hpp>
 #include <poller/main_board_poller.hpp>
 
@@ -32,7 +33,8 @@ void main_board_init(
   auto platform_device_discovery = PlatformDeviceDiscovery{
     pdtree_path,
     RGBIndicatorProvider{},
-    HatchProvider{ polling_service, poller_factory }
+    HatchProvider{ polling_service, poller_factory },
+    SysfsDS18B20Provider{ polling_service, poller_factory }
   };
   platform_device_discovery.setup(builder);
 
