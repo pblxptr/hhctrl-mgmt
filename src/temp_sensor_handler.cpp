@@ -55,7 +55,7 @@ void TempSensorHandler::async_sync_state()
   common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}", __FUNCTION__);
 
   const auto& temp_sensor = mgmt::device::get_device<mgmt::device::TempSensor_t>(device_id_);
-  sensor_.async_set_value(std::to_string(temp_sensor.value()));
+  sensor_.async_set_value(fmt::format("{:.1f}", temp_sensor.value()));
 }
 
 void TempSensorHandler::setup()
