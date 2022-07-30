@@ -38,9 +38,11 @@ public:
 
     auto sysfs_path = pdtree_get<std::string>(object, sysfs_path_atrr);
 
-    builder.template add_loader<mgmt::device::SysfsDS18B20>(DeviceLoader{
+    builder.template add_loader<mgmt::device::TempSensor_t>(DeviceLoader{
       .load = [this, sysfs_path = std::move(sysfs_path)]() {
-          auto device_id = mgmt::device::register_device<mgmt::device::SysfsDS18B20>(sysfs_path);
+          auto device_id = mgmt::device::register_device<mgmt::device::TempSensor_t>(
+            mgmt::device::SysfsDS18B20{ sysfs_path }
+          );
           polling_service_.add_poller(
             device_id,
             std::chrono::seconds(5),

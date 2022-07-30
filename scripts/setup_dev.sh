@@ -36,6 +36,11 @@ echo "
         \"compatible\" : \"sysfs_led\",
         \"sysfs_path\" : \"/tmp/leds/blue\",
         \"color\" : \"blue\"
+      },
+      \{
+        \"model\" : \"temp sensor\",
+        \"compatible\" : \"sysfs_ds18b20\",
+        \"sysfs_path\" : \"/tmp/temp_sensor\"
       }
     ]
   }
@@ -44,4 +49,6 @@ echo "
 
 mkdir /tmp/temp_sensor
 touch /tmp/temp_sensor/w1_slave
-echo "33312" > /tmp/temp_sensor/w1_slave
+echo "14 02 4b 46 7f ff 0c 10 f3 : crc=f3 YES
+14 02 4b 46 7f ff 0c 10 f3 t=33250
+" > /tmp/temp_sensor/w1_slave

@@ -37,13 +37,17 @@ set(MGMT_SOURCES
   sysfs_led.cpp
   devicetree.cpp
   rgb_indicator.cpp
-  hatch_handler.cpp
   ha_hatch_event_handler.cpp
+  hatch_handler.cpp
   ha_main_board_event_handler.cpp
-        main_board_handler.cpp sysfs_rgbled.cpp polling_service.cpp
-        app_config.cpp
-        sysfs_ds18b20.cpp
-        )
+  main_board_handler.cpp
+  ha_temp_sensor_event_handler.cpp
+  temp_sensor_handler.cpp
+  sysfs_rgbled.cpp
+  polling_service.cpp
+  app_config.cpp
+  sysfs_ds18b20.cpp
+)
 
 
 set(SOURCES

@@ -22,6 +22,7 @@
 #include <home_assistant/availability.hpp>
 #include <home_assistant/device/hatch_event_handler.hpp>
 #include <home_assistant/device/main_board_event_handler.hpp>
+#include <home_assistant/device/temp_sensor_event_handler.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_client.hpp>
@@ -96,6 +97,15 @@ int main(int argc, char** argv)
   bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
   bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
   bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
+
+  // Temp sensor dev handler
+  auto temp_sensor_dev_event_handler = mgmt::home_assistant::device::TempSensorEventHandler{
+    entity_factory,
+    device_identity_provider
+  };
+  bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
+  bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
+  bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
 
   /* Device Services */
   auto polling_service = mgmt::device::PollingService{ std::ref(bctx) };

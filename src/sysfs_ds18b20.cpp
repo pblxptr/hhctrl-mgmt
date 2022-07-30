@@ -30,9 +30,11 @@ float SysfsDS18B20::value() const
 
   if (pos == std::string::npos) {
     common::logger::get(mgmt::device::Logger)->error("Invalid data for temperature sensor");
+
+    return 0;
   }
 
-  return atof(attr_val.data() + pos + 2); //output + position where "t=" starts, skip "t="
+  return atof(attr_val.data() + pos + 2) / 1000; //output + position where "t=" starts, skip "t="
 }
 
 }// namespace mgmt::device

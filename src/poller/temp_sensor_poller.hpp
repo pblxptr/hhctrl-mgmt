@@ -31,7 +31,7 @@ public:
     if (tmp_val != cached_temp_) {
       update(tmp_val);
     }
-    common::logger::get(mgmt::poller::Logger)->debug("Polling TempSensorP({}): {}", device_id_, tmp_val == cached_temp_ ? "up to date" : "changed");
+    common::logger::get(mgmt::poller::Logger)->debug("Polling TempSensor({}): {}", device_id_, tmp_val == cached_temp_ ? "up to date" : "changed");
     co_return;
   }
 

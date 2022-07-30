@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <concepts>
+#include <variant>
 
 #include <device/temp_sensor.hpp>
 #include <main_board/device/sysfs_ds18b20.hpp>
