@@ -14,6 +14,7 @@
 #include <main_board/platform/sysfs_rgb_indicator_provider.hpp>
 #include <main_board/platform/sysfs_temp_sensor_provider.hpp>
 #include <main_board/platform/sysfs_ds18b20_provider.hpp>
+#include <main_board/platform/sysfs_cpu_temp_sensor_provider.hpp>
 #include <poller/poller_factory.hpp>
 #include <poller/main_board_poller.hpp>
 
@@ -34,7 +35,8 @@ void main_board_init(
     pdtree_path,
     RGBIndicatorProvider{},
     HatchProvider{ polling_service, poller_factory },
-    SysfsDS18B20Provider{ polling_service, poller_factory }
+    SysfsDS18B20Provider{ polling_service, poller_factory },
+    SysfsCPUTempSensorProvider { polling_service, poller_factory }
   };
   platform_device_discovery.setup(builder);
 

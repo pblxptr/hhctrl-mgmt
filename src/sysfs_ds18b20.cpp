@@ -23,7 +23,7 @@ SysfsDS18B20::SysfsDS18B20(std::string sysfsdir)
 
 float SysfsDS18B20::value() const
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsLed::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->debug("SysfsDS18B20::{}", __FUNCTION__);
 
   const auto attr_val = sysfs::read_attr(sysfsdir_ / ValueAttr);
   const auto pos = attr_val.find("t=");

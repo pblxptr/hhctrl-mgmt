@@ -7,6 +7,7 @@
 
 #include <device/temp_sensor.hpp>
 #include <main_board/device/sysfs_ds18b20.hpp>
+#include <main_board/device/sysfs_cpu_temp_sensor.hpp>
 
 namespace mgmt::device {
 
@@ -34,6 +35,5 @@ private:
   TempSensorVariant_t temp_sensor_;
 };
 
-using TempSensor_t = TempSensorProxy<
-  SysfsDS18B20>;
+using TempSensor_t = TempSensorProxy<SysfsDS18B20, SysfsCPUTempSensor>;
 }// namespace mgmt::device

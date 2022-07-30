@@ -47,6 +47,7 @@ set(MGMT_SOURCES
   polling_service.cpp
   app_config.cpp
   sysfs_ds18b20.cpp
+  sysfs_cpu_temp_sensor.cpp
 )
 
 

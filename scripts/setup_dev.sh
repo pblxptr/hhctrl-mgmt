@@ -36,13 +36,18 @@ echo "
         \"compatible\" : \"sysfs_led\",
         \"sysfs_path\" : \"/tmp/leds/blue\",
         \"color\" : \"blue\"
-      },
-      \{
-        \"model\" : \"temp sensor\",
-        \"compatible\" : \"sysfs_ds18b20\",
-        \"sysfs_path\" : \"/tmp/temp_sensor\"
       }
     ]
+  },
+  {
+    \"model\" : \"temp sensor\",
+    \"compatible\" : \"sysfs_ds18b20\",
+    \"sysfs_path\" : \"/tmp/temp_sensor\"
+  },
+  {
+    \"model\" : \"cpu temp sensor\",
+    \"compatible\" : \"sysfs_cpu_temp_sensor\",
+    \"sysfs_path\" : \"/tmp/cpu_temp\"
   }
 ]
 " > /tmp/dtree.json
@@ -52,3 +57,7 @@ touch /tmp/temp_sensor/w1_slave
 echo "14 02 4b 46 7f ff 0c 10 f3 : crc=f3 YES
 14 02 4b 46 7f ff 0c 10 f3 t=33250
 " > /tmp/temp_sensor/w1_slave
+
+
+mkdir /tmp/cpu_temp
+echo "40084" > /tmp/cpu_temp/temp
