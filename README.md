@@ -13,5 +13,5 @@ A C++20 support is required as the code highly utlizes new features like concept
 - spdlog
 - fmt
 
-## Future improvments ##
+## Future improvements ##
 - Full async support through coroutines
