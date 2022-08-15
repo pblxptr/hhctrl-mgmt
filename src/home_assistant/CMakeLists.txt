@@ -13,4 +13,9 @@ add_library(home_assistant STATIC
 
 target_include_directories(home_assistant PUBLIC include)
 
-target_link_libraries(home_assistant PRIVATE main_board device event mqtt_cpp::mqtt_cpp common_utils)
+target_link_libraries(home_assistant
+  PRIVATE
+    main_board device event common_utils
+  PUBLIC
+    mqtt_cpp::mqtt_cpp common_coro common_logger
+)

@@ -4,10 +4,10 @@
 
 #include <mqtt/client.hpp>
 #include <mqtt/buffer.hpp>
-#include "common/coro/awaitable_adapter.hpp"
-#include "home_assistant/include/home_assistant/logger.hpp"
-#include "entity_error.hpp"
-#include "client_config.hpp"
+#include <coro/awaitable_adapter.hpp>
+#include <home_assistant/logger.hpp>
+#include <home_assistant/mqtt/entity_error.hpp>
+#include <home_assistant/mqtt/client_config.hpp>
 
 namespace mgmt::home_assistant::mqttc {
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
