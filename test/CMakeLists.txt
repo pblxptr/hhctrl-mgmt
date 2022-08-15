@@ -8,7 +8,6 @@ find_package(GTest)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-
 add_executable(${CMAKE_PROJECT_NAME}_unittests main_test.cpp
   common/command_dispatcher_tests.cpp
 )

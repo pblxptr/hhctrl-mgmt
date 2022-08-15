@@ -11,12 +11,12 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/use_awaitable.hpp>
 
-#include <common/event/event_bus.hpp>
+#include "common/event/include/event/event_bus.hpp"
 #include <common/coro/co_spawn.hpp>
 
 #include <cstdlib>
-#include <events/device_created.hpp>
-#include <events/device_removed.hpp>
+#include "event/include/event/device_created.hpp"
+#include "event/include/event/device_removed.hpp"
 #include <app/main_board_init.hpp>
 #include <app/indicator_switcher_init.hpp>
 #include <home_assistant/mqtt/config_builder.hpp>

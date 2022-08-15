@@ -1,38 +1,40 @@
 
-#include "device/polling_service.hpp"
-#include <app/indicator_switcher_init.hpp>
-#include <app/logger.hpp>
-#include <app/main_board_init.hpp>
-#include <app/app_config.hpp>
+#include <filesystem>
+#include <cassert>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/use_awaitable.hpp>
-#include <cassert>
-#include <common/coro/co_spawn.hpp>
-#include <common/event/event_bus.hpp>
-#include <common/utils/static_map.hpp>
-#include <device/hardware_identity_store.hpp>
-#include <device/hatch_t.hpp>
-#include <device/logger.hpp>
-#include <events/device_created.hpp>
-#include <events/device_removed.hpp>
-#include <events/device_state_changed.hpp>
-#include <filesystem>
-#include <home_assistant/availability.hpp>
+#include <poller/polling_service.hpp>
+
+#include <app/logger.hpp>
+#include <app/main_board_init.hpp>
+#include <app/app_config.hpp>
+//
+//
+//#include <coro/co_spawn.hpp>
+//#include <event/event_bus.hpp>
+//#include <utils/static_map.hpp>
+//#include <device/hardware_identity_store.hpp>
+//#include "device/include/device/hatch_t.hpp"
+//#include "device/include/device/logger.hpp"
+//#include "event/include/event/device_created.hpp"
+//#include "event/include/event/device_removed.hpp"
+//#include "event/include/event/device_state_changed.hpp"
+//#include "home_assistant/include/home_assistant/availability.hpp"
 #include <home_assistant/device/hatch_event_handler.hpp>
 #include <home_assistant/device/main_board_event_handler.hpp>
 #include <home_assistant/device/temp_sensor_event_handler.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/logger.hpp>
-#include <home_assistant/mqtt/entity_client.hpp>
-#include <home_assistant/mqtt/entity_client_factory.hpp>
-#include <home_assistant/mqtt/entity_config.hpp>
+//#include <home_assistant/mqtt/entity_client.hpp>
+#include <home_assistant/entity_factory.hpp>
+//#include <home_assistant/mqtt/entity_config.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include <variant>
-#include <vector>
-#include <poller/logger.hpp>
+//#include <variant>
+//#include <vector>
+//#include "poller/include/poller/logger.hpp"
 
 using WorkGuard_t =
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
