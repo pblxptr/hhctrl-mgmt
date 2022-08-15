@@ -6,11 +6,11 @@
 #include <boost/uuid/name_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "common/utils/include/utils/datetime.hpp"
-#include "scheduler_durations.hpp"
-#include "task_store.hpp"
-#include "generic_repeated_task.hpp"
-#include "everydays_at_task.hpp"
+#include <utils/datetime.hpp>
+#include <scheduler/scheduler_durations.hpp>
+#include <scheduler/task_store.hpp>
+#include <scheduler/generic_repeated_task.hpp>
+#include <scheduler/everydays_at_task.hpp>
 
 namespace common::scheduler {
 enum class Execution { Relaxed,

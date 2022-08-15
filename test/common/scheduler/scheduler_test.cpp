@@ -1,8 +1,8 @@
-#include "common/scheduler/include/scheduler/scheduler.hpp"
+#include <scheduler/scheduler.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "gmock_task_store.hpp"
+#include "../mock/gmock_task_store.hpp"
 
 using namespace common::scheduler;
 

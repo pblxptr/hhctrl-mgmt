@@ -1,8 +1,8 @@
 #pragma once
 
-#include <common/command/requirements.hpp>
-#include <common/traits/type_tag.hpp>
-#include <common/command/base_command.hpp>
+#include <command/requirements.hpp>
+#include <traits/type_tag.hpp>
+#include <command/base_command.hpp>
 
 namespace common::command {
 class AsyncHandlerWrapper

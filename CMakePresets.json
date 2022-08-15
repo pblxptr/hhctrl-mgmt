@@ -13,7 +13,9 @@
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/build",
       "toolchainFile": "conan_paths.cmake",
-      "cacheVariables": {}
+      "cacheVariables": {
+        "ENABLE_TESTING" : "ON"
+      }
     }
   ]
 }

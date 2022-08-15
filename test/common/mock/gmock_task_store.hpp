@@ -1,4 +1,4 @@
-#include "common/scheduler/include/scheduler/task_store.hpp"
+#include <scheduler/task_store.hpp>
 
 #include <gmock/gmock.h>
 

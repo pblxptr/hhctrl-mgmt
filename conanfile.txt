@@ -8,6 +8,7 @@ gtest/cci.20210126
 zeromq/4.3.4
 redboltz-mqtt_cpp/13.0.0
 fmt/9.0.0
+catch2/3.1.0
 
 [generators]
 cmake_find_package

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <common/command/requirements.hpp>
-#include <common/command/command_handler_wrapper.hpp>
-#include <common/command/command_id_generator.hpp>
-#include <common/traits/type_tag.hpp>
+#include <command/requirements.hpp>
+#include <command/command_handler_wrapper.hpp>
+#include <command/command_id_generator.hpp>
+#include <traits/type_tag.hpp>
 
 
 namespace common::command {

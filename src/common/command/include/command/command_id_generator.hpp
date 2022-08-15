@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <atomic>
 
-#include <common/command/command_id.hpp>
+#include <command/command_id.hpp>
 
 namespace common::command {
 class CommandIdGenerator

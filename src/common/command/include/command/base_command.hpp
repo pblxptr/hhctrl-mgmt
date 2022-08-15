@@ -2,8 +2,8 @@
 
 #include <cstddef>
 
-#include <common/command/command_id.hpp>
-#include <common/command/command_id_generator.hpp>
+#include <command/command_id.hpp>
+#include <command/command_id_generator.hpp>
 
 namespace common::command {
 class BaseCommand

@@ -1,7 +1,6 @@
 
 #include <gmock/gmock.h>
-#include <catch2/catch_all.hpp>
-#include <catch2/reporters/catch_reporter_console.hpp>
+#include <catch2/catch_session.hpp>
 
 int main(int argc, char* argv[])
 {

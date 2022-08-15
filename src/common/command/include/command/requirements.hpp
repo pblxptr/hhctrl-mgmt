@@ -3,7 +3,7 @@
 #include <concepts>
 #include <boost/asio/awaitable.hpp>
 
-#include <common/command/base_command.hpp>
+#include <command/base_command.hpp>
 
 namespace common::command {
 template<class Handler, class Arg>

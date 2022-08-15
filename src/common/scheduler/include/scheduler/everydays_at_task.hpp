@@ -5,8 +5,8 @@
 #include <boost/asio.hpp>
 #include "date/date.h"
 
-#include "common/utils/include/utils/datetime.hpp"
-#include "scheduler_durations.hpp"
+#include <utils/datetime.hpp>
+#include <scheduler/scheduler_durations.hpp>
 
 namespace common::scheduler {
 template<class THandler>

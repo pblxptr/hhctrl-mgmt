@@ -1,11 +1,13 @@
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_all.hpp>
+
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/co_spawn.hpp>
 
-#include <common/command/dispatcher.hpp>
-#include <common/command/base_command.hpp>
+
+#include <command/dispatcher.hpp>
+#include <command/base_command.hpp>
 
 struct TestCommand1 : common::command::GenericCommand<TestCommand1>
 {
