@@ -4,7 +4,7 @@
 #include <boost/asio/io_context.hpp>
 
 #include <home_assistant/mqtt/entity_client.hpp>
-#include <home_assistant/mqtt/entity_client.hpp>
+#include <home_assistant/mqtt/async_entity_client.hpp>
 #include <home_assistant/mqtt/entity_config.hpp>
 #include <home_assistant/logger.hpp>
 
@@ -28,6 +28,13 @@ public:
     return MqttEntityClient{ std::move(unique_id),
       mqtt::make_client(ioc_, config_.server_address, config_.server_port), config_ };
   }
+
+  auto create_async_client(std::string unique_id)
+  {
+    return AsyncMqttEntityClient{ std::move(unique_id),
+      mqtt::make_async_client(ioc_, config_.server_address, config_.server_port), config_ };
+  }
+
 
 private:
   boost::asio::io_context& ioc_;

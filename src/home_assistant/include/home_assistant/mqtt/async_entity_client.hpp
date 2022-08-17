@@ -2,9 +2,10 @@
 
 #include <boost/asio/steady_timer.hpp>
 
-#include <mqtt/client.hpp>
+#include <mqtt/async_client.hpp>
 #include <mqtt/buffer.hpp>
 #include <coro/awaitable_adapter.hpp>
+#include <coro/co_spawn.hpp>
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>
 #include <home_assistant/mqtt/client_config.hpp>
@@ -33,18 +34,18 @@ public:
   AsyncMqttEntityClient() = delete;
   AsyncMqttEntityClient(std::string uid, Impl impl, const EntityClientConfig& config)
     : impl_{ std::move(impl) }
-      , reconnect_{
-        .max_attempts = config.max_reconnect_attempts,
-        .reconnect_delay = config.reconnect_delay,
-        .timer = boost::asio::steady_timer{ impl_->socket()->get_executor() }
-      }
+    , reconnect_{
+      .max_attempts = config.max_reconnect_attempts,
+      .reconnect_delay = config.reconnect_delay,
+      .timer = boost::asio::steady_timer{ impl_->socket()->get_executor() }
+    }
   {
     impl_->set_client_id(uid);
     impl_->set_clean_session(true);
     impl_->set_keep_alive_sec(config.keep_alive_interval);
   }
 
-  boost::asio::awaitable<void> async_connect()
+  boost::asio::awaitable<MQTT_NS::error_code> async_connect()
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
@@ -53,8 +54,10 @@ public:
     });
 
     if (ec && not (co_await reconnect())) {
-      on_error(ec);
+      co_await on_error(ec);
     }
+
+    co_return ec;
   }
 
   template<class Handler>
@@ -75,10 +78,10 @@ public:
     error_handler_ = std::move(handler);
 
     impl_->set_error_handler([this](const auto& ec) {
-      on_error(ec);
+      boost::asio::co_spawn(impl_->socket()->get_executor(), on_error(ec), common::coro::rethrow);
     });
     impl_->set_close_handler([this]() {
-      on_close();
+      boost::asio::co_spawn(impl_->socket()->get_executor(), on_close(), common::coro::rethrow);
     });
   }
 
@@ -87,7 +90,7 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-    co_return co_await awaitable_call<MQTT_NS::error_code>([this, &topic, payload = std::move(payload)](auto&& h) mutable {
+    co_return co_await common::coro::awaitable_call<MQTT_NS::error_code>([this, &topic, payload = std::move(payload)](auto&& h) mutable {
       impl_->async_publish(topic, std::move(payload), MQTT_NS::qos::at_most_once, std::forward<decltype(h)>(h));
     });
   }
@@ -177,29 +180,23 @@ private:
     return true;
   }
 
-  void on_error(const boost::system::error_code& ec)
+  boost::asio::awaitable<void> on_error(const boost::system::error_code& ec)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
 
-    if (not reconnect()) {
+    if (not (co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Undefined, ec.message() });
     }
   }
 
-  void on_close()
+  boost::asio::awaitable<void> on_close()
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-    if (not reconnect()) {
+    if (not (co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });
     }
   }
-
-  void on_publish()
-  {
-
-  }
-
 
 private:
   Impl impl_;

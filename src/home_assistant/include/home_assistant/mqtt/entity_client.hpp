@@ -12,12 +12,12 @@ namespace mgmt::home_assistant::mqttc {
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
 using ErrorHandler_t = std::function<void(const EntityError&)>;
 
-inline auto default_publish_handler() -> PublishHandler_t
-{
-  return { [](auto&&) {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("default_publish_handler");
-  } };
-}
+//inline auto default_publish_handler() -> PublishHandler_t
+//{
+//  return { [](auto&&) {
+//    common::logger::get(mgmt::home_assistant::Logger)->debug("default_publish_handler");
+//  } };
+//}
 
 template<class Impl>
 class MqttEntityClient
