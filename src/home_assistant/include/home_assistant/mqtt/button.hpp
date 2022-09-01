@@ -31,7 +31,7 @@ class Button : public Entity<EntityClient>
   using Base_t::unique_id_;
   using Base_t::client_;
   using Base_t::topic;
-  using Base_t::async_set_availibility;
+  using Base_t::async_set_availability;
 
 public:
   Button() = delete;
@@ -55,31 +55,31 @@ public:
     };
   }
 
-  void async_set_config(EntityConfig config)
+  boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}", __FUNCTION__);
 
     config.set_override(ButtonConfig::CommandTopicKey, topics_.at(ButtonConfig::CommandTopicKey));
     config.set_override(ButtonConfig::PayloadPressKey, ButtonConfig::PayloadPressValue);
-    config.set_override(GenericEntityConfig::AvailibilityTopic, topics_.at(GenericEntityConfig::AvailibilityTopic));
+    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    client_.subscribe(subs_.begin(), subs_.end());
-    client_.async_publish(fmt::format("homeassistant/button/{}/config", unique_id_), config.parse());
+    co_await client_.async_subscribe(subs_.begin(), subs_.end());
+    co_await client_.async_publish(fmt::format("homeassistant/button/{}/config", unique_id_), config.parse());
   }
 
-  void async_set_availability(const Availability& availibility)
+  boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}", __FUNCTION__);
 
-    async_set_availibility(topics_.at(GenericEntityConfig::AvailibilityTopic), availibility);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
     std::pair{ ButtonConfig::CommandTopicKey, topic(ButtonConfig::TopicEntityName, ButtonConfig::CommandTopicValue) },
-    std::pair{ GenericEntityConfig::AvailibilityTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::AvailibilityTopic) },
+    std::pair{ GenericEntityConfig::availabilityTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
   std::unordered_map<std::string, PublishHandler_t> subs_{

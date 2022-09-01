@@ -29,12 +29,12 @@ public:
   HatchHandler& operator=(HatchHandler&& rhs) noexcept;
 
   mgmt::device::DeviceId_t hardware_id() const;
-  void connect();
-  void async_sync_state();
+  boost::asio::awaitable<void> async_connect();
+  boost::asio::awaitable<void> async_sync_state();
 
 private:
   void setup();
-  void set_config();
+  boost::asio::awaitable<void> async_set_config();
   void handle_command(const mgmt::home_assistant::mqttc::CoverCommand& cmd) const;
   void on_error(const mgmt::home_assistant::mqttc::EntityError& error);
 

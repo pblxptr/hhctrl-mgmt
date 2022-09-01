@@ -3,7 +3,8 @@
 //
 
 #include <home_assistant/device/hatch_handler.hpp>
-#include "device/hatch_t.hpp"
+#include <device/hatch_t.hpp>
+#include <coro/async_wait.hpp>
 
 namespace mgmt::home_assistant::device {
 HatchHandler::HatchHandler(
@@ -40,14 +41,14 @@ mgmt::device::DeviceId_t HatchHandler::hardware_id() const
   return device_id_;
 }
 
-void HatchHandler::connect()
+boost::asio::awaitable<void> HatchHandler::async_connect()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
 
-  cover_.connect();
+  co_await cover_.async_connect();
 }
 
-void HatchHandler::async_sync_state()
+boost::asio::awaitable<void> HatchHandler::async_sync_state()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
 
@@ -63,24 +64,24 @@ void HatchHandler::async_sync_state()
     break;
   default:
     spdlog::error("State not handled");// TODO: Error just for the purpose of tests
-    return;
+    co_return;
   }
 
-  cover_.async_set_state(cover_state);
+  co_await cover_.async_set_state(cover_state);
 }
 
 void HatchHandler::setup()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
 
-  cover_.set_ack_handler([this]() { set_config(); });
+  cover_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config(); });
   cover_.set_error_handler([this](const auto& ec) { on_error(ec); });
   cover_.on_command([this](const auto& cmd) {
     handle_command(cmd);
   });
 }
 
-void HatchHandler::set_config()
+boost::asio::awaitable<void> HatchHandler::async_set_config()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
 
@@ -89,11 +90,13 @@ void HatchHandler::set_config()
   config.set("device_class", "door");
   config.set("device", mqttc::helper::entity_config_basic_device(identity_provider_.identity(device_id_)));
   config.set(mqttc::CoverConfig::PayloadStopKey, nullptr);// Stop command not implemented
-  cover_.async_set_config(std::move(config));
-  cover_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
+  co_await cover_.async_set_config(std::move(config));
 
-  std::this_thread::sleep_for(std::chrono::seconds(1));// TODO: Workaround
-  async_sync_state();
+  //Wait until entity is configured on remote
+  co_await common::coro::async_wait(std::chrono::seconds(1));
+
+  co_await cover_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
+  co_await async_sync_state();
 }
 
 void HatchHandler::handle_command(const mgmt::home_assistant::mqttc::CoverCommand& cmd) const

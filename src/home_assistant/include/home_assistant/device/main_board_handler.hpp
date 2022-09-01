@@ -24,13 +24,13 @@ public:
   MainBoardHandler& operator=(MainBoardHandler&& rhs) noexcept;
 
   mgmt::device::DeviceId_t hardware_id() const;
-  void connect();
-  void async_sync_state();
+  boost::asio::awaitable<void> async_connect();
+  boost::asio::awaitable<void> async_sync_state();
 
 private:
   void setup();
-  void set_config_indicator(const mgmt::device::IndicatorType&);
-  void set_config_restart_button();
+  boost::asio::awaitable<void> async_set_config_indicator(const mgmt::device::IndicatorType&);
+  boost::asio::awaitable<void> async_set_config_restart_button();
   void on_error(const mgmt::home_assistant::mqttc::EntityError& error);
 
 private:

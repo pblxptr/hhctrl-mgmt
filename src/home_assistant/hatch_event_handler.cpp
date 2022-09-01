@@ -23,8 +23,7 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
   hatches_.emplace_back(event.device_id, device_identity_provider_, factory_);
 
   auto& h = hatches_.back();
-  h.connect();
-  co_return;
+  co_await h.async_connect();
 }
 
 boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] const DeviceRemoved_t& event)
@@ -56,10 +55,9 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
     throw std::runtime_error(fmt::format("Hatch device with id: {} was not found", device_id));
   }
 
-  hatch->async_sync_state();
-
-  co_return;
+  co_await hatch->async_sync_state();
 }
+
 void HatchEventHandler::on_error()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}", __FUNCTION__);

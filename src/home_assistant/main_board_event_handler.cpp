@@ -20,9 +20,7 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceCreat
   assert(main_board_ == std::nullopt);
 
   main_board_.emplace(event.device_id, device_identity_provider_, factory_);
-  main_board_->connect();
-
-  co_return;
+  co_await main_board_->async_connect();
 }
 
 boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceRemoved_t& /* event */)
@@ -38,7 +36,7 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceState
   spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
   assert(main_board_ != std::nullopt);
 
-  main_board_->async_sync_state();
+  co_await main_board_->async_sync_state();
 
   co_return;
 }

@@ -14,7 +14,8 @@
       "binaryDir": "${sourceDir}/build",
       "toolchainFile": "conan_paths.cmake",
       "cacheVariables": {
-        "ENABLE_TESTING" : "ON"
+        "ENABLE_TESTING" : "ON",
+        "USE_SANITIZERS" : "ON"
       }
     }
   ]

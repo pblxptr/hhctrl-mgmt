@@ -12,7 +12,7 @@
 namespace mgmt::home_assistant::mqttc {
 struct GenericEntityConfig
 {
-  static constexpr inline auto AvailibilityTopic = std::string_view{ "availibility_topic" };
+  static constexpr inline auto availabilityTopic = std::string_view{ "availability_topic" };
   static constexpr inline auto JsonAttributesTopic = std::string_view{ "json_attributes_topic" };
   static constexpr inline auto JsonAttributesTemplate = std::string_view{ "json_attributes_template" };
 };
@@ -33,11 +33,11 @@ public:
     return unique_id_;
   }
 
-  void connect()
+  boost::asio::awaitable<void> async_connect()
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
 
-    client_.connect();
+    co_await client_.async_connect();
   }
 
   template<class Handler>
@@ -61,22 +61,22 @@ protected:
     : unique_id_{ std::move(unique_id) }, client_{ std::move(client) }
   {}
 
-  void async_set_availibility(const std::string& topic, const Availability& availibility)
+  boost::asio::awaitable<void> async_set_availability(const std::string& topic, const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
 
-    auto availibility_str = std::string{};
+    auto availability_str = std::string{};
 
-    switch (availibility) {
+    switch (availability) {
     case Availability::Offline:
-      availibility_str = "offline";
+      availability_str = "offline";
       break;
     case Availability::Online:
-      availibility_str = "online";
+      availability_str = "online";
       break;
     }
 
-    client_.async_publish(topic, availibility_str);
+    co_await client_.async_publish(topic, availability_str);
   }
 
 

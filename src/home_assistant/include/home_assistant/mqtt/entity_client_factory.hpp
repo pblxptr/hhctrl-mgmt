@@ -29,7 +29,7 @@ public:
       mqtt::make_client(ioc_, config_.server_address, config_.server_port), config_ };
   }
 
-  auto create_async_client(std::string unique_id)
+  auto create_async_client(std::string unique_id) const
   {
     return AsyncMqttEntityClient{ std::move(unique_id),
       mqtt::make_async_client(ioc_, config_.server_address, config_.server_port), config_ };

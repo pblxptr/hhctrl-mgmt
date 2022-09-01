@@ -6,6 +6,7 @@
 #include <device/device_register.hpp>
 #include <home_assistant/device/main_board_handler.hpp>
 #include <home_assistant/unique_id.hpp>
+#include <coro/async_wait.hpp>
 
 /**
  * 000asd_binary_sensor_1
@@ -60,7 +61,10 @@ MainBoardHandler::MainBoardHandler(
   mgmt::device::DeviceId_t device_id,
   const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
   const mgmt::home_assistant::EntityFactory& factory)
-  : device_id_{ std::move(device_id) }, identity_provider_{ identity_provider }, indicators_{ create_indicator_entities(device_id, factory, identity_provider) }, restart_button_{ create_restart_button(device_id, factory, identity_provider) }
+  : device_id_{ std::move(device_id) }
+  , identity_provider_{ identity_provider }
+  , indicators_{ create_indicator_entities(device_id, factory, identity_provider) }
+  , restart_button_{ create_restart_button(device_id, factory, identity_provider) }
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}, device id: {}", __FUNCTION__, device_id_);
 
@@ -91,19 +95,19 @@ mgmt::device::DeviceId_t MainBoardHandler::hardware_id() const
   return device_id_;
 }
 
-void MainBoardHandler::connect()
+boost::asio::awaitable<void> MainBoardHandler::async_connect()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
 
   // Connect indicators
   for (auto&& [_, indicator] : indicators_) {
-    indicator.connect();
+    co_await indicator.async_connect();
   }
   // Connect restart button
-  restart_button_.connect();
+  co_await restart_button_.async_connect();
 }
 
-void MainBoardHandler::async_sync_state()
+boost::asio::awaitable<void> MainBoardHandler::async_sync_state()
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
 
@@ -113,6 +117,7 @@ void MainBoardHandler::async_sync_state()
   for (auto&& [type, indicator] : indicators_) {
     auto binary_sensor_state = mgmt::home_assistant::mqttc::BinarySensorState{};
     const auto current_state = board.indicator_state(type);
+
     switch (current_state) {
     case mgmt::device::IndicatorState::NotAvailable:
     case mgmt::device::IndicatorState::Off:
@@ -123,7 +128,7 @@ void MainBoardHandler::async_sync_state()
       binary_sensor_state = mgmt::home_assistant::mqttc::BinarySensorState::On;
       break;
     }
-    indicator.async_set_state(binary_sensor_state);
+    co_await indicator.async_set_state(binary_sensor_state);
   }
 }
 
@@ -133,11 +138,11 @@ void MainBoardHandler::setup()
 
   // Setup indicators
   for (auto&& [type, indicator] : indicators_) {
-    indicator.set_ack_handler([this, type]() { set_config_indicator(type); });
+    indicator.set_ack_handler([this, type]() -> boost::asio::awaitable<void> { co_await async_set_config_indicator(type); });
     indicator.set_error_handler([this](const auto& ec) { on_error(ec); });
   }
   // Setup restart button
-  restart_button_.set_ack_handler([this]() { set_config_restart_button(); });
+  restart_button_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config_restart_button(); });
   restart_button_.set_error_handler([this](const auto& ec) { on_error(ec); });
   restart_button_.on_command([this](auto&&) {
     auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
@@ -145,7 +150,7 @@ void MainBoardHandler::setup()
   });
 }
 
-void MainBoardHandler::set_config_indicator(const mgmt::device::IndicatorType& type)
+boost::asio::awaitable<void> MainBoardHandler::async_set_config_indicator(const mgmt::device::IndicatorType& type)
 {
   using std::to_string;
 
@@ -155,21 +160,27 @@ void MainBoardHandler::set_config_indicator(const mgmt::device::IndicatorType& t
   config.set("device_class", "light");
   config.set("entity_category", "diagnostic");
   config.set("device", mqttc::helper::entity_config_basic_device(identity_provider_.identity(device_id_)));
-  indicator.async_set_config(std::move(config));
-  indicator.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
+  co_await indicator.async_set_config(std::move(config));
 
-  std::this_thread::sleep_for(std::chrono::seconds(1));// TODO: Workaround
-  async_sync_state();
+  //Wait until entity is configured on remote
+  co_await common::coro::async_wait(std::chrono::seconds(1));
+
+  co_await indicator.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
+  co_await async_sync_state();
 }
 
-void MainBoardHandler::set_config_restart_button()
+boost::asio::awaitable<void> MainBoardHandler::async_set_config_restart_button()
 {
   auto config = mgmt::home_assistant::mqttc::EntityConfig{ restart_button_.unique_id() };
   config.set("name", "Restart board");
   config.set("device_class", "restart");
   config.set("device", mqttc::helper::entity_config_basic_device(identity_provider_.identity(device_id_)));
-  restart_button_.async_set_config(std::move(config));
-  restart_button_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
+  co_await restart_button_.async_set_config(std::move(config));
+
+  //Wait until entity is configured on remote
+  co_await common::coro::async_wait(std::chrono::seconds(1));
+
+  co_await restart_button_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
 }
 
 void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& /* error */)

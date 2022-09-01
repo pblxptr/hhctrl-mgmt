@@ -59,7 +59,7 @@ class Cover : public Entity<EntityClient>
   using Base_t::unique_id_;
   using Base_t::client_;
   using Base_t::topic;
-  using Base_t::async_set_availibility;
+  using Base_t::async_set_availability;
 
 public:
   Cover() = delete;
@@ -83,7 +83,7 @@ public:
     };
   }
 
-  void async_set_config(EntityConfig config)
+  boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
@@ -97,31 +97,31 @@ public:
     config.set_override_if_not_null(CoverConfig::PayloadCloseKey, std::string{ CoverCommandMapper.map(CoverCommand::Close) });
     config.set_override_if_not_null(CoverConfig::PayloadStopKey, std::string{ CoverCommandMapper.map(CoverCommand::Stop) });
 
-    config.set_override(GenericEntityConfig::AvailibilityTopic, topics_.at(GenericEntityConfig::AvailibilityTopic));
+    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    client_.subscribe(subs_.begin(), subs_.end());
-    client_.async_publish(fmt::format("homeassistant/cover/{}/config", unique_id_), config.parse());
+    co_await client_.async_subscribe(subs_.begin(), subs_.end());
+    co_await client_.async_publish(fmt::format("homeassistant/cover/{}/config", unique_id_), config.parse());
   }
 
-  void async_set_state(const CoverState& state)
+  boost::asio::awaitable<void> async_set_state(const CoverState& state)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
-    client_.async_publish(topics_.at(CoverConfig::StateTopicKey), std::string{ CoverStateMapper.map(state) });
+    co_await client_.async_publish(topics_.at(CoverConfig::StateTopicKey), std::string{ CoverStateMapper.map(state) });
   }
 
-  void async_set_availability(const Availability& availibility)
+  boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
-    async_set_availibility(topics_.at(GenericEntityConfig::AvailibilityTopic), availibility);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
     std::pair{ CoverConfig::StateTopicKey, topic(CoverConfig::TopicEntityName, CoverConfig::StateTopicValue) },
     std::pair{ CoverConfig::CommandTopicKey, topic(CoverConfig::TopicEntityName, CoverConfig::CommandTopicValue) },
-    std::pair{ GenericEntityConfig::AvailibilityTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::AvailibilityTopic) },
+    std::pair{ GenericEntityConfig::availabilityTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
   std::unordered_map<std::string, PublishHandler_t> subs_{

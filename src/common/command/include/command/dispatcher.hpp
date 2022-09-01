@@ -26,9 +26,9 @@ public:
   }
 
   template<CommandCompatible Command>
-  boost::asio::awaitable<void> async_dispatch(Command&& command)
+  boost::asio::awaitable<void> async_dispatch(Command command)
   {
-    using Command_t = std::decay_t<Command>;
+    using Command_t = Command;
 
     auto handler_it = handlers_.find(CommandIdGenerator::get<Command_t>());
 

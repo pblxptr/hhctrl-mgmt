@@ -18,30 +18,22 @@ public:
 
   [[nodiscard]] auto create_cover(const std::string& unique_id) const
   {
-    using EntityClient_t = decltype(client_factory_.create(std::declval<std::string>()));
-
-    return mgmt::home_assistant::mqttc::Cover<EntityClient_t>(unique_id, client_factory_.create(unique_id));
+    return mgmt::home_assistant::mqttc::Cover(unique_id, client_factory_.create_async_client(unique_id));
   }
 
   [[nodiscard]] auto create_binary_sensor(const std::string& unique_id) const
   {
-    using EntityClient_t = decltype(client_factory_.create(std::declval<std::string>()));
-
-    return mgmt::home_assistant::mqttc::BinarySensor<EntityClient_t>(unique_id, client_factory_.create(unique_id));
+    return mgmt::home_assistant::mqttc::BinarySensor(unique_id, client_factory_.create_async_client(unique_id));
   }
 
   [[nodiscard]] auto create_button(const std::string& unique_id) const
   {
-    using EntityClient_t = decltype(client_factory_.create(std::declval<std::string>()));
-
-    return mgmt::home_assistant::mqttc::Button<EntityClient_t>(unique_id, client_factory_.create(unique_id));
+    return mgmt::home_assistant::mqttc::Button(unique_id, client_factory_.create_async_client(unique_id));
   }
 
   [[nodiscard]] auto create_sensor(const std::string& unique_id) const
   {
-    using EntityClient_t = decltype(client_factory_.create(std::declval<std::string>()));
-
-    return mgmt::home_assistant::mqttc::Sensor<EntityClient_t>(unique_id, client_factory_.create(unique_id));
+    return mgmt::home_assistant::mqttc::Sensor(unique_id, client_factory_.create_async_client(unique_id));
   }
 
 private:

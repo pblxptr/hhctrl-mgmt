@@ -29,12 +29,12 @@ public:
   TempSensorHandler& operator=(TempSensorHandler&& rhs) noexcept;
 
   mgmt::device::DeviceId_t hardware_id() const;
-  void connect();
-  void async_sync_state();
+  boost::asio::awaitable<void> async_connect();
+  boost::asio::awaitable<void> async_sync_state();
 
 private:
   void setup();
-  void set_config();
+  boost::asio::awaitable<void> async_set_config();
   void on_error(const mgmt::home_assistant::mqttc::EntityError& error);
 
 private:

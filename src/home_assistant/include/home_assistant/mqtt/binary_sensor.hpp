@@ -36,7 +36,7 @@ class BinarySensor : public Entity<EntityClient>
   using Base_t::unique_id_;
   using Base_t::client_;
   using Base_t::topic;
-  using Base_t::async_set_availibility;
+  using Base_t::async_set_availability;
 
 public:
   BinarySensor() = delete;
@@ -51,7 +51,7 @@ public:
   BinarySensor(BinarySensor&& rhs) noexcept = default;
   BinarySensor& operator=(BinarySensor&&) noexcept = default;
 
-  void async_set_config(EntityConfig config)
+  boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensor::{}", __FUNCTION__);
 
@@ -59,31 +59,31 @@ public:
     config.set_override(BinarySensorConfig::StateOffKey, std::string{ BinarySensorStateMapper.map(BinarySensorState::Off) });
     config.set_override(BinarySensorConfig::StateOnKey, std::string{ BinarySensorStateMapper.map(BinarySensorState::On) });
 
-    config.set_override(GenericEntityConfig::AvailibilityTopic, topics_.at(GenericEntityConfig::AvailibilityTopic));
+    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    client_.async_publish(fmt::format("homeassistant/binary_sensor/{}/config", unique_id_), config.parse());
+    co_await client_.async_publish(fmt::format("homeassistant/binary_sensor/{}/config", unique_id_), config.parse());
   }
 
-  void async_set_state(const BinarySensorState& state)
+  boost::asio::awaitable<void> async_set_state(const BinarySensorState& state)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}", __FUNCTION__);
 
-    client_.async_publish(topics_.at(BinarySensorConfig::StateTopicKey), std::string{ BinarySensorStateMapper.map(state) });
+    co_await client_.async_publish(topics_.at(BinarySensorConfig::StateTopicKey), std::string{ BinarySensorStateMapper.map(state) });
   }
 
-  void async_set_availability(const Availability& availibility)
+  boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}", __FUNCTION__);
 
-    async_set_availibility(topics_.at(GenericEntityConfig::AvailibilityTopic), availibility);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{
     std::pair{ BinarySensorConfig::StateTopicKey, topic(BinarySensorConfig::TopicEntityName, BinarySensorConfig::StateTopicValue) },
-    std::pair{ GenericEntityConfig::AvailibilityTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::AvailibilityTopic) },
+    std::pair{ GenericEntityConfig::availabilityTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
 };

@@ -17,6 +17,6 @@ concept AsyncEventHandler = requires(Handler&& handler, const Arg& arg)
 template<class Command>
 concept CommandCompatible = requires(Command c)
 {
-  requires std::is_base_of_v<GenericCommand<Command>, Command>;
+  requires std::is_base_of_v<GenericCommand<std::decay_t<Command>>, std::decay_t<Command>>;
 };
 }// namespace common::command

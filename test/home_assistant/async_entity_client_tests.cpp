@@ -1,6 +1,7 @@
 //
 // Created by bielpa on 15.08.22.
 //
+
 #include <catch2/catch_all.hpp>
 #include <random>
 
@@ -99,8 +100,8 @@ namespace {
         Ioc.stop();
         co_return;
       });
-      impl_.set_connack_handler([this](auto&&...) {
-        boost::asio::co_spawn(Ioc, async_subscribe(), rethrow);
+      impl_.set_connack_handler([this](auto&&...) -> boost::asio::awaitable<void> {
+        co_await async_subscribe();
       });
       const auto ret = co_await impl_.async_connect();
 

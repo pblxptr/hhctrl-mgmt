@@ -24,8 +24,7 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
   sensors_.emplace_back(event.device_id, device_identity_provider_, factory_);
 
   auto& sensor = sensors_.back();
-  sensor.connect();
-  co_return;
+  co_await sensor.async_connect();
 }
 
 boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceRemoved_t& event)
@@ -57,9 +56,7 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
     throw std::runtime_error(fmt::format("TempSensor device with id: {} was not found", device_id));
   }
 
-  sensor->async_sync_state();
-
-  co_return;
+  co_await sensor->async_sync_state();
 }
 void TempSensorEventHandler::on_error()
 {
