@@ -40,7 +40,8 @@ class GenericCommand : public BaseCommand
   // user-provided constructor.
 protected:
   friend DerivedCommand;
-  GenericCommand() : BaseCommand{ CommandIdGenerator::get<DerivedCommand>() }
+  GenericCommand()
+    : BaseCommand{ CommandIdGenerator::get<DerivedCommand>() }
   {}
 };
 }// namespace common::command

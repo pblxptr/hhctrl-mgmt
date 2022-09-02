@@ -39,7 +39,8 @@ class Mapper : public impl::BaseMapper<typename KV::first_type, typename KV::sec
 
 public:
   consteval Mapper(Base_t::KeyValuePair_t kv, Rest... rest)
-    : Base_t{ kv }, m_next{ rest... }
+    : Base_t{ kv }
+    , m_next{ rest... }
   {}
 
   // //Map by key

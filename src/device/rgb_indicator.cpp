@@ -23,7 +23,8 @@ constexpr auto IndicatorMapping = common::utils::StaticMap<IndicatorType, RGBbri
 
 namespace mgmt::device {
 RGBIndicator::RGBIndicator(IndicatorType type, std::shared_ptr<RGBLed_t> rgbled)
-  : type_{ type }, rgbled_{ std::move(rgbled) }
+  : type_{ type }
+  , rgbled_{ std::move(rgbled) }
 {}
 
 IndicatorType RGBIndicator::type() const

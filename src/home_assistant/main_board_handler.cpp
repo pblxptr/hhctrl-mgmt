@@ -14,7 +14,7 @@
  */
 
 namespace {
-auto create_indicator_entities(
+auto create_indicators(
   const mgmt::device::DeviceId_t& device_id,
   const mgmt::home_assistant::EntityFactory& factory,
   const mgmt::home_assistant::DeviceIdentityProvider& identity_provider)
@@ -63,7 +63,7 @@ MainBoardHandler::MainBoardHandler(
   const mgmt::home_assistant::EntityFactory& factory)
   : device_id_{ std::move(device_id) }
   , identity_provider_{ identity_provider }
-  , indicators_{ create_indicator_entities(device_id, factory, identity_provider) }
+  , indicators_{ create_indicators(device_id, factory, identity_provider) }
   , restart_button_{ create_restart_button(device_id, factory, identity_provider) }
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}, device id: {}", __FUNCTION__, device_id_);
@@ -72,7 +72,10 @@ MainBoardHandler::MainBoardHandler(
 }
 
 MainBoardHandler::MainBoardHandler(MainBoardHandler&& rhs) noexcept
-  : device_id_{ std::move(rhs.device_id_) }, identity_provider_{ rhs.identity_provider_ }, indicators_{ std::move(rhs.indicators_) }, restart_button_{ std::move(rhs.restart_button_) }
+  : device_id_{ std::move(rhs.device_id_) }
+  , identity_provider_{ rhs.identity_provider_ }
+  , indicators_{ std::move(rhs.indicators_) }
+  , restart_button_{ std::move(rhs.restart_button_) }
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::(MainBoardHandler&&)");
 
@@ -162,7 +165,7 @@ boost::asio::awaitable<void> MainBoardHandler::async_set_config_indicator(const 
   config.set("device", mqttc::helper::entity_config_basic_device(identity_provider_.identity(device_id_)));
   co_await indicator.async_set_config(std::move(config));
 
-  //Wait until entity is configured on remote
+  // Wait until entity is configured on remote
   co_await common::coro::async_wait(std::chrono::seconds(1));
 
   co_await indicator.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
@@ -177,7 +180,7 @@ boost::asio::awaitable<void> MainBoardHandler::async_set_config_restart_button()
   config.set("device", mqttc::helper::entity_config_basic_device(identity_provider_.identity(device_id_)));
   co_await restart_button_.async_set_config(std::move(config));
 
-  //Wait until entity is configured on remote
+  // Wait until entity is configured on remote
   co_await common::coro::async_wait(std::chrono::seconds(1));
 
   co_await restart_button_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);

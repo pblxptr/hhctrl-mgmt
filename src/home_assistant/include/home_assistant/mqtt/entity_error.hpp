@@ -15,7 +15,8 @@ public:
     Disconnected };
 
   explicit EntityError(Code code, std::string message = {})
-    : code_{ code }, message_{ std::move(message) }
+    : code_{ code }
+    , message_{ std::move(message) }
   {}
 
   Code code() const

@@ -19,7 +19,9 @@ class HatchPoller
 {
 public:
   HatchPoller(mgmt::device::DeviceId_t device_id, common::event::AsyncEventBus& bus)
-    : device_id_{ std::move(device_id) }, bus_{ bus }, hash_{}
+    : device_id_{ std::move(device_id) }
+    , bus_{ bus }
+    , hash_{}
   {
   }
 

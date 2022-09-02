@@ -94,7 +94,7 @@ SCENARIO("Handlers should be executed")
        *  - V: When the async_dispatch takes parameter by VALUE and command is passed by lvalue ref then then everything's fine
        */
 
-      boost::asio::co_spawn(ioc, dispatcher.async_dispatch(TestCommand1{command_value}), boost::asio::detached);
+      boost::asio::co_spawn(ioc, dispatcher.async_dispatch(TestCommand1{ command_value }), boost::asio::detached);
       ioc.run_one();
 
       THEN("handler gets invoked")

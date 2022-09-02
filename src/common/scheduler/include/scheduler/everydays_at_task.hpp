@@ -20,7 +20,11 @@ public:
     boost::asio::io_context& io,
     TDurationArg&& duration,
     THandlerArg&& handler)
-    : id_{ std::move(id) }, owner_{ std::move(owner) }, timer_{ io }, duration_{ std::forward<TDurationArg>(duration) }, handler_{ std::forward<THandlerArg>(handler) }
+    : id_{ std::move(id) }
+    , owner_{ std::move(owner) }
+    , timer_{ io }
+    , duration_{ std::forward<TDurationArg>(duration) }
+    , handler_{ std::forward<THandlerArg>(handler) }
   {
     // TODO: Add static_assert to check if duration property is constructible from provided argument.
 

@@ -36,7 +36,7 @@ public:
   {
     common::logger::get(mgmt::device::Logger)->debug("PlatformBuilder::{}", __FUNCTION__);
 
-    return mgmt::device::MainBoard{std::move(indicators_)};
+    return mgmt::device::MainBoard{ std::move(indicators_) };
   }
 
   auto build_generic_loaders() &&

@@ -18,7 +18,9 @@ class DeviceTree
     OnNodeRemoved_t func_{};
 
     Node(DeviceId_t p, DeviceId_t c, OnNodeRemoved_t f)
-      : parent_{ std::move(p) }, child_{ std::move(c) }, func_{ std::move(f) }
+      : parent_{ std::move(p) }
+      , child_{ std::move(c) }
+      , func_{ std::move(f) }
     {}
     Node(Node&&) noexcept = default;
     Node& operator=(Node&&) noexcept = default;

@@ -13,7 +13,8 @@ class PlatformDeviceDiscovery// device discovery
 public:
   template<class... P>
   explicit PlatformDeviceDiscovery(std::string pdtree_file, P... providers)
-    : pdtree_file_{ std::move(pdtree_file) }, providers_{ DeviceProvider_t{ std::move(providers) }... }
+    : pdtree_file_{ std::move(pdtree_file) }
+    , providers_{ DeviceProvider_t{ std::move(providers) }... }
   {
     if (not std::filesystem::exists(pdtree_file_)) {
       throw std::runtime_error("Platform device tree file does not exist");

@@ -9,7 +9,8 @@ namespace mgmt::home_assistant::device {
 MainBoardEventHandler::MainBoardEventHandler(
   const EntityFactory& factory,
   const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider)
-  : factory_{ factory }, device_identity_provider_{ device_identity_provider }
+  : factory_{ factory }
+  , device_identity_provider_{ device_identity_provider }
 {
   spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
 }

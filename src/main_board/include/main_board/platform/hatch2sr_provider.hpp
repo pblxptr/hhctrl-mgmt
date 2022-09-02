@@ -15,7 +15,8 @@ public:
   HatchProvider(
     mgmt::device::PollingService& polling_service,
     mgmt::poller::PollerFactory& poller_factory)
-    : polling_service_{ polling_service }, poller_factory_{ poller_factory }
+    : polling_service_{ polling_service }
+    , poller_factory_{ poller_factory }
   {}
   static constexpr auto compatible()
   {

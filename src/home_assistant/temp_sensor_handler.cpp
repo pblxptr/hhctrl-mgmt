@@ -11,7 +11,8 @@ TempSensorHandler::TempSensorHandler(
   mgmt::device::DeviceId_t device_id,
   const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
   const mgmt::home_assistant::EntityFactory& factory)
-  : device_id_{ std::move(device_id) }, identity_provider_{ identity_provider }
+  : device_id_{ std::move(device_id) }
+  , identity_provider_{ identity_provider }
   , sensor_{ factory.create_sensor(get_unique_id(device_id_, identity_provider_.identity(device_id_))) }
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}, device id: {}", __FUNCTION__, device_id_);
@@ -78,7 +79,7 @@ boost::asio::awaitable<void> TempSensorHandler::async_set_config()
   config.set("device", mqttc::helper::entity_config_basic_device(identity_provider_.identity(device_id_)));
   co_await sensor_.async_set_config(std::move(config));
 
-  //Wait until entity is configured on remote
+  // Wait until entity is configured on remote
   co_await common::coro::async_wait(std::chrono::seconds(1));
 
   co_await sensor_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);

@@ -58,7 +58,8 @@ public:
 
 protected:
   Entity(std::string unique_id, EntityClient client)
-    : unique_id_{ std::move(unique_id) }, client_{ std::move(client) }
+    : unique_id_{ std::move(unique_id) }
+    , client_{ std::move(client) }
   {}
 
   boost::asio::awaitable<void> async_set_availability(const std::string& topic, const Availability& availability)

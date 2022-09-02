@@ -34,7 +34,8 @@ class GenericEvent : public BaseEvent
 protected:
   friend DerivedEvent;
 
-  GenericEvent() : BaseEvent{ EventIdGenerator::get<DerivedEvent>() }
+  GenericEvent()
+    : BaseEvent{ EventIdGenerator::get<DerivedEvent>() }
   {}
 };
 }// namespace common::event

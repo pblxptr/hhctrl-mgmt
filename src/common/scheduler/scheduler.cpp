@@ -6,7 +6,8 @@ namespace datetime = common::utils::datetime;
 
 namespace common::scheduler {
 Scheduler::Scheduler(boost::asio::io_context& io, TaskStore& tasks_store)
-  : io_{ io }, tasks_store_{ tasks_store }
+  : io_{ io }
+  , tasks_store_{ tasks_store }
 {}
 
 void Scheduler::add_task(std::unique_ptr<Task> new_task, Execution policy)

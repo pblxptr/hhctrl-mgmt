@@ -40,7 +40,7 @@ void main_board_init(
     RGBIndicatorProvider{},
     HatchProvider{ polling_service, poller_factory },
     SysfsDS18B20Provider{ polling_service, poller_factory },
-    SysfsCPUTempSensorProvider { polling_service, poller_factory }
+    SysfsCPUTempSensorProvider{ polling_service, poller_factory }
   };
   platform_device_discovery.setup(builder);
 

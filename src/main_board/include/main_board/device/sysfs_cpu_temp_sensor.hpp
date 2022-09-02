@@ -8,6 +8,7 @@ class SysfsCPUTempSensor
 public:
   explicit SysfsCPUTempSensor(std::string);
   float value() const;
+
 private:
   std::filesystem::path sysfsdir_;
 };

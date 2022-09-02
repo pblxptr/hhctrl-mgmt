@@ -19,7 +19,8 @@ class DeviceIdentityProvider
 {
 public:
   DeviceIdentityProvider(const mgmt::device::HardwareIdentityStore_t& store, const mgmt::device::DeviceTree& dtree)
-    : hw_identity_{ store }, dtree_{ dtree }
+    : hw_identity_{ store }
+    , dtree_{ dtree }
   {}
 
   [[nodiscard]] DeviceIdentity identity(const mgmt::device::DeviceId_t& device_id) const

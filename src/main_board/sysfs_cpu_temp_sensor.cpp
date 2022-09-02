@@ -9,7 +9,7 @@
 namespace {
 namespace sysfs = common::utils::sysfs;
 
-  constexpr auto ValueAttr = "temp";
+constexpr auto ValueAttr = "temp";
 }// namespace
 
 namespace mgmt::device {

@@ -11,7 +11,9 @@ HatchHandler::HatchHandler(
   mgmt::device::DeviceId_t device_id,
   const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
   const mgmt::home_assistant::EntityFactory& factory)
-  : device_id_{ std::move(device_id) }, identity_provider_{ identity_provider }, cover_{ factory.create_cover(get_unique_id(device_id_, identity_provider_.identity(device_id_))) }
+  : device_id_{ std::move(device_id) }
+  , identity_provider_{ identity_provider }
+  , cover_{ factory.create_cover(get_unique_id(device_id_, identity_provider_.identity(device_id_))) }
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}, device id: {}", __FUNCTION__, device_id_);
 
@@ -19,7 +21,9 @@ HatchHandler::HatchHandler(
 }
 
 HatchHandler::HatchHandler(HatchHandler&& rhs) noexcept
-  : device_id_{ std::move(rhs.device_id_) }, identity_provider_{ rhs.identity_provider_ }, cover_{ std::move(rhs.cover_) }
+  : device_id_{ std::move(rhs.device_id_) }
+  , identity_provider_{ rhs.identity_provider_ }
+  , cover_{ std::move(rhs.cover_) }
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::(HatchHandler&&)");
 
@@ -92,7 +96,7 @@ boost::asio::awaitable<void> HatchHandler::async_set_config()
   config.set(mqttc::CoverConfig::PayloadStopKey, nullptr);// Stop command not implemented
   co_await cover_.async_set_config(std::move(config));
 
-  //Wait until entity is configured on remote
+  // Wait until entity is configured on remote
   co_await common::coro::async_wait(std::chrono::seconds(1));
 
   co_await cover_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);

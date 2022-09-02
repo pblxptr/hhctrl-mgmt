@@ -69,7 +69,7 @@ int main(int argc, char** argv)
   config_builder.set("device_class", "door");
   config_builder.set("command_topic", mgmt::home_assistant::mqtt_topic(mgmt::home_assistant::TopicPlaceholder::UniqueId, "state"));
   config_builder.set("command_topic", mgmt::home_assistant::mqtt_topic(mgmt::home_assistant::TopicPlaceholder::UniqueId, "set"));
-  config_builder.set("availibility_topic", mgmt::home_assistant::mqtt_topic(mgmt::home_assistant::TopicPlaceholder::UniqueId, "availibitity"));
+  config_builder.set("availability_topic", mgmt::home_assistant::mqtt_topic(mgmt::home_assistant::TopicPlaceholder::UniqueId, "availibitity"));
   config_builder.set("payload_open", "open");
   config_builder.set("payload_close", "close");
   config_builder.set("payload_stop", nullptr);
@@ -90,9 +90,9 @@ int main(int argc, char** argv)
 }
 struct Cover
 {
-  struct Availibility
+  struct availability
   {
-    constexpr static inline auto Topic = "availibility";
+    constexpr static inline auto Topic = "availability";
   };
 
   struct Command

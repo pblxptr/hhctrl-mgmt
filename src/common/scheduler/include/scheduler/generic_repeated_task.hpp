@@ -14,7 +14,11 @@ public:
     boost::asio::io_context& io,
     TDurationArg&& interval,
     THandlerArg&& handler)
-    : id_{ std::move(id) }, owner_{ std::move(owner) }, timer_{ io }, duration_{ std::forward<TDurationArg>(interval) }, handler_{ std::forward<THandlerArg>(handler) }
+    : id_{ std::move(id) }
+    , owner_{ std::move(owner) }
+    , timer_{ io }
+    , duration_{ std::forward<TDurationArg>(interval) }
+    , handler_{ std::forward<THandlerArg>(handler) }
   {
     configure_expiry();
   }

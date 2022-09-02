@@ -15,7 +15,9 @@ namespace mgmt::home_assistant::mqttc {
 template<class Handler, class Ret = void>
 concept AsyncHandler = requires(Handler handler)
 {
-  { handler() } -> std::same_as<boost::asio::awaitable<Ret>>;
+  {
+    handler()
+    } -> std::same_as<boost::asio::awaitable<Ret>>;
 };
 
 
@@ -32,12 +34,14 @@ inline auto default_publish_handler() -> PublishHandler_t
 template<class Impl>
 class AsyncMqttEntityClient
 {
-  struct Reconnect {
-    int attempt {};
-    int max_attempts { 5 };
+  struct Reconnect
+  {
+    int attempt{};
+    int max_attempts{ 5 };
     std::chrono::seconds reconnect_delay = { std::chrono::seconds(3) };
     boost::asio::steady_timer timer;
   };
+
 public:
   AsyncMqttEntityClient() = delete;
   AsyncMqttEntityClient(std::string uid, Impl impl, const EntityClientConfig& config)
@@ -61,7 +65,7 @@ public:
 
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
 
-    if (ec && not (co_await reconnect())) {
+    if (ec && not(co_await reconnect())) {
       co_await on_error(ec);
     }
 
@@ -98,7 +102,7 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-    //Working
+    // Working
     auto ec = co_await do_async_publish(topic, std::move(payload));
 
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
@@ -170,9 +174,7 @@ private:
     reconnect_.timer.expires_after(reconnect_.reconnect_delay);
     co_await reconnect_.timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, ec));
     if (!ec) {
-      common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::reconnect, attempt: {}/{}",
-        reconnect_.attempt, reconnect_.max_attempts
-      );
+      common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
       co_await async_connect();
     }
 
@@ -180,7 +182,7 @@ private:
   }
 
   template<class Handler>
-  bool on_ack(bool sp, mqtt::connect_return_code connack_return_code, Handler&&  client_handler)
+  bool on_ack(bool sp, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, sp, MQTT_NS::connect_return_code_to_str(connack_return_code));
 
@@ -195,7 +197,7 @@ private:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
 
-    if (not (co_await reconnect())) {
+    if (not(co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Undefined, ec.message() });
     }
   }
@@ -204,55 +206,52 @@ private:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-    if (not (co_await reconnect())) {
+    if (not(co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });
     }
   }
 
-    template<class ResponseHandler = boost::asio::use_awaitable_t<>>
-    auto do_async_connect(ResponseHandler&& handler = {})
-    {
-      auto initiate = [this]<typename Handler>(Handler&& self) mutable
-      {
-        impl_->async_connect([self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec){
-            (*self)(std::current_exception(), ec);
-          });
-      };
-      return boost::asio::async_initiate<
-        ResponseHandler, void(std::exception_ptr, const MQTT_NS::error_code&)>(
-        initiate, handler
-      );
-    }
+  template<class ResponseHandler = boost::asio::use_awaitable_t<>>
+  auto do_async_connect(ResponseHandler&& handler = {})
+  {
+    auto initiate = [this]<typename Handler>(Handler&& self) mutable {
+      impl_->async_connect([self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec) {
+        (*self)(std::current_exception(), ec);
+      });
+    };
+    return boost::asio::async_initiate<
+      ResponseHandler,
+      void(std::exception_ptr, const MQTT_NS::error_code&)>(
+      initiate, handler);
+  }
 
-    template<class Payload, class ResponseHandler = boost::asio::use_awaitable_t<>>
-    auto do_async_publish(const std::string& topic, Payload payload, ResponseHandler&& handler = {})
-    {
-      auto initiate = [this]<typename Handler>(Handler&& self, auto&&...args) mutable
-      {
-        impl_->async_publish(std::forward<decltype(args)>(args)...,[self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec){
-          (*self)(std::current_exception(), ec);
-        });
-      };
-      return boost::asio::async_initiate<
-        ResponseHandler, void(std::exception_ptr, const MQTT_NS::error_code&)>(
-        initiate, handler, topic, std::move(payload), MQTT_NS::qos::at_most_once
-      );
-    }
+  template<class Payload, class ResponseHandler = boost::asio::use_awaitable_t<>>
+  auto do_async_publish(const std::string& topic, Payload payload, ResponseHandler&& handler = {})
+  {
+    auto initiate = [this]<typename Handler>(Handler&& self, auto&&... args) mutable {
+      impl_->async_publish(std::forward<decltype(args)>(args)..., [self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec) {
+        (*self)(std::current_exception(), ec);
+      });
+    };
+    return boost::asio::async_initiate<
+      ResponseHandler,
+      void(std::exception_ptr, const MQTT_NS::error_code&)>(
+      initiate, handler, topic, std::move(payload), MQTT_NS::qos::at_most_once);
+  }
 
-    template<class Container, class ResponseHandler = boost::asio::use_awaitable_t<>>
-    auto do_async_subscribe(const Container& subscriptions, ResponseHandler&& handler = {})
-    {
-      auto initiate = [this]<typename Handler>(Handler&& self, auto&&...args) mutable
-      {
-        impl_->async_subscribe(std::forward<decltype(args)>(args)...,[self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec){
-          (*self)(std::current_exception(), ec);
-        });
-      };
-      return boost::asio::async_initiate<
-        ResponseHandler, void(std::exception_ptr, const MQTT_NS::error_code&)>(
-        initiate, handler, subscriptions
-      );
-    }
+  template<class Container, class ResponseHandler = boost::asio::use_awaitable_t<>>
+  auto do_async_subscribe(const Container& subscriptions, ResponseHandler&& handler = {})
+  {
+    auto initiate = [this]<typename Handler>(Handler&& self, auto&&... args) mutable {
+      impl_->async_subscribe(std::forward<decltype(args)>(args)..., [self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec) {
+        (*self)(std::current_exception(), ec);
+      });
+    };
+    return boost::asio::async_initiate<
+      ResponseHandler,
+      void(std::exception_ptr, const MQTT_NS::error_code&)>(
+      initiate, handler, subscriptions);
+  }
 
 private:
   Impl impl_;

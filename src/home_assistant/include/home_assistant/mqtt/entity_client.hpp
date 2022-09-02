@@ -12,31 +12,33 @@ namespace mgmt::home_assistant::mqttc {
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
 using ErrorHandler_t = std::function<void(const EntityError&)>;
 
-//inline auto default_publish_handler() -> PublishHandler_t
+// inline auto default_publish_handler() -> PublishHandler_t
 //{
-//  return { [](auto&&) {
-//    common::logger::get(mgmt::home_assistant::Logger)->debug("default_publish_handler");
-//  } };
-//}
+//   return { [](auto&&) {
+//     common::logger::get(mgmt::home_assistant::Logger)->debug("default_publish_handler");
+//   } };
+// }
 
 template<class Impl>
 class MqttEntityClient
 {
-  struct Reconnect {
-    int attempt {};
-    int max_attempts { 5 };
+  struct Reconnect
+  {
+    int attempt{};
+    int max_attempts{ 5 };
     std::chrono::seconds reconnect_delay = { std::chrono::seconds(3) };
     boost::asio::steady_timer timer;
   };
+
 public:
   MqttEntityClient() = delete;
   MqttEntityClient(std::string uid, Impl impl, const EntityClientConfig& config)
     : impl_{ std::move(impl) }
     , reconnect_{
-        .max_attempts = config.max_reconnect_attempts,
-        .reconnect_delay = config.reconnect_delay,
-        .timer = boost::asio::steady_timer{ impl_->socket()->get_executor() }
-      }
+      .max_attempts = config.max_reconnect_attempts,
+      .reconnect_delay = config.reconnect_delay,
+      .timer = boost::asio::steady_timer{ impl_->socket()->get_executor() }
+    }
   {
     impl_->set_client_id(uid);
     impl_->set_clean_session(true);
@@ -150,9 +152,7 @@ private:
     reconnect_.timer.expires_after(reconnect_.reconnect_delay);
     reconnect_.timer.async_wait([this](const auto& ec) {
       if (!ec) {
-        common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::reconnect, attempt: {}/{}",
-          reconnect_.attempt, reconnect_.max_attempts
-        );
+        common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
         connect();
       }
     });

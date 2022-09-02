@@ -13,7 +13,8 @@ public:
     boost::asio::io_context& bctx,
     zmq::context_t& zctx,
     std::string endpoint_address)
-    : icon::BasicClient{ zctx, bctx }, endpoint_addresss_{ std::move(endpoint_address) }
+    : icon::BasicClient{ zctx, bctx }
+    , endpoint_addresss_{ std::move(endpoint_address) }
   {
     spdlog::get("mgmt")->debug("Client: ctor");
   }
@@ -24,7 +25,8 @@ public:
   }
 
   Client(const Client&&) = delete;
-  Client(Client&& src) : icon::BasicClient(std::move(src))
+  Client(Client&& src)
+    : icon::BasicClient(std::move(src))
   {
     spdlog::get("mgmt")->debug("Client: move ctor");
     endpoint_addresss_ = std::move(src.endpoint_addresss_);

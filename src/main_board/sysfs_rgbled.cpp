@@ -6,7 +6,9 @@
 
 namespace mgmt::device {
 SysfsRGBLed::SysfsRGBLed(SysfsLed red, SysfsLed green, SysfsLed blue)
-  : red_{ std::move(red) }, green_{ std::move(green) }, blue_{ std::move(blue) }
+  : red_{ std::move(red) }
+  , green_{ std::move(green) }
+  , blue_{ std::move(blue) }
 {}
 
 RGBLedValue SysfsRGBLed::brightness() const

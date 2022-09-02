@@ -29,7 +29,7 @@ inline std::string read_attr(const fs::path& path)
     throw std::runtime_error{ fmt::format("Attribute does not exist. Path: {}", path.string()) };
   }
 
-  while(!fstream.eof()) {
+  while (!fstream.eof()) {
     fstream >> ret;
   }
 

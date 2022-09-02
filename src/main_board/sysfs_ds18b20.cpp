@@ -9,7 +9,7 @@
 namespace {
 namespace sysfs = common::utils::sysfs;
 
-  constexpr auto ValueAttr = "w1_slave";
+constexpr auto ValueAttr = "w1_slave";
 }// namespace
 
 namespace mgmt::device {
@@ -34,7 +34,7 @@ float SysfsDS18B20::value() const
     return 0;
   }
 
-  return atof(attr_val.data() + pos + 2) / 1000; //output + position where "t=" starts, skip "t="
+  return atof(attr_val.data() + pos + 2) / 1000;// output + position where "t=" starts, skip "t="
 }
 
 }// namespace mgmt::device

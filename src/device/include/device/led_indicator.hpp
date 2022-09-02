@@ -8,7 +8,8 @@ class LedIndicator
 {
 public:
   LedIndicator(IndicatorType type, Led_t led)
-    : type_{ type }, led_{ std::move(led) }
+    : type_{ type }
+    , led_{ std::move(led) }
   {}
 
   LedIndicator(const LedIndicator&) = delete;

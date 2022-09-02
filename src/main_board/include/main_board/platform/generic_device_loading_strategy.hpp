@@ -12,7 +12,9 @@ public:
     mgmt::device::DeviceId_t board_id,
     mgmt::device::DeviceTree& dtree,
     common::event::AsyncEventBus& bus)
-    : board_id_{ board_id }, dtree_{ dtree }, bus_{ bus }
+    : board_id_{ board_id }
+    , dtree_{ dtree }
+    , bus_{ bus }
   {}
 
   template<class D, class Loader>

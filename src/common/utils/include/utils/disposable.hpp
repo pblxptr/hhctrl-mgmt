@@ -9,7 +9,8 @@ class Disposable : public T
 public:
   template<class... Args>
   Disposable(OnDispose on_dispose, Args&&... args)
-    : on_dispose_{ std::move(on_dispose) }, T{ std::forward<Args>(args)... }
+    : on_dispose_{ std::move(on_dispose) }
+    , T{ std::forward<Args>(args)... }
   {}
 
   ~Disposable()
