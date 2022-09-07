@@ -94,6 +94,8 @@ int main(int argc, char** argv)
 
   /* Device Services */
   auto polling_service = mgmt::device::PollingService{ std::ref(bctx) };
+
+  /* Run */
   boost::asio::co_spawn(
     bctx, [pdtree_path = config.dtree_file, &dtree, &hw_identity_store, &bus, &polling_service]() -> boost::asio::awaitable<void> {
       mgmt::app::main_board_init(

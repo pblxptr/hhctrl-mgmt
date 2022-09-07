@@ -7,16 +7,39 @@
   },
   "configurePresets": [
     {
-      "name": "default",
-      "displayName": "Default Config",
-      "description": "Default build using Unix Makefiles generator",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build",
-      "toolchainFile": "conan_paths.cmake",
+      "name": "Linux",
+      "hidden": true,
+      "generator" : "Unix Makefiles",
+      "toolchainFile" : "conan_paths.cmake"
+    },
+    {
+      "name": "Linux_GCC",
+      "hidden": true,
+      "inherits": "Linux"
+    },
+
+    {
+      "name": "Debug",
+      "hidden": true,
       "cacheVariables": {
-        "ENABLE_TESTING" : "ON",
-        "USE_SANITIZERS" : "ON"
+        "CMAKE_BUILD_TYPE" : "Debug"
       }
+    },
+    {
+      "name": "Release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : "Release"
+      }
+    },
+
+    {
+      "name": "linux_gcc_debug",
+      "inherits": ["Linux_GCC", "Debug"]
+    },
+    {
+      "name" : "linux_gcc_release",
+      "inherits": ["Linux_GCC", "Release"]
     }
   ]
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
 #include <boost/asio.hpp>
 #include <boost/uuid/detail/sha1.hpp>
 #include <boost/uuid/name_generator.hpp>

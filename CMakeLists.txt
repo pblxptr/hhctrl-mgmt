@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(hhctrl-mgmt CXX)
 
-#add_compile_definitions(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif ()

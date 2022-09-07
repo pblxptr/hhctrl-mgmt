@@ -4,7 +4,10 @@ add_executable(${CMAKE_PROJECT_NAME} main.cpp app_config.cpp)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE include)
 target_link_libraries(${CMAKE_PROJECT_NAME}
-  PRIVATE common_event common_executor poller device home_assistant main_board event mqtt_cpp::mqtt_cpp common_utils fmt spdlog::spdlog
+  PRIVATE
+    common_event common_executor poller device
+    home_assistant main_board event mqtt_cpp::mqtt_cpp
+    common_utils
 )
 
 install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION bin)

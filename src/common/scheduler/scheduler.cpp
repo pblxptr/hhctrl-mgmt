@@ -1,7 +1,5 @@
 #include <scheduler/scheduler.hpp>
 
-#include <spdlog/spdlog.h>
-
 namespace datetime = common::utils::datetime;
 
 namespace common::scheduler {

@@ -13,5 +13,6 @@ add_library(main_board STATIC
 
 target_include_directories(main_board PUBLIC include)
 target_link_libraries(main_board
-  PRIVATE device common_utils common_logger
+  PRIVATE
+    device common_utils common_logger
 )

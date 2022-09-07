@@ -7,6 +7,8 @@
 #include <sstream>
 #include <date/date.h>
 #include <date/tz.h>
+#include <fmt/format.h>
+
 namespace {
 using namespace std::literals;
 namespace dt = date;

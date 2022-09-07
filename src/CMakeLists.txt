@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
-set(CMAKE_CXX_STANDARD 20)
 
 add_compile_options(-Werror -Wextra -Wall -pedantic -save-temps)
-
-find_package(fmt REQUIRED)
-find_package(spdlog REQUIRED)
-find_package(mqtt_cpp REQUIRED)
-find_package(Boost COMPONENTS date_time json log log_setup thread)
 
 add_subdirectory(common)
 add_subdirectory(event)

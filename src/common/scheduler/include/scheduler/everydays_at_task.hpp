@@ -1,11 +1,11 @@
 #pragma once
 
-#include "task.hpp"
-
 #include <boost/asio.hpp>
-#include "date/date.h"
-
+#include <date/date.h>
 #include <utils/datetime.hpp>
+
+#include <scheduler/task.hpp>
+#include <scheduler/logger.hpp>
 #include <scheduler/scheduler_durations.hpp>
 
 namespace common::scheduler {
@@ -48,7 +48,7 @@ public:
 
   void set_expiry(Timepoint_t tp) override
   {
-    spdlog::debug(fmt::format("Updating task expiry. From: {}, to: {}",
+    common::logger::get(common::scheduler::Logger)->debug(fmt::format("Updating task expiry. From: {}, to: {}",
       common::utils::datetime::to_string(timer_.expiry()),
       common::utils::datetime::to_string(tp)));
     timer_.expires_at(std::move(tp));
@@ -56,7 +56,7 @@ public:
 
   void activate() override
   {
-    spdlog::debug("Installing task: {}", to_string());
+    common::logger::get(common::scheduler::Logger)->debug("Installing task: {}", to_string());
 
     timer_.async_wait([&](const boost::system::error_code& ec) {
       if (ec) {
