@@ -10,8 +10,6 @@ add_library(common_scheduler STATIC
 
 target_include_directories(common_scheduler PUBLIC include)
 target_link_libraries(common_scheduler
-  INTERFACE
-    date
   PUBLIC
     common_logger common_utils fmt::fmt
   PRIVATE

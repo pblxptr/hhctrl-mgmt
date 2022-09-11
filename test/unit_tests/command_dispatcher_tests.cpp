@@ -6,8 +6,8 @@
 #include <boost/asio/co_spawn.hpp>
 
 
-#include <command/dispatcher.hpp>
-#include <command/base_command.hpp>
+#include "command/dispatcher.hpp"
+#include "command/base_command.hpp"
 
 struct TestCommand1 : common::command::GenericCommand<TestCommand1>
 {

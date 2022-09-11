@@ -12,7 +12,7 @@ set(DATE_DEPENDS "")
 #   set (DATE_DEPENDS "curl")
 # endif(NOT CURL_FOUND)
 
-ExternalProject_Add(date
+ExternalProject_Add(date-tz
   GIT_REPOSITORY    "https://github.com/HowardHinnant/date.git"
   GIT_TAG           master
   SOURCE_DIR        ${CMAKE_SOURCE_DIR}/lib/date

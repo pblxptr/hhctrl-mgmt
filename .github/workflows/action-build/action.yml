@@ -1,0 +1,12 @@
+# action.yml
+name: 'Build'
+description: 'Build'
+inputs:
+  preset:
+    description: 'Selected preset'
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: "echo DUPA"
+      shell: bash

@@ -57,6 +57,11 @@ public:
     impl_->set_keep_alive_sec(config.keep_alive_interval);
   }
 
+  auto client_id() const
+  {
+    return impl_->get_client_id();
+  }
+
   boost::asio::awaitable<MQTT_NS::error_code> async_connect()
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);

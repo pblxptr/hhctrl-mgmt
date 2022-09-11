@@ -40,6 +40,22 @@
     {
       "name" : "linux_gcc_release",
       "inherits": ["Linux_GCC", "Release"]
+    },
+
+
+    {
+      "name" : "linux_gcc_build_testing",
+      "inherits": ["linux_gcc_debug"],
+      "cacheVariables": {
+        "ENABLE_TESTING" : "ON"
+      }
+    },
+    {
+      "name" : "linux_gcc_build_testing_sanitizers",
+      "inherits": ["linux_gcc_build_testing"],
+      "cacheVariables": {
+        "USE_SANITIZERS" : "ON"
+      }
     }
   ]
 }
