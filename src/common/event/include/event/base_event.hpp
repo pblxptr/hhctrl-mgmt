@@ -1,7 +1,7 @@
 #pragma once
 
-#include "event_id.hpp"
-#include "event_id_generator.hpp"
+#include <event/event_id.hpp>
+#include <event/event_id_generator.hpp>
 
 namespace common::event {
 class BaseEvent

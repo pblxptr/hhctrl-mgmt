@@ -1,21 +1,21 @@
 #pragma once
 
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/signals2/signal.hpp"
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/asio/awaitable.hpp"
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/asio/detached.hpp"
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/asio/io_context.hpp"
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/asio/thread_pool.hpp"
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/asio/system_executor.hpp"
-#include "../../../../../../../../.conan/data/boost/1.79.0/_/_/package/dc8aedd23a0f0a773a5fcdcfe1ae3e89c4205978/include/boost/asio/co_spawn.hpp"
+#include <boost/signals2/signal.hpp>
+#include <boost/asio/awaitable.hpp>
+#include <boost/asio/detached.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/system_executor.hpp>
+#include <boost/asio/co_spawn.hpp>
 #include <functional>
 #include <variant>
 
-#include "../../../coro/include/coro/co_spawn.hpp"
-#include "base_event.hpp"
-#include "event.hpp"
-#include "../../../utils/include/utils/overloaded.hpp"
-#include "../../../utils/include/utils/capture_fwd.hpp"
-#include "logger.hpp"
+#include <coro/co_spawn.hpp>
+#include <event/base_event.hpp>
+#include <event/event.hpp>
+#include <event/logger.hpp>
+#include <utils/overloaded.hpp>
+#include <utils/capture_fwd.hpp>
 namespace common::event {
 class AsyncEventBus
 {

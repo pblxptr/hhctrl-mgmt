@@ -6,8 +6,6 @@
 #include <event/event_bus.hpp>
 #include <device/devicetree.hpp>
 #include <device/hardware_identity_store.hpp>
-//#include "device/include/device/logger.hpp"
-//#include "event/include/event/device_state_changed.hpp"
 #include <main_board/platform/platform_builder.hpp>
 #include <main_board/platform/platform_device_discovery.hpp>
 #include <main_board/platform/generic_device_loading_strategy.hpp>
@@ -18,9 +16,6 @@
 #include <main_board/platform/sysfs_cpu_temp_sensor_provider.hpp>
 
 #include <poller/main_board_poller.hpp>
-
-
-//#include <main_board/platform/sysfs_temp_sensor_provider.hpp>
 
 namespace mgmt::app {
 void main_board_init(

@@ -1,3 +1,22 @@
+## action.yml
+#name: 'Build'
+#description: 'Build'
+#inputs:
+#  preset:
+#    description: 'Selected preset'
+#    required: true
+#runs:
+#  using: composite
+#  steps:
+#    - uses: actions/checkout@v3
+#    - run: echo image=${{ inputs.image }} >> $GITHUB_ENV
+#    - name: Do sth
+#      uses: docker://${{ env.image }}
+#      with:
+
+
+
+
 # action.yml
 name: 'Build'
 description: 'Build'
@@ -5,8 +24,27 @@ inputs:
   preset:
     description: 'Selected preset'
     required: true
+  build_type:
+    description: "Build type e.g. Debug, Release"
+    required: true
 runs:
   using: composite
   steps:
-    - run: "echo DUPA"
+    - name: "Make build directory"
+      run: mkdir cmake-build-${{ inputs.preset }}
+      shell: bash
+
+    - name: "Install Conan dependencies"
+      working-directory: cmake-build-${{ inputs.preset }}
+      run: conan install .. --build=missing -s build_type=${{ inputs.build_type }}
+      shell: bash
+
+    - name: "Configure CMake"
+      working-directory: cmake-build-${{ inputs.preset }}
+      run: cmake .. --preset ${{ inputs.preset }}
+      shell: bash
+
+    - name: "Make"
+      working-directory: cmake-build-${{ inputs.preset }}
+      run: make -j$(nproc)
       shell: bash

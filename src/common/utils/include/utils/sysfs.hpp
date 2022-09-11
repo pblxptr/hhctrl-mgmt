@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include "../../../../../../../../.conan/data/fmt/9.0.0/_/_/package/2c09c8f84c016041549fcee94e4caae5d89424b6/include/fmt/format.h"
+#include <fmt/format.h>
 #include <filesystem>
 
 namespace {

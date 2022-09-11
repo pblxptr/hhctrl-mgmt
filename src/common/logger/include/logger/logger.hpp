@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string_view>
-#include "../../../../../../../../.conan/data/spdlog/1.9.2/_/_/package/afd3da2a94c004467a0de976e36f26f96df04fe0/include/spdlog/spdlog.h"
-#include "../../../../../../../../.conan/data/spdlog/1.9.2/_/_/package/afd3da2a94c004467a0de976e36f26f96df04fe0/include/spdlog/sinks/null_sink.h"
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/null_sink.h>
 #include <source_location>
 
 namespace common::logger {
