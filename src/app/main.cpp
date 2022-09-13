@@ -1,4 +1,3 @@
-
 #include <filesystem>
 #include <cassert>
 #include <boost/asio/awaitable.hpp>
@@ -48,7 +47,7 @@ int main(int argc, char** argv)
 
   using std::to_string;
 
-  spdlog::get("mgmt")->info("App config: \n {}", pretty_format_config(config));
+  spdlog::get("mgmt")->info("App config: {}", pretty_format_config(config));
 
   /* General Services */
   auto bctx = boost::asio::io_context{};

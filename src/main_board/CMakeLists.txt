@@ -19,5 +19,6 @@ target_link_libraries(main_board
     device common_utils common_logger
   PUBLIC
     Boost::json
+    range-v3
 )
 

@@ -141,7 +141,12 @@ void MainBoardHandler::setup()
 
   // Setup indicators
   for (auto&& [type, indicator] : indicators_) {
-    indicator.set_ack_handler([this, type]() -> boost::asio::awaitable<void> { co_await async_set_config_indicator(type); });
+    /*
+     * type = type it has to be formed that way, because according to the standard
+     * structure binding does not introduce variable name. Compiles with gcc but not with clang
+     * https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+     */
+    indicator.set_ack_handler([this, type = type]() -> boost::asio::awaitable<void> { co_await async_set_config_indicator(type); });
     indicator.set_error_handler([this](const auto& ec) { on_error(ec); });
   }
   // Setup restart button

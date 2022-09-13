@@ -23,7 +23,7 @@ void PollingService::add_poller(
     throw std::runtime_error("Poller for requested device id, already exists");
   }
 
-  pollers_.emplace_back(device_id, interval, poll);
+  pollers_.push_back(Poller{ device_id, interval, poll });
   start_poller(pollers_.back());
 }
 

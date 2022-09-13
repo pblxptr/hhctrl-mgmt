@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-add_compile_options(-Werror -Wextra -Wall -pedantic -save-temps)
+add_compile_options(-Werror -Wextra -Wall -save-temps)
 
 add_subdirectory(common)
 add_subdirectory(event)

@@ -1,7 +1,9 @@
 #include <device/devicetree.hpp>
 
-#include <ranges>
 #include <algorithm>
+#include <range/v3/range.hpp>
+#include <range/v3/algorithm/for_each.hpp>
+#include <range/v3/view/filter.hpp>
 
 #include <device/logger.hpp>
 
@@ -78,7 +80,7 @@ std::vector<DeviceId_t> DeviceTree::all_children(const DeviceId_t& parent) const
   auto filter = [parent](auto&& n) {
     return n.parent_ == parent;
   };
-  std::ranges::for_each(nodes_ | std::ranges::views::filter(filter),
+  ranges::for_each(nodes_ | ranges::views::filter(filter),
     push,
     &Node::child_);
   return children;

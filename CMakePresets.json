@@ -17,7 +17,17 @@
       "hidden": true,
       "inherits": "Linux"
     },
-
+    {
+      "name": "Linux_Clang",
+      "hidden": true,
+      "inherits": "Linux",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER" : "clang",
+        "CMAKE_CXX_COMPILER" : "clang++",
+        "BOOST_ASIO_HAS_CO_AWAIT" : true,
+        "BOOST_ASIO_HAS_STD_COROUTINE": true
+      }
+    },
     {
       "name": "Debug",
       "hidden": true,
@@ -38,24 +48,16 @@
       "inherits": ["Linux_GCC", "Debug"]
     },
     {
-      "name" : "linux_gcc_release",
+      "name": "linux_gcc_release",
       "inherits": ["Linux_GCC", "Release"]
     },
-
-
     {
-      "name" : "linux_gcc_build_testing",
-      "inherits": ["linux_gcc_debug"],
-      "cacheVariables": {
-        "ENABLE_TESTING" : "ON"
-      }
+      "name": "linux_clang_debug",
+      "inherits": ["Linux_Clang", "Debug"]
     },
     {
-      "name" : "linux_gcc_build_testing_sanitizers",
-      "inherits": ["linux_gcc_build_testing"],
-      "cacheVariables": {
-        "USE_SANITIZERS" : "ON"
-      }
+      "name": "linux_clang_release",
+      "inherits": ["Linux_Clang", "Release"]
     }
   ]
 }

@@ -2,7 +2,7 @@
 // Created by pp on 7/29/22.
 //
 
-#include "app/app_config.hpp"
+#include <app/app_config.hpp>
 
 #include <boost/json.hpp>
 #include <fstream>

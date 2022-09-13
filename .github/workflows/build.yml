@@ -54,7 +54,8 @@ jobs:
           preset: linux_gcc_debug
           build_type: Debug
 
-#      - name: Build Release
-#        uses: ./.github/workflows/action-build
-#        with:
-#          preset: linux_gcc_release
+      - name: Build Release
+        uses: ./.github/workflows/action-build
+        with:
+          preset: linux_gcc_release
+

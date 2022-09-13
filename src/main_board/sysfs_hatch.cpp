@@ -20,12 +20,6 @@ struct ChangePositionAttr
   static constexpr const char* open{ "open" };
   static constexpr const char* close{ "close" };
 };
-struct SlowStartAttr
-{
-  static constexpr const char* name{ "slow_start" };
-  static constexpr const char* enable{ "1" };
-  static constexpr const char* disable{ "0" };
-};
 
 struct StatusAttr
 {

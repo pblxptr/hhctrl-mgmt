@@ -78,13 +78,13 @@ public:
   }
 
   template<AsyncHandler Handler>
-  void set_connack_handler(Handler handler)
+  void set_connack_handler(Handler /* handler */)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-    impl_->set_connack_handler([this, client_handler = std::move(handler)](bool sp, auto rc) mutable {
-      return on_ack(sp, rc, std::move(client_handler));
-    });
+//    impl_->set_connack_handler([this, handler = std::move(handler)](bool sp, auto rc) mutable {
+//      return on_ack(sp, rc, std::move(handler));
+//    });
   }
 
   template<class Handler>
@@ -126,7 +126,7 @@ public:
         common::logger::get(mgmt::home_assistant::Logger)->debug("  - suback_return_code: {}", MQTT_NS::suback_return_code_to_str(result));
       }
 
-      impl_->set_publish_handler([this, begin, end](
+      impl_->set_publish_handler([begin, end](
                                    mqtt::optional<std::uint16_t> packet_id,
                                    [[maybe_unused]] mqtt::publish_options pubopts,
                                    mqtt::buffer topic_name,

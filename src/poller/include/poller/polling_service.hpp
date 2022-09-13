@@ -24,10 +24,10 @@ class PollingService
   using Interval_t = std::chrono::milliseconds;
   struct Poller
   {
-    mgmt::device::DeviceId_t device_id;
-    Interval_t interval;
-    Poll_t poll;
-    std::optional<Timer_t> timer_;
+    mgmt::device::DeviceId_t device_id {};
+    Interval_t interval {};
+    Poll_t poll {};
+    std::optional<Timer_t> timer_ {};
   };
 
 public:

@@ -15,7 +15,7 @@ public:
   using Id_t = boost::uuids::uuid;
   using Timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
 
-  ~Task() = default;
+  virtual ~Task() = default;
   virtual const Id_t& id() const = 0;
   virtual const std::string& owner() const = 0;
   virtual void activate() = 0;

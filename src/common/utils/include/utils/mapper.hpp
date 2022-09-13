@@ -38,13 +38,13 @@ class Mapper : public impl::BaseMapper<typename KV::first_type, typename KV::sec
   const Mapper<Rest...> m_next;
 
 public:
-  consteval Mapper(Base_t::KeyValuePair_t kv, Rest... rest)
+  consteval Mapper(typename Base_t::KeyValuePair_t kv, Rest... rest)
     : Base_t{ kv }
     , m_next{ rest... }
   {}
 
   // //Map by key
-  constexpr auto map(const Base_t::Key_t& key) const
+  constexpr auto map(const typename Base_t::Key_t& key) const
   {
     const auto& [k, v] = Base_t::m_kv;
 
@@ -52,7 +52,7 @@ public:
   }
 
   // //Map by value - reverse
-  constexpr auto map(const Base_t::Value_t& value) const
+  constexpr auto map(const typename Base_t::Value_t& value) const
   {
     const auto& [k, v] = Base_t::m_kv;
 
@@ -68,18 +68,18 @@ class Mapper<std::pair<Key, Value>> : public impl::BaseMapper<Key, Value>
   using Base_t = impl::BaseMapper<Key, Value>;
 
 public:
-  consteval Mapper(Base_t::KeyValuePair_t kv)
+  consteval Mapper(typename Base_t::KeyValuePair_t kv)
     : Base_t{ kv }
   {}
 
-  constexpr auto map(const Base_t::Key_t& key) const
+  constexpr auto map(const typename Base_t::Key_t& key) const
   {
     const auto& [k, v] = Base_t::m_kv;
 
     return automap(key, k, v);
   }
 
-  constexpr auto map(const Base_t::Value_t& value) const
+  constexpr auto map(const typename Base_t::Value_t& value) const
   {
     const auto& [k, v] = Base_t::m_kv;
 
