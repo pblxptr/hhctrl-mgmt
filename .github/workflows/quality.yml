@@ -12,30 +12,28 @@ jobs:
         run: ./scripts/check-clang-format-all.sh
 
       - name: "Verify"
-        run: |
-          git diff --color > clang-format.patch
-          if [[ `wc -l < clang-format.patch` != "0" ]]; then
-            cat clang-format.patch
-            git checkout -- .
-            false
-          fi
-  clang-tidy:
-    runs-on: ubuntu-latest
-    container: bicompb/clang-15
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v3
+        run: ./scripts/verify-clang-format.sh
 
-      - name: "Configure CMake"
-        run: | 
-          mkdir cmake-build-clang-tidy
-          cmake .. --preset linux_clang_debug
-
-      - name: "Run clang-tidy"
-        run: ./scripts/check-clang-tidy.sh
-
-      - name: "Verify"
-        run: |
-          if [[ `wc -l < errors.yml` != "0" ]]; then
-              false
-          fi
+#  clang-tidy:
+#    runs-on: ubuntu-latest
+#    container: bicompb/clang-15
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v3
+#
+#      - name: "Configure CMake"
+#        uses: ./.github/workflows/action-cmake-configure
+#        with:
+#          preset: ${{ inputs.preset }}
+#          build_type: ${{ inputs.build_type }}
+#
+#      - name: "Run clang-tidy"
+#        working-directory: cmake-build-${{ inputs.preset }}
+#        run: ../scripts/check-clang-tidy.sh
+#
+#      - name: "Verify"
+#        working-directory: cmake-build-${{ inputs.preset }}
+#        run: |
+#          if [[ `wc -l < errors.yml` != "0" ]]; then
+#              false
+#          fi

@@ -30,19 +30,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: "Make build directory"
-      run: mkdir cmake-build-${{ inputs.preset }}
-      shell: bash
-
-    - name: "Install Conan dependencies"
-      working-directory: cmake-build-${{ inputs.preset }}
-      run: conan install .. --build=missing -s build_type=${{ inputs.build_type }}
-      shell: bash
-
     - name: "Configure CMake"
       working-directory: cmake-build-${{ inputs.preset }}
-      run: cmake .. --preset ${{ inputs.preset }}
-      shell: bash
+      uses: ./.github/workflows/action-cmake-configure
+      with:
+          preset: ${{ inputs.preset }}
+          build_type: ${{ inputs.build_type }}
 
     - name: "Make"
       working-directory: cmake-build-${{ inputs.preset }}

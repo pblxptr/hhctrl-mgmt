@@ -12,9 +12,9 @@
 #        with:
 #          preset: Dupa
 #name: Main
-
+#
 #on: [push, workflow_dispatch]
-
+#
 #jobs:
 #  terffere:
 #    runs-on: ubuntu-latest
@@ -22,9 +22,9 @@
 #      - name: Checkout
 #        uses: actions/checkout@v3
 #      - id: ls
-#        run: ls -la .github/workflows/action-build
+#        run: ls -la .github/workflows/action-cmake-build
 #        shell: bash
-
+#
 #on: [push]
 #jobs:
 #  build-GCC:
@@ -33,29 +33,29 @@
 #      - name: Checkout
 #        uses: actions/checkout@v3
 #      - name: ls
-#        uses: ./.github/workflows/action-build
+#        uses: ./.github/workflows/action-cmake-build
 #        with:
 #          preset: linux_gcc_debug
 #          image: gcc:11
-
-
-on: [push]
-jobs:
-  build-GCC:
-    runs-on: ubuntu-latest
-    container: gcc:11
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v3
-
-      - name: Build Debug
-        uses: ./.github/workflows/action-build
-        with:
-          preset: linux_gcc_debug
-          build_type: Debug
-
-      - name: Build Release
-        uses: ./.github/workflows/action-build
-        with:
-          preset: linux_gcc_release
-
+#
+#
+#on: [push]
+#jobs:
+#  build-GCC:
+#    runs-on: ubuntu-latest
+#    container: gcc:11
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v3
+#
+#      - name: Build Debug
+#        uses: ./.github/workflows/action-cmake-build
+#        with:
+#          preset: linux_gcc_debug
+#          build_type: Debug
+#
+#      - name: Build Release
+#        uses: ./.github/workflows/action-cmake-build
+#        with:
+#          preset: linux_gcc_release
+#
