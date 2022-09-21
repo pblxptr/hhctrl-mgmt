@@ -5,7 +5,7 @@
 #include <memory>
 #include <chrono>
 
-// TODO: Consider changing to base class instead of interface, as all types share some similar methods to return
+// TODO(pp): Consider changing to base class instead of interface, as all types share some similar methods to return
 // e.g. id, owner and so on.
 
 namespace common::scheduler {

@@ -49,11 +49,11 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-    auto ec = boost::system::error_code{};
-    impl_->connect(ec);
+    auto error_code = boost::system::error_code{};
+    impl_->connect(error_code);
 
-    if (ec && not reconnect()) {
-      on_error(ec);
+    if (error_code && not reconnect()) {
+      on_error(error_code);
     }
   }
 
@@ -74,8 +74,8 @@ public:
 
     error_handler_ = std::move(handler);
 
-    impl_->set_error_handler([this](const auto& ec) {
-      on_error(ec);
+    impl_->set_error_handler([this](const auto& error_code) {
+      on_error(error_code);
     });
     impl_->set_close_handler([this]() {
       on_close();
@@ -150,8 +150,8 @@ private:
     }
 
     reconnect_.timer.expires_after(reconnect_.reconnect_delay);
-    reconnect_.timer.async_wait([this](const auto& ec) {
-      if (!ec) {
+    reconnect_.timer.async_wait([this](const auto& error_code) {
+      if (!error_code) {
         common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
         connect();
       }
@@ -170,12 +170,12 @@ private:
     return true;
   }
 
-  void on_error(const boost::system::error_code& ec)
+  void on_error(const boost::system::error_code& error_code)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
+    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
     if (not reconnect()) {
-      error_handler_(EntityError{ EntityError::Code::Undefined, ec.message() });
+      error_handler_(EntityError{ EntityError::Code::Undefined, error_code.message() });
     }
   }
 

@@ -51,8 +51,8 @@ public:
   {
     common::logger::get(common::scheduler::Logger)->debug("Installing task: {}", to_string());
 
-    timer_.async_wait([&](const boost::system::error_code& ec) {
-      if (ec) {
+    timer_.async_wait([&](const boost::system::error_code& error_code) {
+      if (error_code) {
         spdlog::error("Timer error");
         return;
       }

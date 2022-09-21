@@ -138,7 +138,7 @@ public:
     return task_id;
   }
 
-  bool is_task_active(const Task::Id_t& id) const;
+  bool is_task_active(const Task::Id_t&) const;
   std::vector<TaskInfo> get_active_tasks() const;
 
 private:

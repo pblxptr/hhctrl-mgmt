@@ -9,7 +9,7 @@ class FileTaskStore : public TaskStore
 {
 public:
   explicit FileTaskStore(std::string);
-  void add(TaskEntity) override;
+  void add(const TaskEntity&) override;
   bool exist(const TaskEntity::Id_t&) const override;
   std::optional<TaskEntity> find(const TaskEntity::Id_t&) const override;
   void remove(const TaskEntity::Id_t&) override;

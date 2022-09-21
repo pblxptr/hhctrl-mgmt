@@ -26,7 +26,7 @@ public:
     , duration_{ std::forward<TDurationArg>(duration) }
     , handler_{ std::forward<THandlerArg>(handler) }
   {
-    // TODO: Add static_assert to check if duration property is constructible from provided argument.
+    // TODO(pp): Add static_assert to check if duration property is constructible from provided argument.
 
     configure_expiry();
   }
@@ -58,8 +58,8 @@ public:
   {
     common::logger::get(common::scheduler::Logger)->debug("Installing task: {}", to_string());
 
-    timer_.async_wait([&](const boost::system::error_code& ec) {
-      if (ec) {
+    timer_.async_wait([&](const boost::system::error_code& error_code) {
+      if (error_code) {
         spdlog::error("Timer error");
         return;
       }

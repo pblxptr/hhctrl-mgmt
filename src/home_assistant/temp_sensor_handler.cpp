@@ -65,7 +65,7 @@ void TempSensorHandler::setup()
   common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}", __FUNCTION__);
 
   sensor_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config(); });
-  sensor_.set_error_handler([this](const auto& ec) { on_error(ec); });
+  sensor_.set_error_handler([this](const auto& error_code) { on_error(error_code); });
 }
 
 boost::asio::awaitable<void> TempSensorHandler::async_set_config()
@@ -86,7 +86,7 @@ boost::asio::awaitable<void> TempSensorHandler::async_set_config()
   co_await async_sync_state();
 }
 
-void TempSensorHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)
+void TempSensorHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error) //NOLINT(readability-convert-member-functions-to-static)
 {
   spdlog::error("TempSensorHandler::{}, message: {}", __FUNCTION__, error.message());
 }

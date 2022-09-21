@@ -9,7 +9,7 @@ namespace mgmt::device {
 class SysfsHatch
 {
 public:
-  explicit SysfsHatch(std::string);
+  explicit SysfsHatch(const std::string&);
   // movable
   SysfsHatch(SysfsHatch&&) noexcept = default;
   SysfsHatch& operator=(SysfsHatch&&) noexcept = default;

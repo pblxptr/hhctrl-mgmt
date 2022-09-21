@@ -67,7 +67,7 @@ boost::asio::awaitable<void> HatchHandler::async_sync_state()
     cover_state = mgmt::home_assistant::mqttc::CoverState::Closed;
     break;
   default:
-    spdlog::error("State not handled");// TODO: Error just for the purpose of tests
+    spdlog::error("State not handled");// TODO(pp): Error just for the purpose of tests
     co_return;
   }
 
@@ -79,7 +79,7 @@ void HatchHandler::setup()
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
 
   cover_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config(); });
-  cover_.set_error_handler([this](const auto& ec) { on_error(ec); });
+  cover_.set_error_handler([this](const auto& error_code) { on_error(error_code); });
   cover_.on_command([this](const auto& cmd) {
     handle_command(cmd);
   });
@@ -117,12 +117,12 @@ void HatchHandler::handle_command(const mgmt::home_assistant::mqttc::CoverComman
     hatch.close();
     break;
   case mgmt::home_assistant::mqttc::CoverCommand::Stop:
-    spdlog::error("Command not supported");// TODO: Error just for the purpose of tests
+    spdlog::error("Command not supported");// TODO(pp): Error just for the purpose of tests
     break;
   }
 }
 
-void HatchHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)
+void HatchHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error) //NOLINT(readability-convert-member-functions-to-static)
 {
   spdlog::error("HatchHandler::{}, message: {}", __FUNCTION__, error.message());
 }

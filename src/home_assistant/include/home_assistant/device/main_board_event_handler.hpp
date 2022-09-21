@@ -23,10 +23,6 @@ public:
   boost::asio::awaitable<void> operator()(const DeviceCreated_t& event);
   boost::asio::awaitable<void> operator()(const DeviceRemoved_t& event);
   boost::asio::awaitable<void> operator()(const DeviceStateChanged_t& event);
-
-private:
-  void on_error();
-
 private:
   EntityFactory factory_;
   const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider_;

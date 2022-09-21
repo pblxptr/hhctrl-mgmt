@@ -7,11 +7,9 @@
 #include <utils/static_map.hpp>
 #include <utils/sysfs.hpp>
 
-using namespace common::utils;
 using namespace std::literals;
 
 namespace sysfs = common::utils::sysfs;
-namespace fs = std::filesystem;
 
 namespace {
 struct ChangePositionAttr
@@ -26,7 +24,7 @@ struct StatusAttr
   static constexpr const char* name{ "status" };
 };
 
-constexpr auto StatusMapping = StaticMap<mgmt::device::HatchState, std::string_view, 5>{
+constexpr auto StatusMapping = common::utils::StaticMap<mgmt::device::HatchState, std::string_view, 5>{
   std::pair(mgmt::device::HatchState::Open, "open"sv),
   std::pair(mgmt::device::HatchState::Closed, "closed"sv),
   std::pair(mgmt::device::HatchState::ChangingPosition, "changing_position"sv),
@@ -36,13 +34,9 @@ constexpr auto StatusMapping = StaticMap<mgmt::device::HatchState, std::string_v
 }// namespace
 
 namespace mgmt::device {
-SysfsHatch::SysfsHatch(std::string sysfsdir)
-  : sysfsdir_{ common::utils::sysfs::get_path(sysfsdir) }
-{
-  if (not fs::exists(sysfsdir_)) {
-    common::logger::get(mgmt::device::Logger)->error("Directory {} does not exist.", sysfsdir_.c_str());
-  }
-}
+SysfsHatch::SysfsHatch(const std::string& sysfsdir)
+  : sysfsdir_{ sysfs::get_path(sysfsdir) }
+{}
 
 void SysfsHatch::open() const
 {

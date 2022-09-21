@@ -26,9 +26,6 @@ public:
   boost::asio::awaitable<void> operator()(const DeviceStateChanged_t& event);
 
 private:
-  void on_error();
-
-private:
   const EntityFactory& factory_;
   const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider_;
   std::vector<HatchHandler> hatches_;

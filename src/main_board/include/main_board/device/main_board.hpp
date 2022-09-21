@@ -4,10 +4,10 @@
 #include <variant>
 #include <ranges>
 
-#include "../../../../device/include/device/hardware_identity.hpp"
-#include "../../../../device/include/device/indicator_t.hpp"
-#include "../../../../device/include/device/temp_sensor.hpp"
-#include "../../../../device/include/device/hardware_identity.hpp"
+#include <device/hardware_identity.hpp>
+#include <device/indicator_t.hpp>
+#include <device/temp_sensor.hpp>
+#include <device/hardware_identity.hpp>
 
 namespace mgmt::device {
 class MainBoard

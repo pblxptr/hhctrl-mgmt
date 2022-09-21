@@ -87,7 +87,7 @@ SCENARIO("Handlers should be executed")
     {
       constexpr auto command_value = 100;// it can be any value
 
-      /*  TODO: This seems to be kinda interesting, needs investigation, the same may happen for EventHandler, or it may be a bug of asan dealing with coroutines
+      /*  TODO(pp): This seems to be kinda interesting, needs investigation, the same may happen for EventHandler, or it may be a bug of asan dealing with coroutines
        *  - X: When the async_dispatch takes parameter by UNIVERSAL REF and command is created in place of function call then we've got stack-use-after-scope-error
        *  - V: When the async_dispatch takes parameter by UNIVERSAL REF and command is passed by lvalue ref then everything's fine
        *  - V: When the async_dispatch takes parameter by VALUE and command is created in place of function call then everything's fine

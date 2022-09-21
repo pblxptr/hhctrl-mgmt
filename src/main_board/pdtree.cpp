@@ -17,20 +17,20 @@ boost::json::value pdtree_load(const std::string& file_path)
   }
 
   auto parser = boost::json::stream_parser{};
-  auto ec = boost::json::error_code{};
+  auto error_code = boost::json::error_code{};
 
   do {
     auto buffer = std::array<char, 4096>{};
     file.read(buffer.begin(), buffer.size());
-    parser.write(buffer.data(), file.gcount(), ec);
+    parser.write(buffer.data(), file.gcount(), error_code);
   } while (!file.eof());
 
-  if (ec) {
+  if (error_code) {
     return nullptr;
   }
-  parser.finish(ec);
+  parser.finish(error_code);
 
-  if (ec) {
+  if (error_code) {
     return nullptr;
   }
   return parser.release();

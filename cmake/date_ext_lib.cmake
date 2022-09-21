@@ -16,6 +16,8 @@ set(DATE_DEPENDS "")
 
 ## CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 
+#TODO: Add above flags to use clang when compiling, consider changing to fetchcontent
+
 ExternalProject_Add(date-tz
   GIT_REPOSITORY    "https://github.com/HowardHinnant/date.git"
   GIT_TAG           master

@@ -4,8 +4,6 @@
 #include <device/logger.hpp>
 
 namespace {
-using namespace mgmt::device;
-
 struct RGBbrightnessProxy
 {
   uint8_t red{};
@@ -13,11 +11,11 @@ struct RGBbrightnessProxy
   uint8_t blue{};
 };
 
-constexpr auto IndicatorMapping = common::utils::StaticMap<IndicatorType, RGBbrightnessProxy, 4>{
-  std::pair(IndicatorType::Status, RGBbrightnessProxy{ 0, 255, 0 }),
-  std::pair(IndicatorType::Warning, RGBbrightnessProxy{ 255, 255, 0 }),
-  std::pair(IndicatorType::Maintenance, RGBbrightnessProxy{ 0, 0, 255 }),
-  std::pair(IndicatorType::Fault, RGBbrightnessProxy{ 255, 0, 0 })
+constexpr auto IndicatorMapping = common::utils::StaticMap<mgmt::device::IndicatorType, RGBbrightnessProxy, 4>{
+  std::pair(mgmt::device::IndicatorType::Status, RGBbrightnessProxy{ 0, 255, 0 }),
+  std::pair(mgmt::device::IndicatorType::Warning, RGBbrightnessProxy{ 255, 255, 0 }),
+  std::pair(mgmt::device::IndicatorType::Maintenance, RGBbrightnessProxy{ 0, 0, 255 }),
+  std::pair(mgmt::device::IndicatorType::Fault, RGBbrightnessProxy{ 255, 0, 0 })
 };
 }// namespace
 
@@ -41,9 +39,9 @@ IndicatorState RGBIndicator::state() const
       && proxy_led_brightness.green == brightness.green
       && proxy_led_brightness.blue == brightness.blue) {
     return IndicatorState::On;
-  } else {
-    return IndicatorState::Off;
   }
+
+  return IndicatorState::Off;
 }
 
 void RGBIndicator::set_state(IndicatorState state)

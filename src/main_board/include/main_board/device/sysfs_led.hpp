@@ -7,7 +7,7 @@ namespace mgmt::device {
 class SysfsLed
 {
 public:
-  explicit SysfsLed(std::string);
+  explicit SysfsLed(const std::string&);
   // movable
   SysfsLed(SysfsLed&&) noexcept = default;
   SysfsLed& operator=(SysfsLed&&) noexcept = default;

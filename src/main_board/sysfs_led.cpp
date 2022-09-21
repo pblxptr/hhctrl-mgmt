@@ -12,13 +12,9 @@ struct BrightnessAttr
 }// namespace
 
 namespace mgmt::device {
-SysfsLed::SysfsLed(std::string sysfsdir)
+SysfsLed::SysfsLed(const std::string& sysfsdir)
   : sysfsdir_{ common::utils::sysfs::get_path(sysfsdir) }
-{
-  if (not fs::exists(sysfsdir_)) {
-    common::logger::get(mgmt::device::Logger)->error("Directory {} does not exist.", sysfsdir_.c_str());
-  }
-}
+{}
 
 int SysfsLed::brightness() const
 {

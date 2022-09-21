@@ -10,9 +10,9 @@
 namespace json = boost::json;
 
 namespace mgmt::app {
-static mgmt::app::AppConfig tag_invoke(json::value_to_tag<mgmt::app::AppConfig>, const json::value& jv)
+static mgmt::app::AppConfig tag_invoke(json::value_to_tag<mgmt::app::AppConfig> /* unused */, const json::value& jvalue)
 {
-  const json::object& obj = jv.as_object();
+  const json::object& obj = jvalue.as_object();
   return mgmt::app::AppConfig{
     .dtree_file = json::value_to<std::string>(obj.at("dtree_file")),
     .entity_client_config = json::value_to<mgmt::home_assistant::mqttc::EntityClientConfig>(obj.at("entity_client_config"))

@@ -29,10 +29,10 @@ void PollingService::add_poller(
 
 void PollingService::start_poller(Poller& poller)
 {
-  common::executor::invoke(executor_, [&poller](auto&& e) {
-    auto poll = [&poller, &e]() -> boost::asio::awaitable<void> {
+  common::executor::invoke(executor_, [&poller](auto&& executor) {
+    auto poll = [&poller, &executor]() -> boost::asio::awaitable<void> {
       auto& timer = poller.timer_;
-      timer.emplace(Timer_t{ e });
+      timer.emplace(Timer_t{ executor });
 
       for (;;) {
         auto error_code = boost::system::error_code{};
@@ -48,7 +48,7 @@ void PollingService::start_poller(Poller& poller)
         co_await poller.poll();
       };
     };
-    boost::asio::co_spawn(e, std::move(poll), common::coro::rethrow);
+    boost::asio::co_spawn(executor, std::move(poll), common::coro::rethrow);
   });
 }
 

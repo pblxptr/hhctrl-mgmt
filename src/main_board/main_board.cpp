@@ -15,7 +15,7 @@ MainBoard::MainBoard(std::vector<Indicator_t> indicators)
   set_indicator_state(IndicatorType::Maintenance, IndicatorState::On);
 }
 
-HardwareIdentity MainBoard::hardware_identity() const
+HardwareIdentity MainBoard::hardware_identity() const  //NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
@@ -31,8 +31,8 @@ IndicatorState MainBoard::indicator_state(IndicatorType type) const
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
-  auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
-    return i.type() == type;
+  auto indicator = std::ranges::find_if(indicators_, [type](auto&& xindicator) {
+    return xindicator.type() == type;
   });
 
   if (indicator == indicators_.end()) {
@@ -46,9 +46,9 @@ void MainBoard::set_indicator_state(IndicatorType type, IndicatorState state)
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
-  // TODO: Add concepts to constraint auto&&
-  auto indicator = std::ranges::find_if(indicators_, [type](auto&& i) {
-    return i.type() == type;
+  // TODO(pp): Add concepts to constraint auto&&
+  auto indicator = std::ranges::find_if(indicators_, [type](auto&& xindicator) {
+    return xindicator.type() == type;
   });
 
   if (indicator == indicators_.end()) {
@@ -58,7 +58,7 @@ void MainBoard::set_indicator_state(IndicatorType type, IndicatorState state)
   indicator->set_state(state);
 }
 
-void MainBoard::restart()
+void MainBoard::restart() //NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 }

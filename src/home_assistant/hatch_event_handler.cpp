@@ -23,20 +23,20 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
 
   hatches_.emplace_back(event.device_id, device_identity_provider_, factory_);
 
-  auto& h = hatches_.back();
-  co_await h.async_connect();
+  auto& hatch = hatches_.back();
+  co_await hatch.async_connect();
 }
 
-boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] const DeviceRemoved_t& event)
+boost::asio::awaitable<void> HatchEventHandler::operator()(const DeviceRemoved_t& event)
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}(DeviceRemoved)", __FUNCTION__);
 
   const auto device_id = event.device_id;
-  const auto erased = std::erase_if(hatches_, [device_id](auto& h) {
-    return device_id == h.hardware_id();
+  const auto erased = std::erase_if(hatches_, [device_id](auto& hatch) {
+    return device_id == hatch.hardware_id();
   });
 
-  if (not erased) {
+  if (erased == 0) {
     throw std::runtime_error(fmt::format("Hatch device with id: {} was not found", device_id));
   }
 
@@ -48,8 +48,8 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
 
   const auto device_id = event.device_id;
-  auto hatch = std::ranges::find_if(hatches_, [device_id](auto& h) {
-    return device_id == h.hardware_id();
+  auto hatch = std::ranges::find_if(hatches_, [device_id](auto& hatch) {
+    return device_id == hatch.hardware_id();
   });
 
   if (hatch == hatches_.end()) {
@@ -57,10 +57,5 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
   }
 
   co_await hatch->async_sync_state();
-}
-
-void HatchEventHandler::on_error()
-{
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}", __FUNCTION__);
 }
 }// namespace mgmt::home_assistant::device

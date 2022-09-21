@@ -66,15 +66,15 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-    auto ec = co_await do_async_connect(boost::asio::use_awaitable);
+    auto error_code = co_await do_async_connect(boost::asio::use_awaitable);
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
+    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
-    if (ec && not(co_await reconnect())) {
-      co_await on_error(ec);
+    if (error_code && not(co_await reconnect())) {
+      co_await on_error(error_code);
     }
 
-    co_return ec;
+    co_return error_code;
   }
 
   template<AsyncHandler Handler>
@@ -94,8 +94,8 @@ public:
 
     error_handler_ = std::move(handler);
 
-    impl_->set_error_handler([this](const auto& ec) {
-      boost::asio::co_spawn(impl_->socket()->get_executor(), on_error(ec), common::coro::rethrow);
+    impl_->set_error_handler([this](const auto& error_code) {
+      boost::asio::co_spawn(impl_->socket()->get_executor(), on_error(error_code), common::coro::rethrow);
     });
     impl_->set_close_handler([this]() {
       boost::asio::co_spawn(impl_->socket()->get_executor(), on_close(), common::coro::rethrow);
@@ -108,11 +108,11 @@ public:
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
     // Working
-    auto ec = co_await do_async_publish(topic, std::move(payload));
+    auto error_code = co_await do_async_publish(topic, std::move(payload));
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
+    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
-    co_return ec;
+    co_return error_code;
   }
 
   template<class Iterator>
@@ -175,10 +175,10 @@ private:
       co_return false;
     }
 
-    auto ec = boost::system::error_code{};
+    auto error_code = boost::system::error_code{};
     reconnect_.timer.expires_after(reconnect_.reconnect_delay);
-    co_await reconnect_.timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-    if (!ec) {
+    co_await reconnect_.timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, error_code));
+    if (!error_code) {
       common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
       co_await async_connect();
     }
@@ -198,12 +198,12 @@ private:
     return true;
   }
 
-  boost::asio::awaitable<void> on_error(const boost::system::error_code& ec)
+  boost::asio::awaitable<void> on_error(const boost::system::error_code& error_code)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, ec: {}", __FUNCTION__, ec.message());
+    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
     if (not(co_await reconnect())) {
-      error_handler_(EntityError{ EntityError::Code::Undefined, ec.message() });
+      error_handler_(EntityError{ EntityError::Code::Undefined, error_code.message() });
     }
   }
 
@@ -220,8 +220,8 @@ private:
   auto do_async_connect(ResponseHandler&& handler = {})
   {
     auto initiate = [this]<typename Handler>(Handler&& self) mutable {
-      impl_->async_connect([self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec) {
-        (*self)(std::current_exception(), ec);
+      impl_->async_connect([self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& error_code) {
+        (*self)(std::current_exception(), error_code);
       });
     };
     return boost::asio::async_initiate<
@@ -234,8 +234,8 @@ private:
   auto do_async_publish(const std::string& topic, Payload payload, ResponseHandler&& handler = {})
   {
     auto initiate = [this]<typename Handler>(Handler&& self, auto&&... args) mutable {
-      impl_->async_publish(std::forward<decltype(args)>(args)..., [self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec) {
-        (*self)(std::current_exception(), ec);
+      impl_->async_publish(std::forward<decltype(args)>(args)..., [self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& error_code) {
+        (*self)(std::current_exception(), error_code);
       });
     };
     return boost::asio::async_initiate<
@@ -248,8 +248,8 @@ private:
   auto do_async_subscribe(const Container& subscriptions, ResponseHandler&& handler = {})
   {
     auto initiate = [this]<typename Handler>(Handler&& self, auto&&... args) mutable {
-      impl_->async_subscribe(std::forward<decltype(args)>(args)..., [self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& ec) {
-        (*self)(std::current_exception(), ec);
+      impl_->async_subscribe(std::forward<decltype(args)>(args)..., [self = std::make_shared<Handler>(std::forward<Handler>(self))](const MQTT_NS::error_code& error_code) {
+        (*self)(std::current_exception(), error_code);
       });
     };
     return boost::asio::async_initiate<

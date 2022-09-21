@@ -13,13 +13,13 @@ class DeviceTree
 {
   struct Node
   {
-    DeviceId_t parent_{};
-    DeviceId_t child_{};
+    DeviceId_t parent_device_id_{};
+    DeviceId_t device_id_{};
     OnNodeRemoved_t func_{};
 
     Node(DeviceId_t p, DeviceId_t c, OnNodeRemoved_t f)
-      : parent_{ std::move(p) }
-      , child_{ std::move(c) }
+      : parent_device_id_{ std::move(p) }
+      , device_id_{ std::move(c) }
       , func_{ std::move(f) }
     {}
     Node(Node&&) noexcept = default;
@@ -38,28 +38,28 @@ class DeviceTree
 
 public:
   /**
-   * @brief Adds child to parent
+   * @brief Adds device_id to parent_device_id
    *
-   * @param parent
-   * @param child
-   * @param on_parent_removed
+   * @param parent_device_id
+   * @param device_id
+   * @param on_parent_device_id_removed
    * @return true
    * @return false
    */
-  bool add_child(const DeviceId_t& parent, const DeviceId_t& child, OnNodeRemoved_t on_parent_removed = OnNodeRemoved_t{});
+  bool add_child(const DeviceId_t& parent_device_id, const DeviceId_t& device_id, OnNodeRemoved_t on_parent_removed = OnNodeRemoved_t{});
 
   /**
-   * @brief Removes child from parent
+   * @brief Removes device_id from parent_device_id
    *
-   * @param parent
-   * @param child
+   * @param parent_device_id
+   * @param device_id
    * @return true
    * @return false
    */
-  bool remove_child(const DeviceId_t& parent, const DeviceId_t& child);
+  bool remove_child(const DeviceId_t& parent_device_id, const DeviceId_t& device_id);
 
   /**
-   * @brief Removes parent if provided id matches to parent parent
+   * @brief Removes parent_device_id if provided id matches to parent_device_id
    *
    * @return true
    * @return false
@@ -67,14 +67,14 @@ public:
   bool remove(const DeviceId_t&);
 
   /**
-   * @brief Returns parent parent id for a given parent
+   * @brief Returns parent_device_id id for a given id
    *
    * @return std::optional<DeviceId_t>
    */
   std::optional<DeviceId_t> parent(const DeviceId_t&) const;
 
   /**
-   * @brief Returns all subnones for a given parent
+   * @brief Returns all subnones for a given id
    *
    * @return std::vector<DeviceId_t>
    */

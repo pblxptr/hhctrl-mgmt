@@ -147,11 +147,11 @@ void MainBoardHandler::setup()
      * https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
      */
     indicator.set_ack_handler([this, type = type]() -> boost::asio::awaitable<void> { co_await async_set_config_indicator(type); });
-    indicator.set_error_handler([this](const auto& ec) { on_error(ec); });
+    indicator.set_error_handler([this](const auto& error_code) { on_error(error_code); });
   }
   // Setup restart button
   restart_button_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config_restart_button(); });
-  restart_button_.set_error_handler([this](const auto& ec) { on_error(ec); });
+  restart_button_.set_error_handler([this](const auto& error_code) { on_error(error_code); });
   restart_button_.on_command([this](auto&&) {
     auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
     board.restart();
@@ -191,7 +191,7 @@ boost::asio::awaitable<void> MainBoardHandler::async_set_config_restart_button()
   co_await restart_button_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
 }
 
-void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& /* error */)
+void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& /* error */) //NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
 }
