@@ -15,7 +15,7 @@ MainBoard::MainBoard(std::vector<Indicator_t> indicators)
   set_indicator_state(IndicatorType::Maintenance, IndicatorState::On);
 }
 
-HardwareIdentity MainBoard::hardware_identity() const  //NOLINT(readability-convert-member-functions-to-static)
+HardwareIdentity MainBoard::hardware_identity() const// NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 
@@ -58,7 +58,7 @@ void MainBoard::set_indicator_state(IndicatorType type, IndicatorState state)
   indicator->set_state(state);
 }
 
-void MainBoard::restart() //NOLINT(readability-convert-member-functions-to-static)
+void MainBoard::restart()// NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
 }

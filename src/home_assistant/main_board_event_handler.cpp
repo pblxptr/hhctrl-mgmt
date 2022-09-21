@@ -6,15 +6,15 @@
 #include <home_assistant/logger.hpp>
 
 namespace {
-  using mgmt::home_assistant::device::MainBoardHandler;
+using mgmt::home_assistant::device::MainBoardHandler;
 
- void assert_has_value(const std::optional<MainBoardHandler>& main_board)
-  {
-    if (not main_board.has_value()) {
-      throw std::runtime_error("std::optional<MainBoardHandler> does not have a value");
-    }
+void assert_has_value(const std::optional<MainBoardHandler>& main_board)
+{
+  if (not main_board.has_value()) {
+    throw std::runtime_error("std::optional<MainBoardHandler> does not have a value");
   }
-} // namespace
+}
+}// namespace
 
 namespace mgmt::home_assistant::device {
 MainBoardEventHandler::MainBoardEventHandler(
@@ -51,6 +51,6 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceState
   spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
   assert_has_value(main_board_);
 
-  co_await main_board_->async_sync_state(); //NOLINT(bugprone-unchecked-optional-access)
+  co_await main_board_->async_sync_state();// NOLINT(bugprone-unchecked-optional-access)
 }
 }// namespace mgmt::home_assistant::device

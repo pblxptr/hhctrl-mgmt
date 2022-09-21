@@ -9,4 +9,3 @@ struct TestParams
   size_t number_of_clients;
   size_t number_of_messages_per_client;
 };
-

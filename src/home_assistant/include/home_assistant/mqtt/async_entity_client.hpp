@@ -82,9 +82,9 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-//    impl_->set_connack_handler([this, handler = std::move(handler)](bool sp, auto rc) mutable {
-//      return on_ack(sp, rc, std::move(handler));
-//    });
+    //    impl_->set_connack_handler([this, handler = std::move(handler)](bool sp, auto rc) mutable {
+    //      return on_ack(sp, rc, std::move(handler));
+    //    });
   }
 
   template<class Handler>

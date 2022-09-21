@@ -122,7 +122,7 @@ void HatchHandler::handle_command(const mgmt::home_assistant::mqttc::CoverComman
   }
 }
 
-void HatchHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error) //NOLINT(readability-convert-member-functions-to-static)
+void HatchHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)// NOLINT(readability-convert-member-functions-to-static)
 {
   spdlog::error("HatchHandler::{}, message: {}", __FUNCTION__, error.message());
 }

@@ -41,9 +41,7 @@ public:
 
   void set_expiry(Timepoint_t tp) override
   {
-    common::logger::get(common::scheduler::Logger)->debug(fmt::format("Updating task expiry. From: {}, to: {}",
-      common::utils::datetime::to_string(timer_.expiry()),
-      common::utils::datetime::to_string(tp)));
+    common::logger::get(common::scheduler::Logger)->debug(fmt::format("Updating task expiry. From: {}, to: {}", common::utils::datetime::to_string(timer_.expiry()), common::utils::datetime::to_string(tp)));
     timer_.expires_at(std::move(tp));
   }
 

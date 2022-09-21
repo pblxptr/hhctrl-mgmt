@@ -191,7 +191,7 @@ boost::asio::awaitable<void> MainBoardHandler::async_set_config_restart_button()
   co_await restart_button_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
 }
 
-void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& /* error */) //NOLINT(readability-convert-member-functions-to-static)
+void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& /* error */)// NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
 }

@@ -12,9 +12,9 @@ namespace common::utils::sysfs {
 
 inline std::string get_path(const std::string& path)
 {
-   if (!fs::exists(path)) {
-     throw std::runtime_error(fmt::format("Sysfs directory: {} does not exist", path));
-   }
+  if (!fs::exists(path)) {
+    throw std::runtime_error(fmt::format("Sysfs directory: {} does not exist", path));
+  }
 
   return path;
 }

@@ -19,10 +19,9 @@ class AsyncClientWrapper : public ClientWrapper
 public:
   AsyncClientWrapper(
     mgmt::home_assistant::mqttc::AsyncMqttEntityClient<Impl> client,
-    TestContext& context
-  )
-    : sut_{std::move(client)}
-    , context_{context}
+    TestContext& context)
+    : sut_{ std::move(client) }
+    , context_{ context }
   {
     spdlog::debug("Created AsyncClientWrapper  {}", sut_.client_id());
   }

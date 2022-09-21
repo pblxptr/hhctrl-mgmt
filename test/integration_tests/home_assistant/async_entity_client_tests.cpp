@@ -19,8 +19,8 @@ constexpr auto NumberOfMessagesPerClientOptionName = "--tp_messages_per_client";
 
 constexpr auto DefaultMqttServerAddress = "localhost";
 constexpr auto DefaultMqttServerPort = 8123;
-constexpr auto DefaultNumberOfClients = size_t{10};
-constexpr auto DefaultNumberOfMessagesPerClient = size_t{100};
+constexpr auto DefaultNumberOfClients = size_t{ 10 };
+constexpr auto DefaultNumberOfMessagesPerClient = size_t{ 100 };
 
 auto get_config()
 {
@@ -32,20 +32,20 @@ auto get_config()
 
   return TestParams{
     .server_address = server_address
-      ? *server_address
-      : DefaultMqttServerAddress,
+                        ? *server_address
+                        : DefaultMqttServerAddress,
     .server_port = server_port
-      ? std::stoi(*server_port)
-      : DefaultMqttServerPort,
+                     ? std::stoi(*server_port)
+                     : DefaultMqttServerPort,
     .number_of_clients = number_of_clients
-      ? std::stoi(*number_of_clients)
-      : DefaultNumberOfClients,
+                           ? std::stoi(*number_of_clients)
+                           : DefaultNumberOfClients,
     .number_of_messages_per_client = number_of_messages_per_client
-      ? std::stoi(*number_of_messages_per_client)
-      : DefaultNumberOfMessagesPerClient
+                                       ? std::stoi(*number_of_messages_per_client)
+                                       : DefaultNumberOfMessagesPerClient
   };
 }
-}
+}// namespace
 
 void test_spec_setup()
 {
@@ -53,26 +53,22 @@ void test_spec_setup()
   config.add_option(TestOption{
     .name = MqttServerAddressOptionName,
     .hint = "mqtt_server",
-    .description = "MQTT Server Address, eg. 192.168.0.1, or domain dame"
-  });
+    .description = "MQTT Server Address, eg. 192.168.0.1, or domain dame" });
 
   config.add_option(TestOption{
     .name = MqttServerPortOptionName,
     .hint = "mqtt server port",
-    .description = "MQTT Server port, eg. 8123"
-  });
+    .description = "MQTT Server port, eg. 8123" });
 
   config.add_option(TestOption{
     .name = NumberOfClientsOptionName,
     .hint = "number of clients",
-    .description = "Number of Async clients that will be tested"
-  });
+    .description = "Number of Async clients that will be tested" });
 
   config.add_option(TestOption{
     .name = NumberOfMessagesPerClientOptionName,
     .hint = "number of messages",
-    .description = "Number of messages that every client will send"
-  });
+    .description = "Number of messages that every client will send" });
 }
 
 SCENARIO("Async clients can send and receive messages")
@@ -86,7 +82,7 @@ SCENARIO("Async clients can send and receive messages")
   spdlog::debug("Number of messages per client: {}", config.number_of_messages_per_client);
 
   auto ioc = boost::asio::io_context{};
-  auto context = TestContext{ioc, std::move(config)};
+  auto context = TestContext{ ioc, std::move(config) };
 
   context.run();
 }

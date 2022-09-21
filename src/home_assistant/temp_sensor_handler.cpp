@@ -86,7 +86,7 @@ boost::asio::awaitable<void> TempSensorHandler::async_set_config()
   co_await async_sync_state();
 }
 
-void TempSensorHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error) //NOLINT(readability-convert-member-functions-to-static)
+void TempSensorHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)// NOLINT(readability-convert-member-functions-to-static)
 {
   spdlog::error("TempSensorHandler::{}, message: {}", __FUNCTION__, error.message());
 }

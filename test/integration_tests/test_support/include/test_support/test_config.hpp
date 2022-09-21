@@ -21,11 +21,13 @@ struct TestOption
 class TestConfig
 {
   TestConfig() = default;
+
 public:
   TestConfig(const TestConfig&) = delete;
   TestConfig& operator=(const TestConfig&) = delete;
   TestConfig(TestConfig&&) = delete;
   TestConfig& operator=(TestConfig&&) = delete;
+
 public:
   static auto& get()
   {
@@ -37,8 +39,8 @@ public:
   void add_option(const TestOption& option)
   {
     if (std::ranges::count_if(options_, [&option](auto&& opt) {
-      return option.name == opt.name;
-    })) {
+          return option.name == opt.name;
+        })) {
       throw std::runtime_error(fmt::format("Option: {} already exists", option.name));
     }
 

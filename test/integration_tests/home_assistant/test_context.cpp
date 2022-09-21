@@ -18,14 +18,14 @@ auto build_client_id(std::size_t client_number)
 {
   return std::string{ "client-" } + std::to_string(client_number);
 }
-}
+}// namespace
 
 TestContext::TestContext(boost::asio::io_context& ioc, TestParams params)
-  : ioc_{ioc}
-  , params_{std::move(params)}
+  : ioc_{ ioc }
+  , params_{ std::move(params) }
 {}
 
-//Done on purpose, explanation in header
+// Done on purpose, explanation in header
 TestContext::~TestContext()
 {}
 
@@ -95,7 +95,7 @@ void TestContext::run()
   for (std::size_t i = 0; i < params_.number_of_clients; i++) {
     auto client_id = build_client_id(i);
 
-    clients_.push_back(std::unique_ptr<ClientWrapper>{new AsyncClientWrapper{factory.create_async_client(client_id), *this}});
+    clients_.push_back(std::unique_ptr<ClientWrapper>{ new AsyncClientWrapper{ factory.create_async_client(client_id), *this } });
   }
 
   boost::asio::co_spawn(
