@@ -43,7 +43,7 @@ on: [push]
 jobs:
   build-GCC:
     runs-on: ubuntu-latest
-    container: gcc:11-root
+    container: bicompb/gcc:11-root
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
@@ -66,7 +66,7 @@ jobs:
 
   buildClang:
     runs-on: ubuntu-latest
-    container: clang:15-root
+    container: bicompb/clang:15-root
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
