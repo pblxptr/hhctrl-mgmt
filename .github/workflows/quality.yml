@@ -23,8 +23,8 @@ jobs:
       - name: "Test"
         run: |
           ls -la ~/
+          ls -la /github/home
           ls -la /root
-          ls -la /github/home/.conan
           find / --name target-default
 
       - name: "Checkout"
