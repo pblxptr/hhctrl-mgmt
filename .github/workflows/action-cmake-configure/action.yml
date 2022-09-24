@@ -18,7 +18,7 @@ runs:
 
     - name: "Install Conan dependencies"
       working-directory: ${{ env.build_dir }}
-      run: conan install .. --build=missing -pr:h=target-default -s build_type=${{ inputs.build_type }}
+      run: conan install .. --build=missing -pr:h=/root/.conan/profiles/target-default -s build_type=${{ inputs.build_type }}
       shell: bash
 
     - name: "Configure CMake"
