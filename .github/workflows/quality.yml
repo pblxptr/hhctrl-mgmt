@@ -20,6 +20,11 @@ jobs:
     env:
       build_dir: cmake-build-clang-tidy
     steps:
+      - name: "Test"
+        run: |
+          ls -la /root
+          ls -la /home/.conan
+
       - name: "Checkout"
         uses: actions/checkout@v3
 
