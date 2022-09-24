@@ -35,10 +35,14 @@ public:
     : executor_{ std::ref(executor) }
   {}
 
-  AsyncEventBus(const AsyncEventBus&) = delete;
+  // movable
   AsyncEventBus(AsyncEventBus&&) = default;
-  AsyncEventBus& operator=(const AsyncEventBus&) = delete;
   AsyncEventBus& operator=(AsyncEventBus&&) = default;
+  // non-copyable
+  AsyncEventBus(const AsyncEventBus&) = delete;
+  AsyncEventBus& operator=(const AsyncEventBus&) = delete;
+
+  ~AsyncEventBus() = default;
 
   /*TODO: Once the event is going to be dispatched, there will created separate coroutine for every subscriber.
   Maybe it would be better to call all subscribers for the particular event in single coroutine?
@@ -54,7 +58,7 @@ public:
   */
   template<Event E, class Handler>
   requires AsyncEventHandler<Handler, E> && Event<E>
-  auto subscribe(Handler&& handler)// TODO: Add check that verifies that object passsed by value is copyable
+  auto subscribe(Handler&& handler)// TODO(pp): Add check that verifies that object passed by value is copyable
   {
     using Event_t = std::decay_t<E>;
 
@@ -76,9 +80,9 @@ public:
           // Without mutable, handler is taken by const Handler& thus it's required that the function call operator() needs to have const in signature
           // what is not always applicable. Possible enhancement???
           auto event_handler_wrapper = [handler_as_tuple = std::move(handler_as_tuple)](Event_t event) mutable -> boost::asio::awaitable<void> {// Take event by copy
-            common::logger::get(common::event::Logger)->debug("AsyncEventBus::{}, before dispatch handler id: {}", __FUNCTION__, event.event_id());
+            common::logger::get(common::event::Logger)->debug("AsyncEventBus, before dispatch handler id: {}", event.event_id());
             co_await std::invoke(std::get<0>(handler_as_tuple), event);
-            common::logger::get(common::event::Logger)->debug("AsyncEventBus::{}, after dispatch handler id: {}", __FUNCTION__, event.event_id());
+            common::logger::get(common::event::Logger)->debug("AsyncEventBus, after dispatch handler id: {}", event.event_id());
           };
 
           boost::asio::co_spawn(executor.get(), event_handler_wrapper(event), common::coro::rethrow);

@@ -12,8 +12,8 @@ template<class Response, class Func, typename ResponseHandler = boost::asio::use
 auto async_call(Func&& func, ResponseHandler&& handler = {})
 {
   auto initiate = [func = std::forward<decltype(func)>(func)]<typename Handler>(Handler&& self) mutable {
-    func([self = std::make_shared<Handler>(std::forward<Handler>(self))](const Response& r) {
-      (*self)(r);
+    func([self = std::make_shared<Handler>(std::forward<Handler>(self))](const Response& response) {
+      (*self)(response);
     });
   };
   return boost::asio::async_initiate<
@@ -28,18 +28,18 @@ auto awaitable_call(Func&& func, CompletitionHandler&& handler = {})
   using Signature_t = void(std::exception_ptr, R);
 
   auto initiate = [func = std::forward<Func>(func)]<class Handler>(Handler&& self) mutable {
-    std::invoke(func, [self = std::make_shared<Handler>(std::forward<Handler>(self))](auto&& r, auto&&... args) {
-      (*self)(std::current_exception(), std::forward<decltype(r)>(r), std::forward<decltype(args)>(args)...);
+    std::invoke(func, [self = std::make_shared<Handler>(std::forward<Handler>(self))](auto&& result, auto&&... args) {
+      (*self)(std::current_exception(), std::forward<decltype(result)>(result), std::forward<decltype(args)>(args)...);
     });
   };
   return boost::asio::async_initiate<CompletitionHandler, Signature_t>(initiate, handler);
 }
 
 template<class Func, class O, class... Args>
-auto make_awaitable_for(Func&& func, O&& o, Args&&... args)
+auto make_awaitable_for(Func&& func, O&& obj, Args&&... args)
 {
   return std::bind(std::forward<Func>(func),
-    std::forward<O>(o),
+    std::forward<O>(obj),
     std::forward<Args>(args)...,
     std::placeholders::_1);
 }

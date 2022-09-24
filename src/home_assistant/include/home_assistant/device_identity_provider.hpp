@@ -48,13 +48,12 @@ private:
 
     if (hw_identity_.contains(device_id)) {
       return do_get_hardware_identity(device_id);
-    } else {
-      const auto parent_id = dtree_.parent(device_id);
-      if (not parent_id) {
-        throw std::runtime_error("Cannot get DeviceInfo - parent does not exist");
-      }
-      return do_get_hardware_identity(*parent_id);
     }
+    const auto parent_id = dtree_.parent(device_id);
+    if (not parent_id) {
+      throw std::runtime_error("Cannot get DeviceInfo - parent does not exist");
+    }
+    return do_get_hardware_identity(*parent_id);
   }
 
 private:

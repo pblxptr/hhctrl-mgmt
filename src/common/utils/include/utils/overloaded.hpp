@@ -2,7 +2,7 @@
 
 namespace common::utils {
 template<class... Ts>
-struct overloaded : Ts...
+struct Overloaded : Ts...
 {
   using Ts::operator()...;
 };

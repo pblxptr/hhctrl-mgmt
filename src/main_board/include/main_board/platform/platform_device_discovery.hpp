@@ -29,17 +29,17 @@ public:
     for (const auto& entry : pdtree_content.as_array()) {
       const auto& descriptor = entry.as_object();
       const auto compatible = pdtree_to_string(descriptor.at("compatible"));
-      auto provider = std::ranges::find_if(providers_, [&compatible](auto&& l) {
-        auto call = [](auto&& l) { return l.compatible(); };
+      auto provider = std::ranges::find_if(providers_, [&compatible](auto&& loader) {
+        auto call = [](auto&& loader) { return loader.compatible(); };
 
-        return std::visit(call, l) == compatible;
+        return std::visit(call, loader) == compatible;
       });
 
       if (provider == providers_.end()) {
         throw std::runtime_error(fmt::format("Cannot find loader for device with compatible: {}", compatible));
       }
 
-      std::visit([&builder, &descriptor](auto&& p) { return p.load(builder, descriptor); }, *provider);
+      std::visit([&builder, &descriptor](auto&& provider) { return provider.load(builder, descriptor); }, *provider);
     }
   }
 

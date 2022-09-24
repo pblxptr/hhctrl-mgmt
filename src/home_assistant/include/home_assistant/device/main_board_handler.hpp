@@ -18,10 +18,14 @@ public:
     const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
     const mgmt::home_assistant::EntityFactory& factory);
 
-  MainBoardHandler(const MainBoardHandler&) = delete;
-  MainBoardHandler& operator=(const MainBoardHandler&) = delete;
+  // movable
   MainBoardHandler(MainBoardHandler&& rhs) noexcept;
   MainBoardHandler& operator=(MainBoardHandler&& rhs) noexcept;
+  // non-copyable
+  MainBoardHandler(const MainBoardHandler&) = delete;
+  MainBoardHandler& operator=(const MainBoardHandler&) = delete;
+
+  ~MainBoardHandler() = default;
 
   mgmt::device::DeviceId_t hardware_id() const;
   boost::asio::awaitable<void> async_connect();
@@ -29,7 +33,7 @@ public:
 
 private:
   void setup();
-  boost::asio::awaitable<void> async_set_config_indicator(const mgmt::device::IndicatorType&);
+  boost::asio::awaitable<void> async_set_config_indicator(const mgmt::device::IndicatorType& type);
   boost::asio::awaitable<void> async_set_config_restart_button();
   void on_error(const mgmt::home_assistant::mqttc::EntityError& error);
 

@@ -5,19 +5,19 @@
 
 namespace common::scheduler {
 template<class TDuration, class THandler>
-class GenericRepeatedTask : public Task
+class GenericRepeatedTask : public ITask
 {
 public:
   template<class TDurationArg, class THandlerArg>
   GenericRepeatedTask(
-    boost::uuids::uuid id,
+    boost::uuids::uuid task_id,
     std::string owner,
-    boost::asio::io_context& io,
+    boost::asio::io_context& ioc,
     TDurationArg&& interval,
     THandlerArg&& handler)
-    : id_{ std::move(id) }
+    : id_{ std::move(task_id) }
     , owner_{ std::move(owner) }
-    , timer_{ io }
+    , timer_{ ioc }
     , duration_{ std::forward<TDurationArg>(interval) }
     , handler_{ std::forward<THandlerArg>(handler) }
   {
@@ -39,10 +39,10 @@ public:
     return timer_.expiry();
   }
 
-  void set_expiry(Timepoint_t tp) override
+  void set_expiry(Timepoint_t timepoint) override
   {
-    common::logger::get(common::scheduler::Logger)->debug(fmt::format("Updating task expiry. From: {}, to: {}", common::utils::datetime::to_string(timer_.expiry()), common::utils::datetime::to_string(tp)));
-    timer_.expires_at(std::move(tp));
+    common::logger::get(common::scheduler::Logger)->debug(fmt::format("Updating task expiry. From: {}, to: {}", common::utils::datetime::to_string(timer_.expiry()), common::utils::datetime::to_string(timepoint)));
+    timer_.expires_at(std::move(timepoint));
   }
 
   void activate() override

@@ -23,6 +23,9 @@ include(cmake/range-v3.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(src)
 
+file(GLOB_RECURSE source_list "*.hpp")
+add_library(headers INTERFACE ${source_list})
+
 if (ENABLE_TESTING)
   enable_testing()
   include(cmake/catch2_ext_lib.cmake)

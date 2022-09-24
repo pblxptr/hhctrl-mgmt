@@ -7,7 +7,7 @@ namespace {
 namespace sysfs = common::utils::sysfs;
 struct BrightnessAttr
 {
-  static constexpr const char* name{ "brightness" };
+  static constexpr const char* Name{ "brightness" };
 };
 }// namespace
 
@@ -20,7 +20,7 @@ int SysfsLed::brightness() const
 {
   common::logger::get(mgmt::device::Logger)->debug("SysfsLed::{}", __FUNCTION__);
 
-  const auto path = sysfsdir_ / BrightnessAttr::name;
+  const auto path = sysfsdir_ / BrightnessAttr::Name;
   return std::stoi(sysfs::read_attr(path));
 }
 
@@ -28,7 +28,7 @@ void SysfsLed::set_brightness(int value)
 {
   common::logger::get(mgmt::device::Logger)->debug("SysfsLed::{}", __FUNCTION__);
 
-  const auto path = sysfsdir_ / BrightnessAttr::name;
+  const auto path = sysfsdir_ / BrightnessAttr::Name;
   sysfs::write_attr(path, static_cast<int>(value));
 }
 

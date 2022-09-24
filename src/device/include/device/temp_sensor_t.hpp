@@ -21,14 +21,18 @@ public:
     : temp_sensor_{ std::move(temp_sensor) }
   {}
 
-  TempSensorProxy(const TempSensorProxy&) = delete;
-  TempSensorProxy& operator=(const TempSensorProxy&) = delete;
+  // movable
   TempSensorProxy(TempSensorProxy&&) noexcept = default;
   TempSensorProxy& operator=(TempSensorProxy&&) noexcept = default;
+  // non-copyable
+  TempSensorProxy(const TempSensorProxy&) = delete;
+  TempSensorProxy& operator=(const TempSensorProxy&) = delete;
+
+  ~TempSensorProxy() = default;
 
   auto value() const
   {
-    return std::visit([](auto&& v) { return v.value(); }, temp_sensor_);
+    return std::visit([](auto&& sensor) { return sensor.value(); }, temp_sensor_);
   }
 
 private:

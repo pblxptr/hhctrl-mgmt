@@ -14,24 +14,27 @@ public:
   explicit IndicatorProxy(IndicatorVariant_t indicator)
     : indicator_{ std::move(indicator) }
   {}
-
-  IndicatorProxy(const IndicatorProxy&) = delete;
-  IndicatorProxy& operator=(const IndicatorProxy&) = delete;
+  // movable
   IndicatorProxy(IndicatorProxy&&) noexcept = default;
   IndicatorProxy& operator=(IndicatorProxy&&) noexcept = default;
+  // non-copyable
+  IndicatorProxy(const IndicatorProxy&) = delete;
+  IndicatorProxy& operator=(const IndicatorProxy&) = delete;
+
+  ~IndicatorProxy() = default;
 
   IndicatorType type() const
   {
-    return std::visit([](auto&& v) { return v.type(); }, indicator_);
+    return std::visit([](auto&& indicator) { return indicator.type(); }, indicator_);
   }
 
   IndicatorState state() const
   {
-    return std::visit([](auto&& v) { return v.state(); }, indicator_);
+    return std::visit([](auto&& indicator) { return indicator.state(); }, indicator_);
   }
   void set_state(IndicatorState state)
   {
-    std::visit([state](auto&& v) { v.set_state(state); }, indicator_);
+    std::visit([state](auto&& indicator) { indicator.set_state(state); }, indicator_);
   }
 
 private:

@@ -39,23 +39,27 @@
 #          image: gcc:11
 #
 #
-#on: [push]
-#jobs:
-#  build-GCC:
-#    runs-on: ubuntu-latest
-#    container: gcc:11
-#    steps:
-#      - name: "Checkout"
-#        uses: actions/checkout@v3
-#
-#      - name: Build Debug
-#        uses: ./.github/workflows/action-cmake-build
-#        with:
-#          preset: linux_gcc_debug
-#          build_type: Debug
-#
-#      - name: Build Release
-#        uses: ./.github/workflows/action-cmake-build
-#        with:
-#          preset: linux_gcc_release
-#
+on: [push]
+jobs:
+  build-GCC:
+    runs-on: ubuntu-latest
+    container: gcc:11
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: Build Debug
+        env:
+          build_dir: cmake-build-linux_gcc_debug
+        uses: ./.github/workflows/action-cmake-build
+        with:
+          preset: linux_gcc_debug
+          build_type: Debug
+
+      - name: Build Release
+        env:
+          build_dir: cmake-build-linux_gcc_release
+        uses: ./.github/workflows/action-cmake-build
+        with:
+          preset: linux_gcc_release
+

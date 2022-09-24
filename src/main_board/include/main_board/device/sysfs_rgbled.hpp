@@ -8,12 +8,14 @@ class SysfsRGBLed
 {
 public:
   SysfsRGBLed(SysfsLed red, SysfsLed green, SysfsLed blue);
-
+  // movable
   SysfsRGBLed(const SysfsRGBLed&) = delete;
   SysfsRGBLed& operator=(const SysfsRGBLed&) = delete;
-
+  // non-copyable
   SysfsRGBLed(SysfsRGBLed&&) noexcept = default;
   SysfsRGBLed& operator=(SysfsRGBLed&&) noexcept = default;
+
+  ~SysfsRGBLed() = default;
 
   RGBLedValue brightness() const;
   void set_brightness(const RGBLedValue& value);

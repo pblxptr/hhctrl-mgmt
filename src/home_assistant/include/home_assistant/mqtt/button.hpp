@@ -22,36 +22,40 @@ struct ButtonConfig
   static constexpr inline auto PayloadPressValue = "press";
 };
 
-using ButtonCommandHandler_t = std::function<void(std::string_view)>;
+using ButtonCommandHandler_t = std::function<void()>;
 
 template<class EntityClient>
 class Button : public Entity<EntityClient>
 {
   using Base_t = Entity<EntityClient>;
-  using Base_t::unique_id_;
-  using Base_t::client_;
   using Base_t::topic;
   using Base_t::async_set_availability;
-
+  using Base_t::async_publish;
+  using Base_t::async_subscribe;
 public:
+  using Base_t::unique_id;
+
   Button() = delete;
-  Button(std::string uid, EntityClient client)// TODO: Consider passing EntityClient by rvalue ref
+  Button(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
     : Base_t(std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}, unique_id: {}", __FUNCTION__, unique_id_);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
-
-  Button(const Button&) = delete;
-  Button& operator=(const Button&) = delete;
+  // movable
   Button(Button&& rhs) noexcept = default;
   Button& operator=(Button&&) noexcept = default;
+  // non-copyable
+  Button(const Button&) = delete;
+  Button& operator=(const Button&) = delete;
+
+  ~Button() = default;
 
   void on_command(ButtonCommandHandler_t handler)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("ButtonConfig::{}", __FUNCTION__);
 
-    subs_[topics_.at(ButtonConfig::CommandTopicKey)] = [handler = std::move(handler)](auto&& content) {
-      handler(content);
+    subs_[topics_.at(ButtonConfig::CommandTopicKey)] = [handler = std::move(handler)](auto&& /* content */) {
+      handler();
     };
   }
 
@@ -61,25 +65,25 @@ public:
 
     config.set_override(ButtonConfig::CommandTopicKey, topics_.at(ButtonConfig::CommandTopicKey));
     config.set_override(ButtonConfig::PayloadPressKey, ButtonConfig::PayloadPressValue);
-    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    co_await client_.async_subscribe(subs_.begin(), subs_.end());
-    co_await client_.async_publish(fmt::format("homeassistant/button/{}/config", unique_id_), config.parse());
+    co_await async_subscribe(subs_.begin(), subs_.end());
+    co_await async_publish(fmt::format("homeassistant/button/{}/config", unique_id()), config.parse());
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}", __FUNCTION__);
 
-    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
     std::pair{ ButtonConfig::CommandTopicKey, topic(ButtonConfig::TopicEntityName, ButtonConfig::CommandTopicValue) },
-    std::pair{ GenericEntityConfig::availabilityTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
   std::unordered_map<std::string, PublishHandler_t> subs_{

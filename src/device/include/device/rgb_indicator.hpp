@@ -9,10 +9,10 @@ namespace mgmt::device {
 class RGBIndicator
 {
 public:
-  RGBIndicator(IndicatorType, std::shared_ptr<RGBLed_t>);
+  RGBIndicator(IndicatorType type, std::shared_ptr<RGBLed_t> rgbled);
   IndicatorType type() const;
   IndicatorState state() const;
-  void set_state(IndicatorState);
+  void set_state(IndicatorState state);
 
 private:
   IndicatorType type_;

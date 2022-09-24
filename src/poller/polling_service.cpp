@@ -31,7 +31,7 @@ void PollingService::start_poller(Poller& poller)
 {
   common::executor::invoke(executor_, [&poller](auto&& executor) {
     auto poll = [&poller, &executor]() -> boost::asio::awaitable<void> {
-      auto& timer = poller.timer_;
+      auto& timer = poller.timer;
       timer.emplace(Timer_t{ executor });
 
       for (;;) {

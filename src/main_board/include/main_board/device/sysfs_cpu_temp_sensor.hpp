@@ -6,7 +6,7 @@ namespace mgmt::device {
 class SysfsCPUTempSensor
 {
 public:
-  explicit SysfsCPUTempSensor(const std::string&);
+  explicit SysfsCPUTempSensor(const std::string& sysfsdir);
   float value() const;
 
 private:

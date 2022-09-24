@@ -21,7 +21,6 @@ public:
   MainBoardPoller(mgmt::device::DeviceId_t device_id, common::event::AsyncEventBus& bus)
     : device_id_{ std::move(device_id) }
     , bus_{ bus }
-    , hash_{}
   {
   }
 
@@ -59,7 +58,7 @@ private:
 private:
   mgmt::device::DeviceId_t device_id_;
   common::event::AsyncEventBus& bus_;
-  std::size_t hash_;
+  std::size_t hash_{};
 };
 
 }// namespace mgmt::poller

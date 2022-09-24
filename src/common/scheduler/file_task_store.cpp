@@ -54,7 +54,7 @@ void FileTaskStore::add(const TaskEntity& entity)
   });
 
   if (task != cached_tasks_.end()) {
-    throw std::runtime_error("Task already exist.");
+    throw std::runtime_error("ITask already exist.");
   }
 
   cached_tasks_.push_back(entity);
@@ -89,7 +89,7 @@ void FileTaskStore::remove(const TaskEntity::Id_t& task_id)
   });
 
   if (task == cached_tasks_.end()) {
-    throw std::runtime_error("Task does not exist");
+    throw std::runtime_error("ITask does not exist");
   }
 
   cached_tasks_.erase(task);

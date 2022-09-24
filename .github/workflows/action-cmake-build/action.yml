@@ -38,6 +38,6 @@ runs:
           build_type: ${{ inputs.build_type }}
 
     - name: "Make"
-      working-directory: cmake-build-${{ inputs.preset }}
+      working-directory: ${{ env.build_dir }}
       run: make -j$(nproc)
       shell: bash

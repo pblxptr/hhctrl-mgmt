@@ -21,15 +21,15 @@ public:
   }
 
   template<class D>
-  void add_loader(DeviceLoader&& loader)
+  void add_loader(DeviceLoader&& dev_loader)
   {
     common::logger::get(mgmt::device::Logger)->debug("PlatformBuilder::{}", __FUNCTION__);
 
-    auto x = [loader = std::move(loader)](const GenericDeviceProcessor& processor) mutable -> bool {
-      return processor.template handle<D>(std::move(loader));
+    auto generic_loader = [dev_loader = std::move(dev_loader)](const GenericDeviceProcessor& processor) mutable -> bool {
+      return processor.template handle<D>(std::move(dev_loader));
     };
 
-    generic_loaders_.push_back(std::move(x));
+    generic_loaders_.push_back(std::move(generic_loader));
   }
 
   auto build_board() &&

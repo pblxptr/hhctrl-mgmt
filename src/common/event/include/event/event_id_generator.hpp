@@ -20,11 +20,11 @@ private:
   template<class E>
   static EventId_t id()
   {
-    static auto id = counter_++;
+    static auto event_id = Counter++;
 
-    return id;
+    return event_id;
   }
 
-  static inline std::atomic<EventId_t> counter_{ 1 };
+  static inline std::atomic<EventId_t> Counter{ 1 }; //NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 };
 }// namespace common::event

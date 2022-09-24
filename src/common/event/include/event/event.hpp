@@ -16,16 +16,16 @@ concept AsyncEventHandler = requires(Handler&& handler, const Arg& arg)
 };
 
 template<class E>
-concept Event = requires(E e)
+concept Event = requires(E event)
 {
   requires std::is_base_of_v<GenericEvent<E>, E>;
 };
 
 template<Event E>
-std::string to_string(const E& e)
+std::string to_string(const E& event)
 {
   using std::to_string;
 
-  return to_string(e.event_id());
+  return to_string(event.event_id());
 }
 }// namespace common::event

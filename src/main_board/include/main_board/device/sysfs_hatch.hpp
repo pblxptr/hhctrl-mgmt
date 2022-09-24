@@ -9,13 +9,15 @@ namespace mgmt::device {
 class SysfsHatch
 {
 public:
-  explicit SysfsHatch(const std::string&);
+  explicit SysfsHatch(const std::string& sysfsdir);
   // movable
   SysfsHatch(SysfsHatch&&) noexcept = default;
   SysfsHatch& operator=(SysfsHatch&&) noexcept = default;
   // non-copyable
   SysfsHatch(const SysfsHatch&) = delete;
   SysfsHatch& operator=(const SysfsHatch&) = delete;
+
+  ~SysfsHatch() = default;
 
   void open() const;
   void close() const;

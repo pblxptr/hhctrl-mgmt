@@ -21,7 +21,6 @@ public:
   TempSensorPoller(mgmt::device::DeviceId_t device_id, common::event::AsyncEventBus& bus)
     : device_id_{ std::move(device_id) }
     , bus_{ bus }
-    , cached_temp_{}
   {
   }
 
@@ -38,7 +37,9 @@ public:
 private:
   float current_temp() const
   {
-    const auto& temp_sensor = mgmt::device::get_device<mgmt::device::TempSensor_t>(device_id_);
+    using mgmt::device::TempSensor;
+
+    const TempSensor auto& temp_sensor = mgmt::device::get_device<mgmt::device::TempSensor_t>(device_id_);
 
     return temp_sensor.value();
   }
@@ -52,7 +53,7 @@ private:
 private:
   mgmt::device::DeviceId_t device_id_;
   common::event::AsyncEventBus& bus_;
-  float cached_temp_;
+  float cached_temp_{};
 };
 
 }// namespace mgmt::poller

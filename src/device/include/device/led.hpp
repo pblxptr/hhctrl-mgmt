@@ -6,10 +6,10 @@
 
 namespace mgmt::device {
 template<class T>
-concept Led = Device<T> and requires(T t)
+concept Led = Device<T> and requires(T obj)
 {
   {
-    t.set_brightness(std::declval<int>())
+    obj.set_brightness(std::declval<int>())
     } -> std::same_as<void>;
 };
 

@@ -12,7 +12,7 @@
 namespace mgmt::home_assistant::mqttc {
 struct GenericEntityConfig
 {
-  static constexpr inline auto availabilityTopic = std::string_view{ "availability_topic" };
+  static constexpr inline auto AvailabilityTopic = std::string_view{ "availability_topic" };
   static constexpr inline auto JsonAttributesTopic = std::string_view{ "json_attributes_topic" };
   static constexpr inline auto JsonAttributesTemplate = std::string_view{ "json_attributes_template" };
 };
@@ -23,10 +23,15 @@ class Entity
 {
 public:
   Entity() = delete;
-  Entity(const Entity&) = delete;
-  Entity& operator=(const Entity&) = delete;
+
+  // movable
   Entity(Entity&& rhs) noexcept = default;
   Entity& operator=(Entity&&) noexcept = default;
+  // non-copyable
+  Entity(const Entity&) = delete;
+  Entity& operator=(const Entity&) = delete;
+
+  ~Entity() = default;
 
   const std::string& unique_id() const
   {
@@ -62,6 +67,19 @@ protected:
     , client_{ std::move(client) }
   {}
 
+  //TODO(pp): Consider passing topic by ref
+  template<class Payload>
+  boost::asio::awaitable<void> async_publish(std::string topic, const Payload& payload)
+  {
+    co_await client_.async_publish(topic, payload);
+  }
+
+  template<class Iterator>
+  boost::asio::awaitable<void> async_subscribe(Iterator begin, Iterator end)
+  {
+    co_await client_.async_subscribe(begin, end);
+  }
+
   boost::asio::awaitable<void> async_set_availability(const std::string& topic, const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
@@ -80,14 +98,13 @@ protected:
     co_await client_.async_publish(topic, availability_str);
   }
 
-
   template<class T1, class T2>
   std::string topic(const T1& entity_name, const T2& topic_spec) const
   {
     return fmt::format("{}_{}/{}", entity_name, unique_id_, topic_spec);
   }
 
-protected:
+private:
   std::string unique_id_;
   EntityClient client_;
 };

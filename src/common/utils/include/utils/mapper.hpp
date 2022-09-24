@@ -5,10 +5,10 @@
 namespace common::utils {
 namespace impl {
   template<class Value>
-  consteval auto map_value(Value v) { return v; }
+  consteval auto map_value(Value val) { return val; }
 
   template<class CharT>
-  consteval std::basic_string_view<CharT> map_value(const CharT* v) { return { v }; }
+  consteval std::basic_string_view<CharT> map_value(const CharT* val) { return { val }; }
 
   template<class Value>
   using MapValueType_t = decltype(map_value(std::declval<Value>()));
@@ -20,10 +20,10 @@ namespace impl {
     using Value_t = MapValueType_t<Value>;
     using KeyValuePair_t = std::pair<Key_t, Value_t>;
 
-    const KeyValuePair_t m_kv;
+    const KeyValuePair_t Kvp;
 
-    consteval BaseMapper(std::pair<Key_t, Value_t> kv)
-      : m_kv{ kv }
+    consteval BaseMapper(std::pair<Key_t, Value_t> kvp) //NOLINT(modernize-pass-by-value)
+      : Kvp{ kvp }
     {}
   };
 }// namespace impl
@@ -35,28 +35,28 @@ class Mapper : public impl::BaseMapper<typename KV::first_type, typename KV::sec
     typename KV::first_type,
     typename KV::second_type>;
 
-  const Mapper<Rest...> m_next;
+  const Mapper<Rest...> Next;
 
 public:
-  consteval Mapper(typename Base_t::KeyValuePair_t kv, Rest... rest)
-    : Base_t{ kv }
-    , m_next{ rest... }
+  consteval Mapper(typename Base_t::KeyValuePair_t kvp, Rest... rest)
+    : Base_t{ kvp }
+    , Next{ rest... }
   {}
 
   // //Map by key
   constexpr auto map(const typename Base_t::Key_t& key) const
   {
-    const auto& [k, v] = Base_t::m_kv;
+    const auto& [k, v] = Base_t::Kvp;
 
-    return key == k ? v : m_next.map(key);
+    return key == k ? v : Next.map(key);
   }
 
   // //Map by value - reverse
   constexpr auto map(const typename Base_t::Value_t& value) const
   {
-    const auto& [k, v] = Base_t::m_kv;
+    const auto& [k, v] = Base_t::Kvp;
 
-    return value == v ? k : m_next.map(value);
+    return value == v ? k : Next.map(value);
   }
 };
 
@@ -68,20 +68,20 @@ class Mapper<std::pair<Key, Value>> : public impl::BaseMapper<Key, Value>
   using Base_t = impl::BaseMapper<Key, Value>;
 
 public:
-  consteval Mapper(typename Base_t::KeyValuePair_t kv)
-    : Base_t{ kv }
+  consteval Mapper(typename Base_t::KeyValuePair_t kvp)
+    : Base_t{ kvp }
   {}
 
   constexpr auto map(const typename Base_t::Key_t& key) const
   {
-    const auto& [k, v] = Base_t::m_kv;
+    const auto& [k, v] = Base_t::Kvp;
 
     return automap(key, k, v);
   }
 
   constexpr auto map(const typename Base_t::Value_t& value) const
   {
-    const auto& [k, v] = Base_t::m_kv;
+    const auto& [k, v] = Base_t::Kvp;
 
     return automap(value, v, k);
   }
@@ -93,11 +93,11 @@ private:
     class Ret>
   constexpr auto automap(const Provided& provided, const Actual& actual, const Ret& ret) const
   {
-    if (provided == actual) {
-      return ret;
-    } else {
+    if (provided != actual) {
       throw std::invalid_argument("Key does not exist");
     }
+
+    return ret;
   }
 };
 

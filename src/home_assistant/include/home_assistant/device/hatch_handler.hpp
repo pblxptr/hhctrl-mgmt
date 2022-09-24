@@ -23,10 +23,14 @@ public:
     const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
     const mgmt::home_assistant::EntityFactory& factory);
 
-  HatchHandler(const HatchHandler&) = delete;
-  HatchHandler& operator=(const HatchHandler&) = delete;
+  // movable
   HatchHandler(HatchHandler&& rhs) noexcept;
   HatchHandler& operator=(HatchHandler&& rhs) noexcept;
+  // non-copyable
+  HatchHandler(const HatchHandler&) = delete;
+  HatchHandler& operator=(const HatchHandler&) = delete;
+
+  ~HatchHandler() = default;
 
   mgmt::device::DeviceId_t hardware_id() const;
   boost::asio::awaitable<void> async_connect();

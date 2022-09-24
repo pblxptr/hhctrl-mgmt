@@ -11,4 +11,4 @@
 
 namespace mgmt::device {
 using HardwareIdentityStore_t = std::unordered_map<DeviceId_t, HardwareIdentity>;
-}
+} // namespace mgmt::device

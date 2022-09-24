@@ -14,10 +14,10 @@ using Executor_t = std::variant<
   std::reference_wrapper<ThreadPool_t>,
   std::reference_wrapper<System_t>>;
 template<class Executor, class Func>
-auto invoke(Executor&& executor, Func&& f)
+auto invoke(Executor&& executor, Func&& func)
 {
-  auto invoke_with_executor = [f = std::forward<Func>(f)](auto&& executor) -> decltype(auto) {
-    return f(executor.get());
+  auto invoke_with_executor = [func = std::forward<Func>(func)](auto&& executor) -> decltype(auto) {
+    return func(executor.get());
   };
 
   return std::visit(invoke_with_executor, std::forward<Executor>(executor));

@@ -21,14 +21,14 @@ inline auto get(const std::string& logger_name)
 
   if (log) {
     return log;
-  } else {
-    auto null_logger = spdlog::get("null_logger");
-
-    if (not null_logger) {
-      null_logger = spdlog::create<spdlog::sinks::null_sink_mt>("null_logger");
-    }
-
-    return null_logger;
   }
+
+  auto null_logger = spdlog::get("null_logger");
+
+  if (not null_logger) {
+    null_logger = spdlog::create<spdlog::sinks::null_sink_mt>("null_logger");
+  }
+
+  return null_logger;
 }
 }// namespace common::logger

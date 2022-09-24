@@ -146,13 +146,13 @@ void MainBoardHandler::setup()
      * structure binding does not introduce variable name. Compiles with gcc but not with clang
      * https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
      */
-    indicator.set_ack_handler([this, type = type]() -> boost::asio::awaitable<void> { co_await async_set_config_indicator(type); });
+    indicator.set_ack_handler([type = type, this]() -> boost::asio::awaitable<void> { co_await async_set_config_indicator(type); });
     indicator.set_error_handler([this](const auto& error_code) { on_error(error_code); });
   }
   // Setup restart button
   restart_button_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config_restart_button(); });
   restart_button_.set_error_handler([this](const auto& error_code) { on_error(error_code); });
-  restart_button_.on_command([this](auto&&) {
+  restart_button_.on_command([this]() {
     auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
     board.restart();
   });

@@ -62,8 +62,8 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
 
-    impl_->set_connack_handler([this, client_handler = std::move(handler)](bool sp, auto rc) mutable {
-      return on_ack(sp, rc, std::move(client_handler));
+    impl_->set_connack_handler([this, client_handler = std::move(handler)](bool session_present, auto return_code) mutable {
+      return on_ack(session_present, return_code, std::move(client_handler));
     });
   }
 
@@ -104,12 +104,12 @@ public:
       impl_->set_publish_handler([this, begin, end](
                                    mqtt::optional<std::uint16_t> packet_id,
                                    [[maybe_unused]] mqtt::publish_options pubopts,
-                                   mqtt::buffer topic_name,
+                                   mqtt::buffer topic_name, //NOLINT(bugprone-easily-swappable-parameters) lambda's parameters enforced by 3rd party lib
                                    mqtt::buffer contents) {
-        common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}::publish_handler, packet id: {}", __FUNCTION__, packet_id.value_or(0));
+        common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::publish_handler, packet id: {}", packet_id.value_or(0));
 
-        auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& v) {
-          auto& [topic, handler] = v;
+        auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& cfg) {
+          auto& [topic, handler] = cfg;
           return topic == topic_name;
         });
 
@@ -133,7 +133,7 @@ public:
     auto subs = std::vector<MqttSub_t>{};
     std::transform(begin, end, std::back_inserter(subs), [](auto&& sub) {
       const auto& [topic, _] = sub;
-      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, subscribe topic: {}", __FUNCTION__, topic);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient, subscribe topic: {}", topic);
 
       return MqttSub_t{ topic.c_str(), MQTT_NS::subscribe_options(MQTT_NS::qos::at_most_once) };
     });
@@ -160,9 +160,9 @@ private:
   }
 
   template<class Handler>
-  bool on_ack(bool sp, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
+  bool on_ack(bool session_present, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, sp, MQTT_NS::connect_return_code_to_str(connack_return_code));
+    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, session_present, MQTT_NS::connect_return_code_to_str(connack_return_code));
 
     reconnect_.attempt = 0;
     client_handler();

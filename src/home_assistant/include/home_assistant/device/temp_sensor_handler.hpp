@@ -23,10 +23,14 @@ public:
     const mgmt::home_assistant::DeviceIdentityProvider& identity_provider,
     const mgmt::home_assistant::EntityFactory& factory);
 
-  TempSensorHandler(const TempSensorHandler&) = delete;
-  TempSensorHandler& operator=(const TempSensorHandler&) = delete;
+  // movable
   TempSensorHandler(TempSensorHandler&& rhs) noexcept;
   TempSensorHandler& operator=(TempSensorHandler&& rhs) noexcept;
+  // non-copyable
+  TempSensorHandler(const TempSensorHandler&) = delete;
+  TempSensorHandler& operator=(const TempSensorHandler&) = delete;
+
+  ~TempSensorHandler() = default;
 
   mgmt::device::DeviceId_t hardware_id() const;
   boost::asio::awaitable<void> async_connect();

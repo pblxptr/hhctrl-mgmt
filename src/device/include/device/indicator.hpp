@@ -50,14 +50,14 @@ inline std::string to_string(const IndicatorType& type)
 }
 
 template<class T>
-concept Indicator = Device<T> and requires(T v)
+concept Indicator = Device<T> and requires(T obj)
 {
   {
-    v.type()
+    obj.type()
     } -> std::same_as<IndicatorType>;
   {
-    v.state()
+    obj.state()
     } -> std::same_as<IndicatorState>;
-  v.set_state(std::declval<IndicatorState>());
+  obj.set_state(std::declval<IndicatorState>());
 };
 }// namespace mgmt::device

@@ -4,22 +4,18 @@
 #include <fmt/format.h>
 #include <filesystem>
 
-namespace {
-namespace fs = std::filesystem;
-}
-
 namespace common::utils::sysfs {
 
 inline std::string get_path(const std::string& path)
 {
-  if (!fs::exists(path)) {
+  if (!std::filesystem::exists(path)) {
     throw std::runtime_error(fmt::format("Sysfs directory: {} does not exist", path));
   }
 
   return path;
 }
 
-inline std::string read_attr(const fs::path& path)
+inline std::string read_attr(const std::filesystem::path& path)
 {
   auto ret = std::string{};
   auto fstream = std::fstream(path, std::ios::in);
@@ -36,7 +32,7 @@ inline std::string read_attr(const fs::path& path)
 }
 
 template<class TValue>
-inline void write_attr(const fs::path& path, const TValue& val)
+inline void write_attr(const std::filesystem::path& path, const TValue& val)
 {
   auto fstream = std::fstream(path, std::ios::out);
 

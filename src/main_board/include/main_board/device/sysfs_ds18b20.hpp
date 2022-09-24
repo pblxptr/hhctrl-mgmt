@@ -6,7 +6,7 @@ namespace mgmt::device {
 class SysfsDS18B20
 {
 public:
-  explicit SysfsDS18B20(const std::string&);
+  explicit SysfsDS18B20(const std::string& sysfsdir);
   float value() const;
 
 private:

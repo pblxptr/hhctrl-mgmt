@@ -42,6 +42,9 @@ class AsyncMqttEntityClient
     boost::asio::steady_timer timer;
   };
 
+  using Topic_t = mqtt::buffer;
+  using Content_t = mqtt::buffer;
+
 public:
   AsyncMqttEntityClient() = delete;
   AsyncMqttEntityClient(std::string uid, Impl impl, const EntityClientConfig& config)
@@ -78,13 +81,14 @@ public:
   }
 
   template<AsyncHandler Handler>
-  void set_connack_handler(Handler /* handler */)
+  void set_connack_handler(Handler handler)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-    //    impl_->set_connack_handler([this, handler = std::move(handler)](bool sp, auto rc) mutable {
-    //      return on_ack(sp, rc, std::move(handler));
-    //    });
+    impl_->set_connack_handler([this, handler = std::move(handler)](bool session_present, auto return_code) mutable {
+      // Without explicit 'this->...', clang complains about unused 'this' lambda capture, which in fact is required here
+      return this->on_ack(session_present, return_code, std::move(handler));
+    });
   }
 
   template<class Handler>
@@ -116,7 +120,7 @@ public:
   }
 
   template<class Iterator>
-  boost::asio::awaitable<MQTT_NS::error_code> async_subscribe([[maybe_unused]] Iterator begin, [[maybe_unused]] Iterator end)
+  boost::asio::awaitable<MQTT_NS::error_code> async_subscribe(Iterator begin, Iterator end)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
@@ -127,27 +131,27 @@ public:
       }
 
       impl_->set_publish_handler([begin, end](
-                                   mqtt::optional<std::uint16_t> packet_id,
-                                   [[maybe_unused]] mqtt::publish_options pubopts,
-                                   mqtt::buffer topic_name,
-                                   mqtt::buffer contents) {
-        common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}::publish_handler, packet id: {}", __FUNCTION__, packet_id.value_or(0));
+        mqtt::optional<std::uint16_t> packet_id,
+        [[maybe_unused]] mqtt::publish_options pubopts,
+        mqtt::buffer topic_name, //NOLINT(bugprone-easily-swappable-parameters) lambda's parameters enforced by 3rd party lib
+        mqtt::buffer contents
+        ) {
+          common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::publish_handler, packet id: {}", packet_id.value_or(0));
 
-        auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& v) {
-          auto& [topic, handler] = v;
-          return topic == topic_name;
+          auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& cfg) {
+            auto& [topic, handler] = cfg;
+            return topic_name.compare(topic) == 0; //TODO(pp) Verify if compare works as expected
+          });
+
+          if (topic_handler == end) {
+            return false;
+          }
+
+          auto& [topic, handler] = *topic_handler;
+          handler(std::move(contents));
+
+          return true;
         });
-
-        if (topic_handler == end) {
-          return false;
-        }
-
-        auto& [topic, handler] = *topic_handler;
-        handler(std::move(contents));
-
-        return true;
-      });
-
       return true;
     });
 
@@ -158,7 +162,7 @@ public:
     auto subs = std::vector<MqttSub_t>{};
     std::transform(begin, end, std::back_inserter(subs), [](auto&& sub) {
       const auto& [topic, _] = sub;
-      common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, subscribe topic: {}", __FUNCTION__, topic);
+      common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient, subscribe topic: {}", topic);
 
       return MqttSub_t{ topic, MQTT_NS::subscribe_options(MQTT_NS::qos::at_most_once) };
     });
@@ -187,9 +191,9 @@ private:
   }
 
   template<class Handler>
-  bool on_ack(bool sp, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
+  bool on_ack(bool session_present, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, sp, MQTT_NS::connect_return_code_to_str(connack_return_code));
+    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, session_present, MQTT_NS::connect_return_code_to_str(connack_return_code));
 
     reconnect_.attempt = 0;
 

@@ -14,10 +14,16 @@ struct TaskEntity
   std::int64_t timestamp;
 };
 
-class TaskStore
+class ITaskStore
 {
 public:
-  virtual ~TaskStore() = default;
+  ITaskStore() = default;
+  ITaskStore(ITaskStore&&) noexcept = default;
+  ITaskStore& operator=(ITaskStore&&) noexcept = default;
+  ITaskStore(const ITaskStore&) = default;
+  ITaskStore& operator=(const ITaskStore&) = default;
+  virtual ~ITaskStore() = default;
+
   virtual void add(const TaskEntity&) = 0;
   virtual bool exist(const TaskEntity::Id_t&) const = 0;
   virtual std::optional<TaskEntity> find(const TaskEntity::Id_t&) const = 0;

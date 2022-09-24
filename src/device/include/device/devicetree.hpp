@@ -13,25 +13,26 @@ class DeviceTree
 {
   struct Node
   {
-    DeviceId_t parent_device_id_{};
-    DeviceId_t device_id_{};
-    OnNodeRemoved_t func_{};
+    DeviceId_t parent_device_id{};
+    DeviceId_t device_id{};
+    OnNodeRemoved_t func{};
 
-    Node(DeviceId_t p, DeviceId_t c, OnNodeRemoved_t f)
-      : parent_device_id_{ std::move(p) }
-      , device_id_{ std::move(c) }
-      , func_{ std::move(f) }
+    Node(DeviceId_t parent_device_id, DeviceId_t device_id, OnNodeRemoved_t callback)
+      : parent_device_id{ std::move(parent_device_id) }
+      , device_id{ std::move(device_id) }
+      , func{ std::move(callback) }
     {}
+    // movable
     Node(Node&&) noexcept = default;
     Node& operator=(Node&&) noexcept = default;
-
+    // non-copyable
     Node(const Node&) = default;
     Node& operator=(const Node&) = default;
 
     ~Node()
     {
-      if (func_) {
-        func_();
+      if (func) {
+        func();
       }
     }
   };
@@ -59,26 +60,26 @@ public:
   bool remove_child(const DeviceId_t& parent_device_id, const DeviceId_t& device_id);
 
   /**
-   * @brief Removes parent_device_id if provided id matches to parent_device_id
+   * @brief Removes parent_device_id if provided device_id matches to parent_device_id
    *
    * @return true
    * @return false
    */
-  bool remove(const DeviceId_t&);
+  bool remove(const DeviceId_t& parent_device_id);
 
   /**
-   * @brief Returns parent_device_id id for a given id
+   * @brief Returns parent_device_id device_id for a given device_id
    *
    * @return std::optional<DeviceId_t>
    */
-  std::optional<DeviceId_t> parent(const DeviceId_t&) const;
+  std::optional<DeviceId_t> parent(const DeviceId_t& device_id) const;
 
   /**
-   * @brief Returns all subnones for a given id
+   * @brief Returns all subnones for a given device_id
    *
    * @return std::vector<DeviceId_t>
    */
-  std::vector<DeviceId_t> all_children(const DeviceId_t&) const;
+  std::vector<DeviceId_t> all_children(const DeviceId_t& parent_device_id) const;
 
 private:
   std::vector<Node> nodes_;

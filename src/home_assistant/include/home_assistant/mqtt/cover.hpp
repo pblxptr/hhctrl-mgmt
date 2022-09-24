@@ -56,23 +56,28 @@ template<class EntityClient>
 class Cover : public Entity<EntityClient>
 {
   using Base_t = Entity<EntityClient>;
-  using Base_t::unique_id_;
-  using Base_t::client_;
   using Base_t::topic;
   using Base_t::async_set_availability;
-
+  using Base_t::async_publish;
+  using Base_t::async_subscribe;
 public:
+  using Base_t::unique_id;
+
   Cover() = delete;
-  Cover(std::string uid, EntityClient client)// TODO: Consider passing EntityClient by rvalue ref
+  Cover(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
     : Base_t(std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}, unique_id: {}", __FUNCTION__, unique_id_);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
 
-  Cover(const Cover&) = delete;
-  Cover& operator=(const Cover&) = delete;
+  // movable
   Cover(Cover&& rhs) noexcept = default;
   Cover& operator=(Cover&&) noexcept = default;
+  // non-copyable
+  Cover(const Cover&) = delete;
+  Cover& operator=(const Cover&) = delete;
+
+  ~Cover() = default;
 
   void on_command(CoverCommandHandler_t handler)
   {
@@ -97,31 +102,31 @@ public:
     config.set_override_if_not_null(CoverConfig::PayloadCloseKey, std::string{ CoverCommandMapper.map(CoverCommand::Close) });
     config.set_override_if_not_null(CoverConfig::PayloadStopKey, std::string{ CoverCommandMapper.map(CoverCommand::Stop) });
 
-    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    co_await client_.async_subscribe(subs_.begin(), subs_.end());
-    co_await client_.async_publish(fmt::format("homeassistant/cover/{}/config", unique_id_), config.parse());
+    co_await async_subscribe(subs_.begin(), subs_.end());
+    co_await async_publish(fmt::format("homeassistant/cover/{}/config", unique_id()), config.parse());
   }
 
   boost::asio::awaitable<void> async_set_state(const CoverState& state)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
-    co_await client_.async_publish(topics_.at(CoverConfig::StateTopicKey), std::string{ CoverStateMapper.map(state) });
+    co_await async_publish(topics_.at(CoverConfig::StateTopicKey), std::string{ CoverStateMapper.map(state) });
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
-    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
     std::pair{ CoverConfig::StateTopicKey, topic(CoverConfig::TopicEntityName, CoverConfig::StateTopicValue) },
     std::pair{ CoverConfig::CommandTopicKey, topic(CoverConfig::TopicEntityName, CoverConfig::CommandTopicValue) },
-    std::pair{ GenericEntityConfig::availabilityTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
   std::unordered_map<std::string, PublishHandler_t> subs_{

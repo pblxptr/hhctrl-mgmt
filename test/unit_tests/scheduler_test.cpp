@@ -62,14 +62,14 @@ TEST_CASE("Tasks can't be added to scheduler in certain circumstances")
   {
 
     // Missing timezone in time should be e.g. "20:30:32 Europe/Warsaw"
-    auto add_task = [&sut]() { sut.every(days_at{ std::chrono::days(1), "20:30:32" }, []() {}); };
+    auto add_task = [&sut]() { sut.every(DaysAt{ std::chrono::days(1), "20:30:32" }, []() {}); };
 
     REQUIRE_THROWS(add_task());
   }
 
   SECTION("adding everydays at task with non-existing timezone should throw")
   {
-    auto add_task = [&sut]() { sut.every(days_at{ std::chrono::days(1), "20:30:32 Fake/Timezone" }, []() {}); };
+    auto add_task = [&sut]() { sut.every(DaysAt{ std::chrono::days(1), "20:30:32 Fake/Timezone" }, []() {}); };
 
     REQUIRE_THROWS(add_task());
   }

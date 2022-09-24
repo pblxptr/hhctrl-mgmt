@@ -5,47 +5,47 @@
 
 namespace mgmt::device {
 template<Device D>
-class Inventory
+class DeviceInventory
 {
 public:
   template<class... Args>
-  constexpr auto emplace(const DeviceId_t& id, Args&&... args)
+  constexpr auto emplace(const DeviceId_t& device_id, Args&&... args)
   {
-    if (exists(id)) {
+    if (exists(device_id)) {
       throw std::runtime_error("Duplicate instance of the key");
     }
 
     devices_.emplace(std::piecewise_construct,
-      std::tuple(id),
+      std::tuple(device_id),
       std::forward_as_tuple(std::forward<Args>(args)...));
   }
 
-  constexpr auto add(DeviceId_t id, D device)
+  constexpr auto add(DeviceId_t device_id, D device)
   {
-    if (exists(id)) {
+    if (exists(device_id)) {
       throw std::runtime_error("Duplicate instance of the key");
     }
 
-    devices_.insert({ id, std::move(device) });
+    devices_.insert({ device_id, std::move(device) });
   }
 
-  constexpr auto get(DeviceId_t id) -> D&
+  constexpr auto get(DeviceId_t device_id) -> D&
   {
-    if (not exists(id)) {
+    if (not exists(device_id)) {
       throw std::runtime_error("Device does not exist");
     }
 
-    return devices_.at(id);
+    return devices_.at(device_id);
   }
 
-  constexpr auto remove(const DeviceId_t& id)
+  constexpr auto remove(const DeviceId_t& device_id)
   {
-    devices_.erase(id);
+    devices_.erase(device_id);
   }
 
-  constexpr bool exists(const DeviceId_t& id) const
+  constexpr bool exists(const DeviceId_t& device_id) const
   {
-    return devices_.contains(id);
+    return devices_.contains(device_id);
   }
 
 private:

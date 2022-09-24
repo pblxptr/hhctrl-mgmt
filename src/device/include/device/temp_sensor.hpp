@@ -8,10 +8,10 @@
 
 namespace mgmt::device {
 template<class T>
-concept TempSensor = Device<T> and requires(T t)
+concept TempSensor = Device<T> and requires(T obj)
 {
   {
-    t.value()
+    obj.value()
     } -> std::same_as<float>;
 };
 

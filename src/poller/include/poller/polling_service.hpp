@@ -27,13 +27,13 @@ class PollingService
     mgmt::device::DeviceId_t device_id{};
     Interval_t interval{};
     Poll_t poll{};
-    std::optional<Timer_t> timer_{};
+    std::optional<Timer_t> timer{};
   };
 
 public:
-  explicit PollingService(common::executor::Executor_t);
+  explicit PollingService(common::executor::Executor_t executor);
 
-  void add_poller(const mgmt::device::DeviceId_t&,
+  void add_poller(const mgmt::device::DeviceId_t& device_id,
     const Interval_t& interval,
     const Poll_t& poll);
 

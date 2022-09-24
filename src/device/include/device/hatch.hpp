@@ -10,12 +10,12 @@ enum class HatchState { Undefined,
   Faulty };
 
 template<class T>
-concept Hatch = Device<T> and requires(T v)
+concept Hatch = Device<T> and requires(T obj)
 {
-  v.open();
-  v.close();
+  obj.open();
+  obj.close();
   {
-    v.status()
+    obj.status()
     } -> std::same_as<HatchState>;
 };
 }// namespace mgmt::device

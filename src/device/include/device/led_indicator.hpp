@@ -11,19 +11,22 @@ public:
     : type_{ type }
     , led_{ std::move(led) }
   {}
-
+  // movable
+  LedIndicator(LedIndicator&&) noexcept = default;
+  LedIndicator& operator=(LedIndicator&&) noexcept = default;
+  // non-copyable
   LedIndicator(const LedIndicator&) = delete;
   LedIndicator& operator=(const LedIndicator&) = delete;
 
-  LedIndicator(LedIndicator&&) noexcept = default;
-  LedIndicator& operator=(LedIndicator&&) noexcept = default;
+  ~LedIndicator() = default;
 
   constexpr IndicatorType type() const
   {
     return type_;
   }
 
-  IndicatorState state() const
+  //TODO(pp) Implement, remove nolint
+  IndicatorState state() const //NOLINT(readability-convert-member-functions-to-static)
   {
     return IndicatorState::NotAvailable;
   }

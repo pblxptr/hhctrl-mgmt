@@ -37,10 +37,10 @@ inline std::string to_string(const EntityClientConfig& config)
 }
 
 inline mgmt::home_assistant::mqttc::EntityClientConfig tag_invoke(
-  boost::json::value_to_tag<mgmt::home_assistant::mqttc::EntityClientConfig>,
-  const boost::json::value& jv)
+  boost::json::value_to_tag<mgmt::home_assistant::mqttc::EntityClientConfig> /* unused */,
+  const boost::json::value& jvalue)
 {
-  const auto& obj = jv.as_object();
+  const auto& obj = jvalue.as_object();
   return mgmt::home_assistant::mqttc::EntityClientConfig{
     .server_address = boost::json::value_to<std::string>(obj.at("server_address")),
     .server_port = boost::json::value_to<int>(obj.at("server_port")),

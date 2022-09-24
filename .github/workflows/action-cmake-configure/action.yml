@@ -1,0 +1,27 @@
+# action.yml
+name: 'Configure'
+description: 'Configure'
+inputs:
+  preset:
+    description: 'Selected preset'
+    required: true
+  build_type:
+    description: "Build type e.g. Debug, Release"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: "Create build directory"
+      shell: bash
+      run: |
+        mkdir ${{ env.build_dir }}
+
+    - name: "Install Conan dependencies"
+      working-directory: ${{ env.build_dir }}
+      run: conan install .. --build=missing -pr:h=target-default -s build_type=${{ inputs.build_type }}
+      shell: bash
+
+    - name: "Configure CMake"
+      working-directory: ${{ env.build_dir }}
+      run: cmake .. --preset ${{ inputs.preset }}
+      shell: bash

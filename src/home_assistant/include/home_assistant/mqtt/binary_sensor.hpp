@@ -33,23 +33,26 @@ template<class EntityClient>
 class BinarySensor : public Entity<EntityClient>
 {
   using Base_t = Entity<EntityClient>;
-  using Base_t::unique_id_;
-  using Base_t::client_;
   using Base_t::topic;
   using Base_t::async_set_availability;
-
+  using Base_t::async_publish;
 public:
+  using Base_t::unique_id;
+
   BinarySensor() = delete;
-  BinarySensor(std::string uid, EntityClient client)// TODO: Consider passing EntityClient by rvalue ref
+  BinarySensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
     : Base_t(std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id_);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
-
-  BinarySensor(const BinarySensor&) = delete;
-  BinarySensor& operator=(const BinarySensor&) = delete;
+  // movable
   BinarySensor(BinarySensor&& rhs) noexcept = default;
   BinarySensor& operator=(BinarySensor&&) noexcept = default;
+  // non-copyable
+  BinarySensor(const BinarySensor&) = delete;
+  BinarySensor& operator=(const BinarySensor&) = delete;
+
+  ~BinarySensor() = default;
 
   boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
@@ -59,31 +62,31 @@ public:
     config.set_override(BinarySensorConfig::StateOffKey, std::string{ BinarySensorStateMapper.map(BinarySensorState::Off) });
     config.set_override(BinarySensorConfig::StateOnKey, std::string{ BinarySensorStateMapper.map(BinarySensorState::On) });
 
-    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    co_await client_.async_publish(fmt::format("homeassistant/binary_sensor/{}/config", unique_id_), config.parse());
+    co_await async_publish(fmt::format("homeassistant/binary_sensor/{}/config", unique_id()), config.parse());
   }
 
   boost::asio::awaitable<void> async_set_state(const BinarySensorState& state)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}", __FUNCTION__);
 
-    co_await client_.async_publish(topics_.at(BinarySensorConfig::StateTopicKey), std::string{ BinarySensorStateMapper.map(state) });
+    co_await async_publish(topics_.at(BinarySensorConfig::StateTopicKey), std::string{ BinarySensorStateMapper.map(state) });
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}", __FUNCTION__);
 
-    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{
     std::pair{ BinarySensorConfig::StateTopicKey, topic(BinarySensorConfig::TopicEntityName, BinarySensorConfig::StateTopicValue) },
-    std::pair{ GenericEntityConfig::availabilityTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
 };

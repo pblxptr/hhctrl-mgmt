@@ -107,7 +107,7 @@ void HatchHandler::handle_command(const mgmt::home_assistant::mqttc::CoverComman
 {
   common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
 
-  auto& hatch = mgmt::device::inventory<mgmt::device::Hatch_t>.get(device_id_);
+  auto& hatch = mgmt::device::Inventory<mgmt::device::Hatch_t>.get(device_id_);
 
   switch (cmd) {
   case mgmt::home_assistant::mqttc::CoverCommand::Open:

@@ -21,7 +21,6 @@ public:
   HatchPoller(mgmt::device::DeviceId_t device_id, common::event::AsyncEventBus& bus)
     : device_id_{ std::move(device_id) }
     , bus_{ bus }
-    , hash_{}
   {
   }
 
@@ -38,9 +37,11 @@ public:
 private:
   size_t current_hash() const
   {
-    const auto& hatch = mgmt::device::get_device<mgmt::device::Hatch_t>(device_id_);
+    using mgmt::device::Hatch;
+
+    const Hatch auto& hatch = mgmt::device::get_device<mgmt::device::Hatch_t>(device_id_);
     const auto hatch_status = hatch.status();
-    std::size_t tmp_hash = std::hash<decltype(hatch_status)>{}(hatch_status);
+    const std::size_t tmp_hash = std::hash<decltype(hatch_status)>{}(hatch_status);
 
     return tmp_hash;
   }
@@ -54,7 +55,7 @@ private:
 private:
   mgmt::device::DeviceId_t device_id_;
   common::event::AsyncEventBus& bus_;
-  std::size_t hash_;
+  std::size_t hash_{};
 };
 
 }// namespace mgmt::poller

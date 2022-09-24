@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <sstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -9,14 +8,10 @@
 #include <date/tz.h>
 #include <fmt/format.h>
 
-namespace {
-using namespace std::literals;
-namespace dt = date;
-}// namespace
 namespace common::utils::datetime {
-constexpr auto DATE_FMT = "%Y-%m-%d"sv;
-constexpr auto TIME_FMT = "%H:%M:%S"sv;
-constexpr auto DATETIME_FMT = "%Y-%m-%d %H:%M:%S %Z"sv;
+constexpr auto DateFmt = std::string_view { "%Y-%m-%d"};
+constexpr auto TimeFmt = std::string_view {"%H:%M:%S"};
+constexpr auto DatetimeFmt = std::string_view {"%Y-%m-%d %H:%M:%S %Z"};
 
 using Precision_t = std::chrono::milliseconds;
 
@@ -30,24 +25,24 @@ auto parse_time(T&& time, TTimepoint&& base_timepoint = get_now())
 {
   using namespace std::literals;
 
-  auto datetime = fmt::format("{} {}", date::format(DATE_FMT.data(), std::forward<TTimepoint>(base_timepoint)), std::forward<T>(time));
-  auto local = dt::local_seconds{};
+  auto datetime = fmt::format("{} {}", date::format(DateFmt.data(), std::forward<TTimepoint>(base_timepoint)), std::forward<T>(time));
+  auto local = date::local_seconds{};
   auto tmz = std::string{};
 
-  auto in = std::istringstream{ datetime };
-  in >> dt::parse(DATETIME_FMT.data(), local, tmz);
+  auto input = std::istringstream{ datetime };
+  input >> date::parse(DatetimeFmt.data(), local, tmz);
 
-  if (in.fail() || in.bad()) {
+  if (input.fail() || input.bad()) {
     throw std::invalid_argument("Cannot parse datetime due to invalid format.");
   }
 
-  return dt::zoned_time(tmz, local).get_sys_time();
+  return date::zoned_time(tmz, local).get_sys_time();
 }
 
 template<class TSource>
 auto from_timestamp(TSource&& since_epoch)
 {
-  return std::chrono::time_point<std::chrono::system_clock>(Precision_t(since_epoch));
+  return std::chrono::time_point<std::chrono::system_clock>(Precision_t{since_epoch});
 }
 
 template<class TSource>
@@ -57,8 +52,8 @@ auto to_timestamp(TSource&& src)
 }
 
 template<class TTimepoint>
-auto to_string(const TTimepoint& tp)
+auto to_string(const TTimepoint& timepoint)
 {
-  return date::format(DATETIME_FMT.data(), tp);
+  return date::format(DatetimeFmt.data(), timepoint);
 }
 }// namespace common::utils::datetime

@@ -16,22 +16,23 @@
 #include <main_board/platform/sysfs_cpu_temp_sensor_provider.hpp>
 
 #include <poller/main_board_poller.hpp>
+#include <utility>
 
 namespace mgmt::app {
-void main_board_init(
+inline void main_board_init(
   std::string pdtree_path,
   mgmt::device::DeviceTree& dtree,
   mgmt::device::HardwareIdentityStore_t& hw_identity_store,
   mgmt::device::PollingService& polling_service,
   common::event::AsyncEventBus& bus)
 {
-  using namespace mgmt::platform_device;
+  using namespace mgmt::platform_device; //NOLINT(google-build-using-namespace)
 
   // Prepare
   auto poller_factory = mgmt::poller::PollerFactory{ bus };
   auto builder = PlatformBuilder<DefaultGenericDeviceLoadingStrategy>{};
   auto platform_device_discovery = PlatformDeviceDiscovery{
-    pdtree_path,
+    std::move(pdtree_path),
     RGBIndicatorProvider{},
     HatchProvider{ polling_service, poller_factory },
     SysfsDS18B20Provider{ polling_service, poller_factory },
@@ -41,7 +42,7 @@ void main_board_init(
 
   // Handle main board
   auto board_id = mgmt::device::register_device(std::move(builder).build_board());
-  const auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(board_id);
+  const mgmt::device::Device auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(board_id);
   hw_identity_store.emplace(board_id, board.hardware_identity());
   polling_service.add_poller(board_id,
     std::chrono::seconds(5),
@@ -55,8 +56,8 @@ void main_board_init(
     dtree,
     bus
   };
-  auto generic_dev_loaders = std::move(builder).build_generic_loaders();
-  for (auto&& loader : generic_dev_loaders) {
+  auto generic_dev_loaders = std::move(builder).build_generic_loaders(); //NOLINT(hicpp-invalid-access-moved,bugprone-use-after-move)
+  for (auto&& loader : generic_dev_loaders) {                            //call ref&& qualified method
     loader(generic_dev_loader_handler);
   }
 }

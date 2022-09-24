@@ -11,50 +11,51 @@ namespace mgmt::device {
 namespace details {
   static inline auto new_id()
   {
-    static std::atomic<DeviceId_t> id{ 1 };
+    static std::atomic<DeviceId_t> device_id{ 1 };
 
-    return id++;
+    return device_id++;
   }
 }// namespace details
 
+//TODO(pp): Move Invertory to invertory.hpp
 template<class D>
-inline auto inventory = Inventory<D>{};
+inline auto Inventory = DeviceInventory<D>{}; //NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 template<class D>
 auto register_device(D&& device)
 {
-  auto id = details::new_id();
+  auto device_id = details::new_id();
 
-  common::logger::get(mgmt::device::Logger)->debug("{}, device id: {}", __FUNCTION__, id);
+  common::logger::get(mgmt::device::Logger)->debug("{}, device device_id: {}", __FUNCTION__, device_id);
 
-  inventory<D>.add(id, std::forward<D>(device));
+  Inventory<D>.add(device_id, std::forward<D>(device));
 
-  return id;
+  return device_id;
 }
 
 template<class D, class... Args>
 auto register_device(Args&&... args)
 {
-  auto id = details::new_id();
+  auto device_id = details::new_id();
 
-  common::logger::get(mgmt::device::Logger)->debug("{}, device id: {}", __FUNCTION__, id);
+  common::logger::get(mgmt::device::Logger)->debug("{}, device device_id: {}", __FUNCTION__, device_id);
 
-  inventory<D>.emplace(id, std::forward<Args>(args)...);
+  Inventory<D>.emplace(device_id, std::forward<Args>(args)...);
 
-  return id;
+  return device_id;
 }
 
 template<class D>
-decltype(auto) get_device(const DeviceId_t& id)
+decltype(auto) get_device(const DeviceId_t& device_id)
 {
-  return inventory<D>.get(id);
+  return Inventory<D>.get(device_id);
 }
 
 template<class D>
-auto deregister_device(const DeviceId_t& id)
+auto deregister_device(const DeviceId_t& device_id)
 {
-  common::logger::get(mgmt::device::Logger)->debug("{}, device id: {}", __FUNCTION__, id);
+  common::logger::get(mgmt::device::Logger)->debug("{}, device device_id: {}", __FUNCTION__, device_id);
 
-  inventory<D>.remove(id);
+  Inventory<D>.remove(device_id);
 }
 }// namespace mgmt::device

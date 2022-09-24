@@ -110,7 +110,7 @@ int main(int argc, char** argv)
       },
       common::coro::rethrow);
     bctx.run();
-  } catch (...) {
+  } catch (const std::exception& exception) {
     common::logger::get(mgmt::app::Logger)->error(fmt::format("Exception has been thrown: {}", exception.what()));
     std::abort();
   }

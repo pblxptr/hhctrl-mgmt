@@ -24,23 +24,27 @@ template<class EntityClient>
 class Sensor : public Entity<EntityClient>
 {
   using Base_t = Entity<EntityClient>;
-  using Base_t::unique_id_;
-  using Base_t::client_;
   using Base_t::topic;
   using Base_t::async_set_availability;
-
+  using Base_t::async_publish;
 public:
+  using Base_t::unique_id;
+
   Sensor() = delete;
-  Sensor(std::string uid, EntityClient client)// TODO: Consider passing EntityClient by rvalue ref
+  Sensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
     : Base_t(std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}, unique_id: {}", __FUNCTION__, unique_id_);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
-
-  Sensor(const Sensor&) = delete;
-  Sensor& operator=(const Sensor&) = delete;
+  // movable
   Sensor(Sensor&& rhs) noexcept = default;
   Sensor& operator=(Sensor&&) noexcept = default;
+
+  // non-copyable
+  Sensor(const Sensor&) = delete;
+  Sensor& operator=(const Sensor&) = delete;
+
+  ~Sensor() = default;
 
   boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
@@ -48,31 +52,31 @@ public:
 
     config.set_override(SensorConfig::StateTopicKey, topics_.at(SensorConfig::StateTopicKey));
 
-    config.set_override(GenericEntityConfig::availabilityTopic, topics_.at(GenericEntityConfig::availabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
-    co_await client_.async_publish(fmt::format("homeassistant/sensor/{}/config", unique_id_), config.parse());
+    co_await async_publish(fmt::format("homeassistant/sensor/{}/config", unique_id()), config.parse());
   }
 
   boost::asio::awaitable<void> async_set_value(const std::string& value)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}", __FUNCTION__);
 
-    co_await client_.async_publish(topics_.at(SensorConfig::StateTopicKey), value);
+    co_await async_publish(topics_.at(SensorConfig::StateTopicKey), value);
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}", __FUNCTION__);
 
-    co_await async_set_availability(topics_.at(GenericEntityConfig::availabilityTopic), availability);
+    co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{
     std::pair{ SensorConfig::StateTopicKey, topic(SensorConfig::TopicEntityName, SensorConfig::StateTopicValue) },
-    std::pair{ GenericEntityConfig::availabilityTopic, topic(SensorConfig::TopicEntityName, GenericEntityConfig::availabilityTopic) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(SensorConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(SensorConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
   };
 };

@@ -1,39 +1,39 @@
 on: push
 
 jobs:
-  clang-format:
-    runs-on: ubuntu-latest
-    container: bicompb/clang-15
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v3
-
-      - name: "Run clang-format"
-        run: ./scripts/check-clang-format-all.sh
-
-      - name: "Verify"
-        run: ./scripts/verify-clang-format.sh
-
-#  clang-tidy:
+#  clang-format:
 #    runs-on: ubuntu-latest
 #    container: bicompb/clang-15
 #    steps:
 #      - name: "Checkout"
 #        uses: actions/checkout@v3
 #
-#      - name: "Configure CMake"
-#        uses: ./.github/workflows/action-cmake-configure
-#        with:
-#          preset: ${{ inputs.preset }}
-#          build_type: ${{ inputs.build_type }}
-#
-#      - name: "Run clang-tidy"
-#        working-directory: cmake-build-${{ inputs.preset }}
-#        run: ../scripts/check-clang-tidy.sh
+#      - name: "Run clang-format"
+#        run: ./scripts/check-clang-format-all.sh
 #
 #      - name: "Verify"
-#        working-directory: cmake-build-${{ inputs.preset }}
-#        run: |
-#          if [[ `wc -l < errors.yml` != "0" ]]; then
-#              false
-#          fi
+#        run: ./scripts/verify-clang-format.sh
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    container: bicompb/clang-15
+    env:
+      build_dir: cmake-build-clang-tidy
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Configure CMake"
+        uses: ./.github/workflows/action-cmake-configure
+        with:
+          preset: linux_clang_debug
+          build_type: Debug
+
+      - name: "Run clang-tidy"
+        working-directory: ${{ env.build_dir }}
+        run: ../scripts/check-clang-tidy.sh
+
+      - name: "Verify"
+        working-directory: ${{ env.build_dir }}
+        run: ../scripts/verify-clang-tidy.sh
+

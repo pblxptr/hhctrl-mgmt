@@ -9,13 +9,22 @@
 // e.g. id, owner and so on.
 
 namespace common::scheduler {
-class Task
+class ITask
 {
 public:
   using Id_t = boost::uuids::uuid;
   using Timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
 
-  virtual ~Task() = default;
+  ITask() = default;
+  //movable
+  ITask(ITask&&) noexcept = default;
+  ITask& operator=(ITask&&) noexcept = default;
+  //copyable
+  ITask(const ITask&) = default;
+  ITask& operator=(const ITask&) = default;
+
+  virtual ~ITask() = default;
+
   virtual const Id_t& id() const = 0;
   virtual const std::string& owner() const = 0;
   virtual void activate() = 0;
@@ -26,8 +35,8 @@ public:
 
 struct TaskInfo
 {
-  const Task::Id_t id;
-  const std::string owner;
-  const Task::Timepoint_t expiry;
+  ITask::Id_t id;
+  std::string owner;
+  ITask::Timepoint_t expiry;
 };
 }// namespace common::scheduler

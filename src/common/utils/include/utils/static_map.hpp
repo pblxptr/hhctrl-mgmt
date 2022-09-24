@@ -6,38 +6,38 @@
 
 namespace common::utils {
 
-template<class TKey, class TValue, std::size_t Size>
+template<class TKey, class TValue, std::size_t size>
 class StaticMap
 {
 public:
-  using value_type = std::array<std::pair<TKey, TValue>, Size>;
+  using ValueType_t = std::array<std::pair<TKey, TValue>, size>;
 
   // Find element by key
   // Throws if not found
-  constexpr decltype(auto) at(const TKey& k) const
+  constexpr decltype(auto) at(const TKey& key) const
   {
-    auto it = std::find_if(std::begin(data), std::end(data), [&k](const auto& x) { return k == x.first; });
+    auto elem = std::find_if(std::begin(data), std::end(data), [&key](const auto& xelem) { return key == xelem.first; });
 
-    if (it == data.end()) {
+    if (elem == data.end()) {
       throw std::range_error(fmt::format("range error, details: {}", common::logger::source()));
     }
 
-    return it->second;
+    return elem->second;
   }
 
   // Find element by value
   // Throws if not found
-  constexpr decltype(auto) at(const TValue& v) const
+  constexpr decltype(auto) at(const TValue& value) const
   {
-    auto it = std::find_if(std::begin(data), std::end(data), [&v](const auto& x) { return v == x.second; });
+    auto elem = std::find_if(std::begin(data), std::end(data), [&value](const auto& xelem) { return value == xelem.second; });
 
-    if (it == data.end()) {
+    if (elem == data.end()) {
       throw std::range_error(fmt::format("range error, details: {}", common::logger::source()));
     }
 
-    return it->first;
+    return elem->first;
   }
 
-  value_type data;
+  ValueType_t data;
 };
 }// namespace common::utils

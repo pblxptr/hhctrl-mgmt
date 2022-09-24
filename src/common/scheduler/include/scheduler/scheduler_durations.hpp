@@ -4,10 +4,10 @@
 #include <chrono>
 
 namespace common::scheduler {
-using at_time = std::string;
-struct days_at
+using AtTime_t = std::string;
+struct DaysAt
 {
   std::chrono::days days;
-  at_time at;
+  AtTime_t at;
 };
 }// namespace common::scheduler

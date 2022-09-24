@@ -9,7 +9,7 @@ namespace mgmt::platform_device {
 class RGBIndicatorProvider
 {
 public:
-  constexpr const char* compatible() const
+  constexpr static const char* compatible()
   {
     return "sysfs_rgbled_indicator";
   }
@@ -47,11 +47,12 @@ public:
     return true;
   }
 
-  std::optional<mgmt::device::SysfsLed> load_led(const PdTreeArray_t& leds, std::string_view led_label)
+private:
+  static std::optional<mgmt::device::SysfsLed> load_led(const PdTreeArray_t& leds, std::string_view led_label)
   {
     constexpr auto sysfs_path_atrr = "sysfs_path";
-    auto led_descriptor = std::find_if(leds.begin(), leds.end(), [&led_label](const auto& e) {
-      const auto& e_obj = e.as_object();
+    auto&& led_descriptor = std::find_if(leds.begin(), leds.end(), [&led_label](const auto& prop) {
+      const auto& e_obj = prop.as_object();
       return e_obj.contains("color") && pdtree_to_string(e_obj.at("color")) == led_label;
     });
 
