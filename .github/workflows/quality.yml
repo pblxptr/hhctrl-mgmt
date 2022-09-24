@@ -20,12 +20,9 @@ jobs:
     env:
       build_dir: cmake-build-clang-tidy
     steps:
-      - name: "Test"
-        run: |
-          ls -la ~/
-          ls -la /github/home
-          ls -la /root
-          find / -name target-default
+      - name: "Checkout pre"
+        uses: actions/checkout@v3
+
       - name: "ls -la ~/"
         run: ls -la ~/
 
