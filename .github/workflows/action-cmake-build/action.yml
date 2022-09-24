@@ -11,7 +11,6 @@ runs:
   using: composite
   steps:
     - name: "Configure CMake"
-      working-directory: cmake-build-${{ inputs.preset }}
       uses: ./.github/workflows/action-cmake-configure
       with:
           preset: ${{ inputs.preset }}
