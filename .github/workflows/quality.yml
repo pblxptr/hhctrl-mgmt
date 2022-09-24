@@ -22,8 +22,11 @@ jobs:
     steps:
       - name: "Test"
         run: |
+          ls -la ~/
+          ls -la /github/home
           ls -la /root
-          ls -la /home/.conan
+          ls -la /github/home/.conan
+          find / --name target-default
 
       - name: "Checkout"
         uses: actions/checkout@v3
