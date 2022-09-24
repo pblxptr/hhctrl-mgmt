@@ -25,7 +25,18 @@ jobs:
           ls -la ~/
           ls -la /github/home
           ls -la /root
-          find / --name target-default
+          find / -name target-default
+      - name: "ls -la ~/"
+        run: ls -la ~/
+
+      - name: "ls -la /github/home"
+        run: ls -la /github/home
+
+      - name: "ls -la /root"
+        run: ls -la /root
+
+      - name: "find / -name target-default"
+        run: find / -name target-default
 
       - name: "Checkout"
         uses: actions/checkout@v3
