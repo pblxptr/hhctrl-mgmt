@@ -23,12 +23,6 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
 
-      - name: "Configure CMake"
-        uses: ./.github/workflows/action-cmake-configure
-        with:
-          preset: linux_clang_debug
-          build_type: Debug
-
       - name: "Build CMake"
         uses: ./.github/workflows/action-cmake-build
         with:
