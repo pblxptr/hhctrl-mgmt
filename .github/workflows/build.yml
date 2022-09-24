@@ -43,7 +43,7 @@ on: [push]
 jobs:
   build-GCC:
     runs-on: ubuntu-latest
-    container: gcc:11
+    container: gcc:11-root
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
@@ -62,4 +62,27 @@ jobs:
         uses: ./.github/workflows/action-cmake-build
         with:
           preset: linux_gcc_release
+          build_type: Release
 
+  buildClang:
+    runs-on: ubuntu-latest
+    container: clang:15-root
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: Build Debug
+        env:
+          build_dir: cmake-build-linux_clang_debug
+        uses: ./.github/workflows/action-cmake-build
+        with:
+          preset: linux_clang_debug
+          build_type: Debug
+
+      - name: Build Release
+        env:
+          build_dir: cmake-build-linux_clang_release
+        uses: ./.github/workflows/action-cmake-build
+        with:
+          preset: linux_clang_release
+          build_type: Release
