@@ -175,19 +175,25 @@ private:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
 
-    if (++reconnect_.attempt > reconnect_.max_attempts) {
-      co_return false;
-    }
+    while (++reconnect_.attempt <= reconnect_.max_attempts) {
+      auto error_code = boost::system::error_code{};
 
-    auto error_code = boost::system::error_code{};
-    reconnect_.timer.expires_after(reconnect_.reconnect_delay);
-    co_await reconnect_.timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, error_code));
-    if (!error_code) {
+      reconnect_.timer.expires_after(reconnect_.reconnect_delay);
+      co_await reconnect_.timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, error_code));
+
+      if (error_code) {
+        co_return false;
+      }
       common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
-      co_await async_connect();
+
+      error_code = co_await do_async_connect(boost::asio::use_awaitable);
+
+      if (not error_code) {
+        co_return true;
+      }
     }
 
-    co_return true;
+    co_return false;
   }
 
   template<class Handler>
@@ -209,6 +215,7 @@ private:
     if (not(co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Undefined, error_code.message() });
     }
+    co_return;
   }
 
   boost::asio::awaitable<void> on_close()
@@ -218,6 +225,7 @@ private:
     if (not(co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });
     }
+    co_return ;
   }
 
   template<class ResponseHandler = boost::asio::use_awaitable_t<>>

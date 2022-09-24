@@ -29,6 +29,12 @@ jobs:
           preset: linux_clang_debug
           build_type: Debug
 
+      - name: "Build CMake"
+        uses: ./.github/workflows/action-cmake-build
+        with:
+          preset: linux_clang_debug
+          build_type: Debug
+
       - name: "Run clang-tidy"
         working-directory: ${{ env.build_dir }}
         run: ../scripts/check-clang-tidy.sh
