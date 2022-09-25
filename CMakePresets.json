@@ -29,6 +29,13 @@
       }
     },
     {
+      "name" : "Unit_Tests",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_TESTING" : true
+      }
+    },
+    {
       "name": "Debug",
       "hidden": true,
       "cacheVariables": {
@@ -58,6 +65,11 @@
     {
       "name": "linux_clang_release",
       "inherits": ["Linux_Clang", "Release"]
+    },
+
+    {
+      "name": "linux_gcc_debug_unit_tests",
+      "inherits": ["Linux_GCC", "Debug", "Unit_Tests"]
     }
   ]
 }
