@@ -25,8 +25,8 @@ public:
     return type_;
   }
 
-  //TODO(pp) Implement, remove nolint
-  IndicatorState state() const //NOLINT(readability-convert-member-functions-to-static)
+  // TODO(pp) Implement, remove nolint
+  IndicatorState state() const// NOLINT(readability-convert-member-functions-to-static)
   {
     return IndicatorState::NotAvailable;
   }

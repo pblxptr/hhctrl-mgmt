@@ -9,9 +9,9 @@
 #include <fmt/format.h>
 
 namespace common::utils::datetime {
-constexpr auto DateFmt = std::string_view { "%Y-%m-%d"};
-constexpr auto TimeFmt = std::string_view {"%H:%M:%S"};
-constexpr auto DatetimeFmt = std::string_view {"%Y-%m-%d %H:%M:%S %Z"};
+constexpr auto DateFmt = std::string_view{ "%Y-%m-%d" };
+constexpr auto TimeFmt = std::string_view{ "%H:%M:%S" };
+constexpr auto DatetimeFmt = std::string_view{ "%Y-%m-%d %H:%M:%S %Z" };
 
 using Precision_t = std::chrono::milliseconds;
 
@@ -42,7 +42,7 @@ auto parse_time(T&& time, TTimepoint&& base_timepoint = get_now())
 template<class TSource>
 auto from_timestamp(TSource&& since_epoch)
 {
-  return std::chrono::time_point<std::chrono::system_clock>(Precision_t{since_epoch});
+  return std::chrono::time_point<std::chrono::system_clock>(Precision_t{ since_epoch });
 }
 
 template<class TSource>

@@ -3,4 +3,4 @@
 namespace mgmt::home_assistant::mqttc {
 enum class Availability { Offline,
   Online };
-} // namespace mgmt::home_assistant::mqttc
+}// namespace mgmt::home_assistant::mqttc

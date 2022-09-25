@@ -4,4 +4,4 @@
 
 namespace common::event {
 constexpr auto Logger = "common::event";
-} // namespace common::event
+}// namespace common::event

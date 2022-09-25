@@ -16,10 +16,10 @@ public:
   using Timepoint_t = std::chrono::time_point<std::chrono::system_clock>;
 
   ITask() = default;
-  //movable
+  // movable
   ITask(ITask&&) noexcept = default;
   ITask& operator=(ITask&&) noexcept = default;
-  //copyable
+  // copyable
   ITask(const ITask&) = default;
   ITask& operator=(const ITask&) = default;
 

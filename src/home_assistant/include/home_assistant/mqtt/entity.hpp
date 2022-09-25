@@ -67,7 +67,7 @@ protected:
     , client_{ std::move(client) }
   {}
 
-  //TODO(pp): Consider passing topic by ref
+  // TODO(pp): Consider passing topic by ref
   template<class Payload>
   boost::asio::awaitable<void> async_publish(std::string topic, const Payload& payload)
   {

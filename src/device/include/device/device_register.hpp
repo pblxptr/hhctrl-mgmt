@@ -17,9 +17,9 @@ namespace details {
   }
 }// namespace details
 
-//TODO(pp): Move Invertory to invertory.hpp
+// TODO(pp): Move Invertory to invertory.hpp
 template<class D>
-inline auto Inventory = DeviceInventory<D>{}; //NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+inline auto Inventory = DeviceInventory<D>{};// NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 template<class D>
 auto register_device(D&& device)

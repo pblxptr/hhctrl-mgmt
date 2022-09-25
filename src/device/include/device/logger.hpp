@@ -4,4 +4,4 @@
 
 namespace mgmt::device {
 constexpr auto Logger = "mgmt:device";
-} // namespace mgmt::device
+}// namespace mgmt::device

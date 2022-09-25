@@ -131,27 +131,26 @@ public:
       }
 
       impl_->set_publish_handler([begin, end](
-        mqtt::optional<std::uint16_t> packet_id,
-        [[maybe_unused]] mqtt::publish_options pubopts,
-        mqtt::buffer topic_name, //NOLINT(bugprone-easily-swappable-parameters) lambda's parameters enforced by 3rd party lib
-        mqtt::buffer contents
-        ) {
-          common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::publish_handler, packet id: {}", packet_id.value_or(0));
+                                   mqtt::optional<std::uint16_t> packet_id,
+                                   [[maybe_unused]] mqtt::publish_options pubopts,
+                                   mqtt::buffer topic_name,// NOLINT(bugprone-easily-swappable-parameters) lambda's parameters enforced by 3rd party lib
+                                   mqtt::buffer contents) {
+        common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::publish_handler, packet id: {}", packet_id.value_or(0));
 
-          auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& cfg) {
-            auto& [topic, handler] = cfg;
-            return topic_name.compare(topic) == 0; //TODO(pp) Verify if compare works as expected
-          });
-
-          if (topic_handler == end) {
-            return false;
-          }
-
-          auto& [topic, handler] = *topic_handler;
-          handler(std::move(contents));
-
-          return true;
+        auto topic_handler = std::find_if(begin, end, [&topic_name](auto&& cfg) {
+          auto& [topic, handler] = cfg;
+          return topic_name.compare(topic) == 0;// TODO(pp) Verify if compare works as expected
         });
+
+        if (topic_handler == end) {
+          return false;
+        }
+
+        auto& [topic, handler] = *topic_handler;
+        handler(std::move(contents));
+
+        return true;
+      });
       return true;
     });
 
@@ -225,7 +224,7 @@ private:
     if (not(co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });
     }
-    co_return ;
+    co_return;
   }
 
   template<class ResponseHandler = boost::asio::use_awaitable_t<>>

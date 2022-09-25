@@ -9,4 +9,4 @@
 
 namespace mgmt::device {
 using RGBLed_t = SysfsRGBLed;
-} // namespace mgmt::device
+}// namespace mgmt::device

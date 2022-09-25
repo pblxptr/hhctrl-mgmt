@@ -27,6 +27,7 @@ class Sensor : public Entity<EntityClient>
   using Base_t::topic;
   using Base_t::async_set_availability;
   using Base_t::async_publish;
+
 public:
   using Base_t::unique_id;
 

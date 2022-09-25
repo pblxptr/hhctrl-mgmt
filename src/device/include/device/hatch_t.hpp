@@ -5,4 +5,4 @@
 
 namespace mgmt::device {
 using Hatch_t = mgmt::device::SysfsHatch;
-} // namespace mgmt::device
+}// namespace mgmt::device

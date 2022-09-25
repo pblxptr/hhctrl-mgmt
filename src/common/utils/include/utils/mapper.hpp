@@ -22,7 +22,7 @@ namespace impl {
 
     const KeyValuePair_t Kvp;
 
-    consteval BaseMapper(std::pair<Key_t, Value_t> kvp) //NOLINT(modernize-pass-by-value)
+    consteval BaseMapper(std::pair<Key_t, Value_t> kvp)// NOLINT(modernize-pass-by-value)
       : Kvp{ kvp }
     {}
   };

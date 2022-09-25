@@ -25,6 +25,6 @@ private:
     return event_id;
   }
 
-  static inline std::atomic<EventId_t> Counter{ 1 }; //NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+  static inline std::atomic<EventId_t> Counter{ 1 };// NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 };
 }// namespace common::event

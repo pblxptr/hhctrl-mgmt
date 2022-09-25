@@ -26,7 +26,7 @@ inline void main_board_init(
   mgmt::device::PollingService& polling_service,
   common::event::AsyncEventBus& bus)
 {
-  using namespace mgmt::platform_device; //NOLINT(google-build-using-namespace)
+  using namespace mgmt::platform_device;// NOLINT(google-build-using-namespace)
 
   // Prepare
   auto poller_factory = mgmt::poller::PollerFactory{ bus };
@@ -56,8 +56,8 @@ inline void main_board_init(
     dtree,
     bus
   };
-  auto generic_dev_loaders = std::move(builder).build_generic_loaders(); //NOLINT(hicpp-invalid-access-moved,bugprone-use-after-move)
-  for (auto&& loader : generic_dev_loaders) {                            //call ref&& qualified method
+  auto generic_dev_loaders = std::move(builder).build_generic_loaders();// NOLINT(hicpp-invalid-access-moved,bugprone-use-after-move)
+  for (auto&& loader : generic_dev_loaders) {// call ref&& qualified method
     loader(generic_dev_loader_handler);
   }
 }

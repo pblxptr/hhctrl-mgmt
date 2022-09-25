@@ -12,7 +12,8 @@
 #include <scheduler/everydays_at_task.hpp>
 
 namespace common::scheduler {
-enum class Execution { Relaxed, Strict };
+enum class Execution { Relaxed,
+  Strict };
 constexpr auto AnonymousTask = "anonymous";
 
 template<class T>

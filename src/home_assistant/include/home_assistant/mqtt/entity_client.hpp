@@ -104,7 +104,7 @@ public:
       impl_->set_publish_handler([this, begin, end](
                                    mqtt::optional<std::uint16_t> packet_id,
                                    [[maybe_unused]] mqtt::publish_options pubopts,
-                                   mqtt::buffer topic_name, //NOLINT(bugprone-easily-swappable-parameters) lambda's parameters enforced by 3rd party lib
+                                   mqtt::buffer topic_name,// NOLINT(bugprone-easily-swappable-parameters) lambda's parameters enforced by 3rd party lib
                                    mqtt::buffer contents) {
         common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::publish_handler, packet id: {}", packet_id.value_or(0));
 

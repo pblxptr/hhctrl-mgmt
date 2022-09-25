@@ -60,6 +60,7 @@ class Cover : public Entity<EntityClient>
   using Base_t::async_set_availability;
   using Base_t::async_publish;
   using Base_t::async_subscribe;
+
 public:
   using Base_t::unique_id;
 
