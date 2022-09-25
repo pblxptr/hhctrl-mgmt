@@ -1,4 +1,4 @@
-#include "file_task_store.hpp"
+#include <scheduler/file_task_store.hpp>
 
 #include <string_view>
 #include <filesystem>
@@ -11,14 +11,12 @@
 namespace json = boost::json;
 namespace fs = std::filesystem;
 
-using namespace common::scheduler;
-
 namespace common::scheduler {
 // Serialize
-void tag_invoke(json::value_from_tag, json::value& jv, const TaskEntity& task)
+void tag_invoke(json::value_from_tag /* unused */, json::value& jvalue, const TaskEntity& task)
 {
   using std::to_string;
-  jv = {
+  jvalue = {
     { "id", to_string(task.id) },
     { "owner", task.owner },
     { "timestamp", task.timestamp }
@@ -26,10 +24,10 @@ void tag_invoke(json::value_from_tag, json::value& jv, const TaskEntity& task)
 }
 
 // Deserialize
-TaskEntity tag_invoke(json::value_to_tag<TaskEntity>, const json::value& jv)
+TaskEntity tag_invoke(json::value_to_tag<TaskEntity> /* unused */, const json::value& jvalue)
 {
   auto string_gen = boost::uuids::string_generator{};
-  const json::object& obj = jv.as_object();
+  const json::object& obj = jvalue.as_object();
   return TaskEntity{
     string_gen(json::value_to<std::string>(obj.at("id"))),
     json::value_to<std::string>(obj.at("owner")),
@@ -49,52 +47,52 @@ FileTaskStore::FileTaskStore(std::string fpath)
   load();
 }
 
-void FileTaskStore::add(TaskEntity entity)
+void FileTaskStore::add(const TaskEntity& entity)
 {
-  auto e = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&entity](const auto& x) {
-    return entity.id == x.id;
+  auto task = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&entity](const auto& xtask) {
+    return entity.id == xtask.id;
   });
 
-  if (e != cached_tasks_.end()) {
-    throw std::runtime_error("Task already exist.");
+  if (task != cached_tasks_.end()) {
+    throw std::runtime_error("ITask already exist.");
   }
 
-  cached_tasks_.push_back(std::move(entity));
+  cached_tasks_.push_back(entity);
   store();
   load();
 }
 
-bool FileTaskStore::exist(const TaskEntity::Id_t& id) const
+bool FileTaskStore::exist(const TaskEntity::Id_t& task_id) const
 {
-  return std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&id](const auto& x) {
-    return id == x.id;
+  return std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&task_id](const auto& xtask) {
+    return task_id == xtask.id;
   }) != cached_tasks_.end();
 }
 
-std::optional<TaskEntity> FileTaskStore::find(const TaskEntity::Id_t& id) const// TODO: Consider returning different type
+std::optional<TaskEntity> FileTaskStore::find(const TaskEntity::Id_t& task_id) const// TODO(pp): Consider returning different type
 {
-  auto e = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&id](const auto& x) {
-    return id == x.id;
+  auto task = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&task_id](const auto& xtask) {
+    return task_id == xtask.id;
   });
 
-  if (e == cached_tasks_.end()) {
+  if (task == cached_tasks_.end()) {
     return std::nullopt;
-  } else {
-    return { *e };
   }
+
+  return { *task };
 }
 
-void FileTaskStore::remove(const TaskEntity::Id_t& id)
+void FileTaskStore::remove(const TaskEntity::Id_t& task_id)
 {
-  auto e = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&id](const auto& x) {
-    return id == x.id;
+  auto task = std::find_if(cached_tasks_.begin(), cached_tasks_.end(), [&task_id](const auto& xtask) {
+    return task_id == xtask.id;
   });
 
-  if (e == cached_tasks_.end()) {
-    throw std::runtime_error("Task does not exist");
+  if (task == cached_tasks_.end()) {
+    throw std::runtime_error("ITask does not exist");
   }
 
-  cached_tasks_.erase(e);
+  cached_tasks_.erase(task);
   store();
   load();
 }
@@ -123,7 +121,7 @@ void FileTaskStore::load()
     throw std::runtime_error("Error while parsing file. File may be malformed.");
   }
 
-  // Todo: Consider more efficient way to update values, monotonic buffers etc
+  // TODO(pp): Consider more efficient way to update values, monotonic buffers etc
   cached_tasks_ = json::value_to<std::vector<TaskEntity>>(parser.release());
 }
 

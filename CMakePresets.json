@@ -1,0 +1,63 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "Linux",
+      "hidden": true,
+      "generator" : "Unix Makefiles",
+      "toolchainFile" : "conan_paths.cmake"
+    },
+    {
+      "name": "Linux_GCC",
+      "hidden": true,
+      "inherits": "Linux"
+    },
+    {
+      "name": "Linux_Clang",
+      "hidden": true,
+      "inherits": "Linux",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER" : "clang",
+        "CMAKE_CXX_COMPILER" : "clang++",
+        "BOOST_ASIO_HAS_CO_AWAIT" : true,
+        "BOOST_ASIO_HAS_STD_COROUTINE": true
+      }
+    },
+    {
+      "name": "Debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : "Debug"
+      }
+    },
+    {
+      "name": "Release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : "Release"
+      }
+    },
+
+    {
+      "name": "linux_gcc_debug",
+      "inherits": ["Linux_GCC", "Debug"]
+    },
+    {
+      "name": "linux_gcc_release",
+      "inherits": ["Linux_GCC", "Release"]
+    },
+    {
+      "name": "linux_clang_debug",
+      "inherits": ["Linux_Clang", "Debug"]
+    },
+    {
+      "name": "linux_clang_release",
+      "inherits": ["Linux_Clang", "Release"]
+    }
+  ]
+}

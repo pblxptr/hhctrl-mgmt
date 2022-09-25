@@ -12,3 +12,6 @@ A C++20 support is required as the code highly utlizes new features like concept
 - Boost 1.75+ (required Boost.Json)
 - spdlog
 - fmt
+
+## Future improvements ##
+- Full async support through coroutines

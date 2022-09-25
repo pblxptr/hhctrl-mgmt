@@ -1,0 +1,96 @@
+---
+Checks:                '*,
+                       -altera-*,
+                       -bugprone-macro-parentheses,
+                       -cert-err58-cpp,
+                       -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+                       -cppcoreguidelines-pro-bounds-constant-array-index,
+                       -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+                       -cppcoreguidelines-pro-type-reinterpret-cast,
+                       -cppcoreguidelines-pro-type-union-access,
+                       -fuchsia-*,
+                       -llvmlibc-*,
+                       -google-default-arguments,
+                       -google-explicit-constructor,
+                       -google-runtime-references,
+                       -hicpp-explicit-conversions,
+                       -hicpp-no-array-decay,
+                       -hicpp-no-assembler,
+                       -hicpp-signed-bitwise,
+                       -llvm-header-guard,
+                       -llvm-include-order,
+                       -modernize-use-nodiscard,
+                       -modernize-use-trailing-return-type,
+                       -llvm-include-order,
+                       -readability-redundant-access-specifiers,
+                       -*-magic-numbers'
+WarningsAsErrors:      '*'
+HeaderFilterRegex:     ''
+AnalyzeTemporaryDtors: false
+FormatStyle:           file
+User:                  pp
+CheckOptions:
+  - key:               bugprone-dangling-handle.HandleClasses
+    value:             'std::basic_string_view;std::experimental::basic_string_view'
+  - key:               google-readability-braces-around-statements.ShortStatementLines
+    value:             '2'
+  - key:               hicpp-braces-around-statements.ShortStatementLines
+    value:             '2'
+  - key:               hicpp-move-const-arg.CheckTriviallyCopyableMove
+    value:             '0'
+  - key:               misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:             '1'
+  - key:               readability-braces-around-statements.ShortStatementLines
+    value:             '2'
+  - key:               readability-identifier-naming.AbstractClassCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.AbstractClassPrefix
+    value:             'I'
+  - key:               readability-identifier-naming.ClassCase
+    value:             'CamelCase'
+#  - key:              readability-identifier-naming.ClassMemberCase
+#    value:            'lower_case'
+  - key:               readability-identifier-naming.ConstantMemberCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.PrivateMemberCase
+    value:             'lower_case'
+  - key:               readability-identifier-naming.PrivateMemberSuffix
+    value:             '_'
+  - key:               readability-identifier-naming.ProtectedMemberCase
+    value:             'lower_case'
+  - key:               readability-identifier-naming.ProtectedMemberSuffix
+    value:             '_'
+  - key:               readability-identifier-naming.PublicMemberCase
+    value:             'lower_case'
+  - key:               readability-identifier-naming.EnumCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.EnumConstantCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.FunctionCase
+    value:             'lower_case'
+  - key:               readability-identifier-naming.NamespaceCase
+    value:             'lower_case'
+  - key:               readability-identifier-naming.ParameterCase
+    value:             'lower_case'
+#  - key:               readability-identifier-naming.TemplateParameterCase https://github.com/llvm/llvm-project/issues/46097
+#    value:             'CamelCase'
+  - key:               readability-identifier-naming.TypeAliasCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.TypedefCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.UnionCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.ValueTemplateParameterCase
+    value:             'camelBack'
+  - key:               readability-identifier-naming.VariableCase
+    value:             'lower_case'
+  - key:               readability-identifier-naming.GlobalVariableCase
+    value:             'CamelCase'
+  - key:               readability-identifier-naming.TypeAliasSuffix
+    value:             '_t'
+  - key:               readability-inconsistent-declaration-parameter-name.Strict
+    value:             '1'
+  - key:               performance-move-const-arg.CheckTriviallyCopyableMove
+    value:             '0'
+...
+

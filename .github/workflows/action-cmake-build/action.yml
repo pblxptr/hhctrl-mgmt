@@ -1,0 +1,22 @@
+name: 'Build'
+description: 'Build'
+inputs:
+  preset:
+    description: 'Selected preset'
+    required: true
+  build_type:
+    description: "Build type e.g. Debug, Release"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: "Configure CMake"
+      uses: ./.github/workflows/action-cmake-configure
+      with:
+          preset: ${{ inputs.preset }}
+          build_type: ${{ inputs.build_type }}
+
+    - name: "Make"
+      working-directory: ${{ env.build_dir }}
+      run: make -j$(nproc)
+      shell: bash

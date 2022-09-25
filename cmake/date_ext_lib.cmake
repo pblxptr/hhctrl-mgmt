@@ -1,3 +1,5 @@
+include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+
 ### PATHS ###
 set(DATE_DIR ${CMAKE_SOURCE_DIR}/lib/date)
 set(DATE_INCLUDE_DIR ${DATE_DIR}/include)
@@ -12,7 +14,11 @@ set(DATE_DEPENDS "")
 #   set (DATE_DEPENDS "curl")
 # endif(NOT CURL_FOUND)
 
-ExternalProject_Add(date
+## CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+
+#TODO: Add above flags to use clang when compiling, consider changing to fetchcontent
+
+ExternalProject_Add(date-tz
   GIT_REPOSITORY    "https://github.com/HowardHinnant/date.git"
   GIT_TAG           master
   SOURCE_DIR        ${CMAKE_SOURCE_DIR}/lib/date
