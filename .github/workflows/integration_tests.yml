@@ -4,7 +4,7 @@ jobs:
   build_tests:
     runs-on: ubuntu-latest
     env:
-      build_dir: ./cmake-build-linux-integration-tests
+      build_dir: cmake-build-linux-integration-tests
     container:
       image: bicompb/gcc:11-root
     steps:
@@ -20,13 +20,13 @@ jobs:
       - name: "Build integration tests"
         working-directory: ${{ env.build_dir }}
         run: |
-          make -j$(nproc) home_assistant
+          make -j$(nproc) home_assistant_itc1
 
       - name: "Ls"
         run: ls -la
 
       - name: "Ls2"
-        run: ls ${{ env.build_dir }}/bin
+        run: ls -la ${{ env.build_dir }}/bin
 
 
       - name: "Cache artifacts"
