@@ -4,7 +4,7 @@ jobs:
   build_tests:
     runs-on: ubuntu-latest
     env:
-      build_dir: cmake-build-linux-integration-tests
+      build_dir: ./cmake-build-linux-integration-tests
     container:
       image: bicompb/gcc:11-root
     steps:
@@ -24,6 +24,10 @@ jobs:
 
       - name: "Ls"
         run: ls -la
+
+      - name: "Ls2"
+        run: ls ${{ env.build_dir }}/bin
+
 
       - name: "Cache artifacts"
         uses: actions/upload-artifact@v3
