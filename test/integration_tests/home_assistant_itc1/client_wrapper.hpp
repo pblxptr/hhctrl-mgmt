@@ -36,6 +36,7 @@ public:
       co_await async_subscribe();
     });
     const auto ret = co_await sut_.async_connect();
+    assert(!ret);
     spdlog::debug(ret.message());
 
     spdlog::debug("AsyncClientWrapper: {} connected", sut_.client_id());

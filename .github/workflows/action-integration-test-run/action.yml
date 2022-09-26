@@ -15,14 +15,6 @@ runs:
       run: docker build -f ${{ inputs.dockerfile }} -t integration_tests:${{ inputs.target }} .
       shell: bash
 
-    - name: "LS"
-      run: ls -la
-      shell: bash
-
-    - name: "LS"
-      run: ls -la ${{ env.artifacts_dir }}
-      shell: bash
-
     - name: "Test"
       run: |
         docker run -v `pwd`/${{ env.artifacts_dir }}:/home/integration_test_binaries \

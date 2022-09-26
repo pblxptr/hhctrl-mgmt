@@ -98,6 +98,7 @@ void TestContext::run()
     clients_.push_back(std::unique_ptr<ClientWrapper>{ new AsyncClientWrapper{ factory.create_async_client(client_id), *this } });
   }
 
+  //TODO(pp): Spawn in multiple coroutines
   boost::asio::co_spawn(
     ioc_, [this]() -> boost::asio::awaitable<void> {
       for (auto& client : clients_) {

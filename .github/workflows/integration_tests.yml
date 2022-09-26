@@ -50,26 +50,6 @@ jobs:
           dockerfile: ./test/integration_tests/home_assistant_itc1/Dockerfile
           target: home_assistant_itc1
 
-#  checkout:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: "Checkout"
-#        uses: actions/checkout@v3
-#
-#  HomeAssistant_IntegrationTests:
-#    name: "HomeAssistant integration tests"
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: "Checkout"
-#        uses: actions/checkout@v3
-#
-#      - name: "home_assistant"
-#        uses: ./.github/workflows/action-integration-test-run
-#        with:
-#          dockerfile: ./test/integration_tests/home_assistant/Dockerfile
-#          target: home_assistant
-
-
 
 
 
