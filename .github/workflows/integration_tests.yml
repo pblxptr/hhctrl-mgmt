@@ -1,0 +1,86 @@
+on: push
+
+jobs:
+  build_tests:
+    runs-on: ubuntu-latest
+    env:
+      build_dir: cmake-build-linux-integration-tests
+    container:
+      image: bicompb/gcc:11-root
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Make file"
+        run: |
+          mkdir -p ${{ env.build_dir }}/bin
+          touch ${{ env.build_dir }}/bin/myfile.txt
+
+      - name: "Cache artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: myfile
+          path: ${{ env.build_dir }}/bin/myfile.txt
+
+
+#      - name: "Configure CMake"
+#        uses: ./.github/workflows/action-cmake-configure
+#        with:
+#          preset: linux_gcc_debug_integration_tests
+#          build_type: Debug
+#
+#      - name: "Build integration tests"
+#        working-directory: ${{ env.build_dir }}
+#        run: |
+#          make -j$(nproc) home_assistant
+#
+#      - name: "Cache artifacts"
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: home_assistant
+#          path: ${{ env.build_dir }}/bin/home_assistant
+
+
+
+#  checkout:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v3
+#
+#  HomeAssistant_IntegrationTests:
+#    name: "HomeAssistant integration tests"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v3
+#
+#      - name: "home_assistant"
+#        uses: ./.github/workflows/action-integration-test-run
+#        with:
+#          dockerfile: ./test/integration_tests/home_assistant/Dockerfile
+#          target: home_assistant
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -29,7 +29,7 @@
       }
     },
     {
-      "name" : "Unit_Tests",
+      "name" : "Tests",
       "hidden": true,
       "cacheVariables": {
         "ENABLE_TESTING" : true
@@ -69,7 +69,11 @@
 
     {
       "name": "linux_gcc_debug_unit_tests",
-      "inherits": ["Linux_GCC", "Debug", "Unit_Tests"]
+      "inherits": ["Linux_GCC", "Debug", "Tests"]
+    },
+    {
+      "name": "linux_gcc_debug_integration_tests",
+      "inherits": ["Linux_GCC", "Debug", "Tests"]
     }
   ]
 }

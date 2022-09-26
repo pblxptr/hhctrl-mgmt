@@ -42,6 +42,7 @@
 on: [push]
 jobs:
   build-GCC:
+    name: "Build GCC"
     runs-on: ubuntu-latest
     container: bicompb/gcc:11-root
     steps:
@@ -64,7 +65,8 @@ jobs:
           preset: linux_gcc_release
           build_type: Release
 
-  buildClang:
+  build-Clang:
+    name: "Build Clang"
     runs-on: ubuntu-latest
     container: bicompb/clang:15-root
     steps:

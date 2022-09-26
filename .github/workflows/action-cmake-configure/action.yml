@@ -14,7 +14,7 @@ runs:
     - name: "Create build directory"
       shell: bash
       run: |
-        mkdir ${{ env.build_dir }}
+        mkdir -p ${{ env.build_dir }}
 
     - name: "Install Conan dependencies"
       working-directory: ${{ env.build_dir }}

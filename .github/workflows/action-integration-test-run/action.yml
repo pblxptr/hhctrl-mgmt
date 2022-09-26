@@ -1,0 +1,22 @@
+# action.yml
+name: 'Run integration tests'
+description: 'Run integration tests'
+inputs:
+  target:
+    description: 'Target'
+    required: true
+  dockerfile:
+    description: "Dockefile path"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: "Build image"
+      run: docker build -f ${{ inputs.dockerfile }} -t integration_tests:${{ inputs.target }} .
+      shell: bash
+
+    - name: "Test"
+      run: docker run integration_tests:${{ inputs.target }}
+      shell: bash
+
+#        docker run $ECR_REGISTRY/$ECR_REPOSITORY:latest /bin/bash -c "make test"
