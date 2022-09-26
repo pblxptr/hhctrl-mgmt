@@ -47,7 +47,7 @@ jobs:
       - name: "HomeAssistant_ITC1"
         uses: ./.github/workflows/action-integration-test-run
         with:
-          dockerfile: ./test/integration_tests/home_assistant/Dockerfile
+          dockerfile: ./test/integration_tests/home_assistant_itc1/Dockerfile
           target: home_assistant_itc1
 
 #  checkout:
