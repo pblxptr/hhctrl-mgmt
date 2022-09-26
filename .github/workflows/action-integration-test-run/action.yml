@@ -19,6 +19,10 @@ runs:
       run: ls -la
       shell: bash
 
+    - name: "LS"
+      run: ${{ env.artifacts_dir }}
+      shell: bash
+
     - name: "Test"
       run: |
         docker run -v ${{ env.artifacts_dir }}:/home/integration_test_binaries \
