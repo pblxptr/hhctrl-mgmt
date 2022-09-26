@@ -11,37 +11,34 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
 
-      - name: "Make file"
+      - name: "Configure CMake"
+        uses: ./.github/workflows/action-cmake-configure
+        with:
+          preset: linux_gcc_debug_integration_tests
+          build_type: Debug
+
+      - name: "Build integration tests"
+        working-directory: ${{ env.build_dir }}
         run: |
-          mkdir -p ${{ env.build_dir }}/bin
-          touch ${{ env.build_dir }}/bin/myfile.txt
+          make -j$(nproc) home_assistant
 
       - name: "Cache artifacts"
         uses: actions/upload-artifact@v3
         with:
-          name: myfile
-          path: ${{ env.build_dir }}/bin/myfile.txt
+          name: integration_test_binaries
+          path: ${{ env.build_dir }}/bin
 
+  run_tests:
+    runs-on: ubuntu-latest
+    needs: build_tests
+    steps:
+      - name: "Download artifacts"
+        uses: actions/download-artifact@v3
+        with:
+          name: integration_test_binaries
 
-#      - name: "Configure CMake"
-#        uses: ./.github/workflows/action-cmake-configure
-#        with:
-#          preset: linux_gcc_debug_integration_tests
-#          build_type: Debug
-#
-#      - name: "Build integration tests"
-#        working-directory: ${{ env.build_dir }}
-#        run: |
-#          make -j$(nproc) home_assistant
-#
-#      - name: "Cache artifacts"
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: home_assistant
-#          path: ${{ env.build_dir }}/bin/home_assistant
-
-
-
+      - name: "ls"
+        run: ls integration_test_binaries
 #  checkout:
 #    runs-on: ubuntu-latest
 #    steps:
