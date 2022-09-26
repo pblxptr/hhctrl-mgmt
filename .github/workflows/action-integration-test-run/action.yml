@@ -27,7 +27,5 @@ runs:
       run: |
         docker run -v `pwd`/${{ env.artifacts_dir }}:/home/integration_test_binaries \
           integration_tests:${{ inputs.target }} \
-          /bin/bash -c "ls -la && ls -la /home && ls -la /home/integration_test_binaries"
+          /bin/bash -c "/home/integration_test_binaries/${{ inputs.target }} && exit $?"
       shell: bash
-
-#        /bin/bash -c "/home/integration_test_binaries/${{ inputs.target }} && exit $?"
