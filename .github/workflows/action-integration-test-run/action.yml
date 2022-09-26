@@ -20,7 +20,7 @@ runs:
       shell: bash
 
     - name: "LS"
-      run: ${{ env.artifacts_dir }}
+      run: ls -la ${{ env.artifacts_dir }}
       shell: bash
 
     - name: "Test"
