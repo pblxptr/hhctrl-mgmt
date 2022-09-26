@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       build_dir: cmake-build-linux-integration-tests
+      binary_dir: cmake-build-linux-integration-tests/bin
     container:
       image: bicompb/gcc:11-root
     steps:
@@ -22,18 +23,11 @@ jobs:
         run: |
           make -j$(nproc) home_assistant_itc1
 
-      - name: "Ls"
-        run: ls -la
-
-      - name: "Ls2"
-        run: ls -la ${{ env.build_dir }}/bin
-
-
       - name: "Cache artifacts"
         uses: actions/upload-artifact@v3
         with:
           name: integration_test_binaries
-          path: ${{ env.build_dir }}/bin
+          path: ${{ env.binary_dir }}
 
   run_tests:
     runs-on: ubuntu-latest
@@ -45,7 +39,10 @@ jobs:
           name: integration_test_binaries
 
       - name: "ls"
-        run: ls integration_test_binaries
+        run: ls -la
+
+      - name: "ls2"
+        run: ls -la ./
 #  checkout:
 #    runs-on: ubuntu-latest
 #    steps:
