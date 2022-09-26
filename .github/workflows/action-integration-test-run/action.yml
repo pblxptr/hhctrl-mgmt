@@ -23,5 +23,7 @@ runs:
       run: |
         docker run -v ${{ env.artifacts_dir }}:/home/integration_test_binaries \
           integration_tests:${{ inputs.target }} \
-          /bin/bash -c "/home/integration_test_binaries/${{ inputs.target }} && exit $?"
+          /bin/bash -c "ls -la && ls -la /home && ls -la /home/integration_test_binaries"
       shell: bash
+
+#        /bin/bash -c "/home/integration_test_binaries/${{ inputs.target }} && exit $?"
