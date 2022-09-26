@@ -16,7 +16,8 @@ runs:
       shell: bash
 
     - name: "Test"
-      run: docker run integration_tests:${{ inputs.target }}
+      run: |
+        docker run -v ${{ env.artifacts_dir }}:/home/integration_test_binaries \
+          integration_tests:${{ inputs.target }} \
+          /bin/bash -c "/home/integration_test_binaries/${{ inputs.target }} && exit $?"
       shell: bash
-
-#        docker run $ECR_REGISTRY/$ECR_REPOSITORY:latest /bin/bash -c "make test"

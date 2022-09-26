@@ -1,7 +1,7 @@
 on: push
 
 jobs:
-  build_tests:
+  build_integration_tests:
     runs-on: ubuntu-latest
     env:
       build_dir: cmake-build-linux-integration-tests
@@ -30,19 +30,26 @@ jobs:
           path: ${{ env.binary_dir }}
 
   run_tests:
+    env:
+      artifacts_dir: artifacts
     runs-on: ubuntu-latest
-    needs: build_tests
+    needs: build_integration_tests
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
       - name: "Download artifacts"
         uses: actions/download-artifact@v3
         with:
           name: integration_test_binaries
+          path: ${{ env.artifacts_dir }}
 
-      - name: "ls"
-        run: ls -la
+      - name: "HomeAssistant_ITC1"
+        uses: ./.github/workflows/action-integration-test-run
+        with:
+          dockerfile: ./test/integration_tests/home_assistant/Dockerfile
+          target: home_assistant_itc1
 
-      - name: "ls2"
-        run: ls -la ./
 #  checkout:
 #    runs-on: ubuntu-latest
 #    steps:
