@@ -27,5 +27,8 @@ runs:
       run: |
         docker run -v `pwd`/${{ env.artifacts_dir }}:/home/integration_test_binaries \
           integration_tests:${{ inputs.target }} \
-          /bin/bash -c "/home/integration_test_binaries/${{ inputs.target }} && exit $?"
+          /bin/bash -c "chmod +x /home/integration_test_binaries/${{ inputs.target }} && \
+            /home/integration_test_binaries/${{ inputs.target }} && \
+            exit $?
+          "
       shell: bash
