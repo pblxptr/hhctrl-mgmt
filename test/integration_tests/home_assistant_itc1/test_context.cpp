@@ -46,7 +46,7 @@ void TestContext::fail(const std::string& client_id)
 {
   spdlog::debug("Test interrupted by client: {}", client_id);
 
-  assert(0);
+  std::abort();
 }
 
 void TestContext::mark_ready(const std::string& client_id)

@@ -1,3 +1,4 @@
-FROM ubuntu:22.04
+FROM eclipse-mosquitto:2.0.15
 
 CMD ["bash"]
+

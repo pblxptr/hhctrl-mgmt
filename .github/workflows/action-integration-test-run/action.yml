@@ -15,12 +15,21 @@ runs:
       run: docker build -f ${{ inputs.dockerfile }} -t integration_tests:${{ inputs.target }} .
       shell: bash
 
-    - name: "Test"
+    - name: "Test with 1 client"
       run: |
-        docker run -v `pwd`/${{ env.artifacts_dir }}:/home/integration_test_binaries \
-          integration_tests:${{ inputs.target }} \
-          /bin/bash -c "chmod +x /home/integration_test_binaries/${{ inputs.target }} && \
-            /home/integration_test_binaries/${{ inputs.target }} && \
-            exit $?
-          "
+        run_test.sh `pwd`:/${{ env.artifacts_dir }}  \
+          integration_test:${{ inputs.target }}
+          ${{ inputs.target }}
       shell: bash
+
+
+
+#    - name: "Test with 1 client"
+#      run: |
+#        docker run -v `pwd`/${{ env.artifacts_dir }}:/home/integration_test_binaries \
+#          integration_tests:${{ inputs.target }} \
+#          /bin/bash -c "chmod +x /home/integration_test_binaries/${{ inputs.target }} && \
+#            /home/integration_test_binaries/${{ inputs.target }} && \
+#            exit $?
+#          "
+#      shell: bash
