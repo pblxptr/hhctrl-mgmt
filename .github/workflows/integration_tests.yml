@@ -130,7 +130,7 @@ jobs:
           path: ${{ env.cache_artifacts_dir }}
 
       - name: "asd"
-        run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f `pwd`./test/integration_tests/home_assistant_itc1/docker-compose.yml  up --abort-on-container-exit
+        run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f ./test/integration_tests/home_assistant_itc1/docker-compose.yml  up --abort-on-container-exit
         shell: bash
 
 
