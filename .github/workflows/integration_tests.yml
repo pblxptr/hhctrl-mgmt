@@ -130,9 +130,9 @@ jobs:
           path: ${{ env.cache_artifacts_dir }}
 
       - name: "HomeAssistant_ITC1"
-        run:  | 
-          docker-compose up --abort-on-container-exit \
-            -f ./test/integration_tests/home_assistant_itc1/Dockerfile \
+        run:  >
+          docker-compose up --abort-on-container-exit
+            -f ./test/integration_tests/home_assistant_itc1/Dockerfile
             -e ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }}
         shell: bash
 
