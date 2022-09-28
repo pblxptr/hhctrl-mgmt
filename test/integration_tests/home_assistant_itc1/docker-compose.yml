@@ -7,10 +7,12 @@ services:
     network_mode: host
   test:
     depends_on: [ mqtt_broker ]
-    image: ubuntu
-    command:
-      - /home/bin/home_assistant_itc1
-      - --tp_mqtt_server_port 1883
+    image: ubuntu:22.04
+    command: >
+        bash -c "chmod +x /home/bin/home_assistant_itc1 &&
+        /home/bin/home_assistant_itc1 \
+          --tp_mqtt_server_port 1883
+        "
     volumes:
       - ${ARTIFACTS_DIR}:/home/bin
     network_mode: host

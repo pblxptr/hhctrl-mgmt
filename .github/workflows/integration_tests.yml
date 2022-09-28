@@ -129,9 +129,6 @@ jobs:
           name: integration_test_binaries
           path: ${{ env.cache_artifacts_dir }}
 
-      - name: "Ls"
-        run: ls -la
-
       - name: "asd"
         run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f test/integration_tests/home_assistant_itc1/docker-compose.yml  up --abort-on-container-exit
         shell: bash
