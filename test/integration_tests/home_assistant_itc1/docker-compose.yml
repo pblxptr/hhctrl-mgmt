@@ -1,0 +1,16 @@
+version: "3"
+services:
+  mqtt_broker:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    network_mode: host
+  test:
+    depends_on: [ mqtt_broker ]
+    image: ubuntu
+    command:
+      - /home/bin/home_assistant_itc1
+      - --tp_mqtt_server_port 1883
+    volumes:
+      - ${ARTIFACTS_DIR}:/home/bin
+    network_mode: host
