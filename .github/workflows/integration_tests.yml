@@ -117,6 +117,7 @@ jobs:
 #        shell: bash
 
   test_docker_compose:
+    needs: build_integration_tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
