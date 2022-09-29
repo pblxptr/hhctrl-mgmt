@@ -1,0 +1,44 @@
+# action.yml
+name: 'Integration test docker compose'
+description: 'Use integration test by docker compose'
+inputs:
+  docker_compose_path:
+    description: 'Docker compose path'
+    required: true
+  target:
+    description: "Target"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Check out repository code
+      uses: actions/checkout@v3
+
+    - name: "Download artifacts"
+      uses: actions/download-artifact@v3
+      with:
+        name: integration_test_binaries
+        path: ${{ env.cache_artifacts_dir }}
+
+    - name: "Run docker-compose"
+      run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f ${{ env.docker_compose_path }} up --abort-on-container-exit
+      shell: bash
+
+
+
+#    needs: build_integration_tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out repository code
+#        uses: actions/checkout@v3
+#
+#      - name: "Download artifacts"
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: integration_test_binaries
+#          path: ${{ env.cache_artifacts_dir }}
+#
+#      - name: "asd"
+#        run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f test/integration_tests/home_assistant_itc1/docker-compose.yml  up --abort-on-container-exit
+#        shell: bash
+
