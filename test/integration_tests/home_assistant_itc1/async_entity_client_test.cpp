@@ -45,6 +45,12 @@ auto get_config()
                                        : DefaultNumberOfMessagesPerClient
   };
 }
+
+auto build_client_id(std::size_t client_number)
+{
+  return std::string{ "client-" } + std::to_string(client_number);
+}
+
 }// namespace
 
 void test_spec_setup()
@@ -69,6 +75,23 @@ void test_spec_setup()
     .name = NumberOfMessagesPerClientOptionName,
     .hint = "number of messages",
     .description = "Number of messages that every client will send" });
+}
+
+namespace test {
+  std::string rand_client_id()
+  {
+    static auto gen = std::default_random_engine{};
+    auto dist = std::uniform_int_distribution<int>(0, params_.number_of_clients - 1);
+
+    return build_client_id(dist(gen));
+  }
+
+  size_t number_of_messages_per_client() const;
+  void fail(const std::string& client_id);
+  void mark_ready(const std::string& client_id);
+  bool marked_ready(const std::string& client_id);
+  void notify_received_by(const std::string& client_id);
+  void notify_sent_for(const std::string& client_id);
 }
 
 SCENARIO("Async clients can send and receive messages")
