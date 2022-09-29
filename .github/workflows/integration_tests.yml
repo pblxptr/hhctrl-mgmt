@@ -116,7 +116,26 @@ jobs:
 #        run: ${{ env.binary_dir }}/home_assistant_itc1 --tp_mqtt_server_address mqtt_broker --tp_mqtt_server_port 1883
 #        shell: bash
 
-  test_docker_compose:
+#  test_docker_compose:
+#    needs: build_integration_tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out repository code
+#        uses: actions/checkout@v3
+#
+#      - name: "Download artifacts"
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: integration_test_binaries
+#          path: ${{ env.cache_artifacts_dir }}
+#
+#      - name: "asd"
+#        run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f test/integration_tests/home_assistant_itc1/docker-compose.yml  up --abort-on-container-exit
+#        shell: bash
+
+
+
+  test_docker_compose_via_action:
     needs: build_integration_tests
     runs-on: ubuntu-latest
     steps:
@@ -129,11 +148,11 @@ jobs:
           name: integration_test_binaries
           path: ${{ env.cache_artifacts_dir }}
 
-      - name: "asd"
-        run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f test/integration_tests/home_assistant_itc1/docker-compose.yml  up --abort-on-container-exit
-        shell: bash
-
-
+      - name: "home_assistant_itc1"
+        uses: actions/download-artifact@v3
+        with:
+          docker_compose_path: ./test/integration_tests/home_assistant/itc1/docker-compose.yml
+          target: home_assistant_itc1
 
 
 
