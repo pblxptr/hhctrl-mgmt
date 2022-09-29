@@ -149,7 +149,7 @@ jobs:
           path: ${{ env.cache_artifacts_dir }}
 
       - name: "home_assistant_itc1"
-        uses: actions/download-artifact@v3
+        uses: ./.github/workflows/action-test-docker-compose
         with:
           docker_compose_path: ./test/integration_tests/home_assistant/itc1/docker-compose.yml
           target: home_assistant_itc1
