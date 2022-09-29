@@ -14,12 +14,6 @@ runs:
     - name: Check out repository code
       uses: actions/checkout@v3
 
-    - name: "Download artifacts"
-      uses: actions/download-artifact@v3
-      with:
-        name: integration_test_binaries
-        path: ${{ env.cache_artifacts_dir }}
-
     - name: "Run docker-compose"
       run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f ${{ inputs.docker_compose_path }} up --abort-on-container-exit
       shell: bash

@@ -148,9 +148,6 @@ jobs:
           name: integration_test_binaries
           path: ${{ env.cache_artifacts_dir }}
 
-      - name: "Ls"
-        run: ls -la
-
       - name: "home_assistant_itc1"
         uses: ./.github/workflows/action-test-docker-compose
         with:
