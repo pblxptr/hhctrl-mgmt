@@ -10,8 +10,7 @@ services:
     image: ubuntu:22.04
     command: >
         bash -c "chmod +x /home/bin/home_assistant_itc1 &&
-        /home/bin/home_assistant_itc1 \
-          --tp_mqtt_server_port 1883
+        /home/bin/home_assistant_itc1 ${CMD_OPTIONS}
         "
     volumes:
       - ${ARTIFACTS_DIR}:/home/bin

@@ -5,17 +5,13 @@ inputs:
   docker_compose_path:
     description: 'Docker compose path'
     required: true
-  target:
-    description: "Target"
-    required: true
+  cmd_options:
+    description: "Commandline options"
 runs:
   using: composite
   steps:
-    - name: Check out repository code
-      uses: actions/checkout@v3
-
     - name: "Run docker-compose"
-      run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} docker-compose -f ${{ inputs.docker_compose_path }} up --abort-on-container-exit
+      run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} CMD_OPTIONS={{ inputs.cmd_options }} docker-compose -f ${{ inputs.docker_compose_path }} up --abort-on-container-exit
       shell: bash
 
 
