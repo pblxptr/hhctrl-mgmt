@@ -5,6 +5,7 @@ This project contains logic for managing hh. Manages software tasks and provides
 
 [![.github/workflows/build.yml](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/build.yml/badge.svg)](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/build.yml)
 [![.github/workflows/unit_tests.yml](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/unit_tests.yml)
+[![.github/workflows/integration_tests.yml](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/integration_tests.yml/badge.svg)](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/integration_tests.yml)
 [![.github/workflows/quality.yml](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/quality.yml/badge.svg)](https://github.com/pblxptr/hhctrl-mgmt/actions/workflows/quality.yml)
 
 ## Necessary Dependencies ##
