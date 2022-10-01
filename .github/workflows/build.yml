@@ -1,47 +1,7 @@
-#name: Main
-#
-#on: [push]
-#
-#jobs:
-#  container:
-#    runs-on: ubuntu-latest
-#    container: gcc:11
-#    steps:
-#      - name: Test
-#        uses: ./.github/workflows/build/action.yml
-#        with:
-#          preset: Dupa
-#name: Main
-#
-#on: [push, workflow_dispatch]
-#
-#jobs:
-#  terffere:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#      - id: ls
-#        run: ls -la .github/workflows/action-cmake-build
-#        shell: bash
-#
-#on: [push]
-#jobs:
-#  build-GCC:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#      - name: ls
-#        uses: ./.github/workflows/action-cmake-build
-#        with:
-#          preset: linux_gcc_debug
-#          image: gcc:11
-#
-#
 on: [push]
 jobs:
   build-GCC:
+    name: "Build GCC"
     runs-on: ubuntu-latest
     container: bicompb/gcc:11-root
     steps:
@@ -64,7 +24,8 @@ jobs:
           preset: linux_gcc_release
           build_type: Release
 
-  buildClang:
+  build-Clang:
+    name: "Build Clang"
     runs-on: ubuntu-latest
     container: bicompb/clang:15-root
     steps:
