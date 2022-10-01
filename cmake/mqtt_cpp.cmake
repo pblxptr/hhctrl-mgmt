@@ -29,7 +29,7 @@ elseif(mqtt_cpp_iface_FOUND)
 endif()
 
 if (MQTT_CPP_LIBNAME)
-  message(STATUS "mqtt_cpp: Found with libname: ${MQTT_CPP_LIBNAME}")
+  message(STATUS "Found library mqttcpp with lib name: ${MQTT_CPP_LIBNAME}")
   add_compile_definitions(
     MQTT_STD_VARIANT
     MQTT_STD_OPTIONAL

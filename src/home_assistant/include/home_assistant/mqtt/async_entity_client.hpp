@@ -58,6 +58,8 @@ public:
     impl_->set_client_id(uid);
     impl_->set_clean_session(true);
     impl_->set_keep_alive_sec(config.keep_alive_interval);
+
+    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient, max connection attempts:{}", reconnect_.max_attempts);
   }
 
   auto client_id() const
@@ -73,8 +75,11 @@ public:
 
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
-    if (error_code && not(co_await reconnect())) {
-      co_await on_error(error_code);
+    if (error_code) {
+      const auto reconnected = co_await reconnect();
+      if (not reconnected) {
+        co_return error_code;
+      }
     }
 
     co_return error_code;
@@ -177,13 +182,14 @@ private:
     while (++reconnect_.attempt <= reconnect_.max_attempts) {
       auto error_code = boost::system::error_code{};
 
+      common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
+
       reconnect_.timer.expires_after(reconnect_.reconnect_delay);
       co_await reconnect_.timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, error_code));
 
       if (error_code) {
         co_return false;
       }
-      common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::reconnect, attempt: {}/{}", reconnect_.attempt, reconnect_.max_attempts);
 
       error_code = co_await do_async_connect(boost::asio::use_awaitable);
 
