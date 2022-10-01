@@ -17,10 +17,19 @@
 #  INSTALL_COMMAND sudo make install
 #)
 
-find_package(mqtt_cpp REQUIRED)
+#TODO(pp): Refactor this
+## This hack is required because mqtt_cpp in conan is delivered as mqtt_cpp whereas in CMake available on github
+find_package(mqtt_cpp QUIET)
+find_package(mqtt_cpp_iface QUIET)
 
 if (mqtt_cpp_FOUND)
-  message(INFO "mqtt_cpp: Found")
+  set(MQTT_CPP_LIBNAME mqtt_cpp)
+elseif(mqtt_cpp_iface_FOUND)
+  set(MQTT_CPP_LIBNAME mqtt_cpp_iface)
+endif()
+
+if (MQTT_CPP_LIBNAME)
+  message(STATUS "mqtt_cpp: Found with libname: ${MQTT_CPP_LIBNAME}")
   add_compile_definitions(
     MQTT_STD_VARIANT
     MQTT_STD_OPTIONAL
