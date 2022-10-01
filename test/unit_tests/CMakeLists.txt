@@ -19,4 +19,4 @@ target_compile_definitions(unit_tests
     GTEST_DONT_DEFINE_FAIL=1
     GTEST_DONT_DEFINE_SUCCEED=1
 )
-add_test(NAME UnitTests COMMAND unittests)
+add_test(NAME UnitTests COMMAND unit_tests)

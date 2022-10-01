@@ -1,0 +1,29 @@
+on: push
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container: bicompb/gcc:11-root
+    env:
+      build_dir: cmake-build-linux-unit-tests
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Configure CMake"
+        uses: ./.github/workflows/action-cmake-configure
+        with:
+          preset: linux_gcc_debug_unit_tests
+          build_type: Debug
+
+      - name: "Build unit tests"
+        working-directory: ${{ env.build_dir }}
+        run: make -j$(nproc) unit_tests
+        shell: bash
+
+      - name: "Run unit tests"
+        working-directory: ${{ env.build_dir }}
+        run: make test
+        shell: bash
+
+
