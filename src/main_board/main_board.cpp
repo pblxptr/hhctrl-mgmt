@@ -2,7 +2,9 @@
 
 #include <ranges>
 #include <algorithm>
-
+#include <unistd.h>
+#include <sys/reboot.h>
+#include <linux/reboot.h>
 #include "device/logger.hpp"
 
 namespace mgmt::device {
@@ -61,5 +63,12 @@ void MainBoard::set_indicator_state(IndicatorType type, IndicatorState state)
 void MainBoard::restart()// NOLINT(readability-convert-member-functions-to-static)
 {
   common::logger::get(mgmt::device::Logger)->debug("MainBoard::{}", __FUNCTION__);
+
+  sync();
+
+  if (reboot(LINUX_REBOOT_CMD_RESTART) < 0) { /* It should never happen */
+    common::logger::get(mgmt::device::Logger)->error("Restart trigger has failed. Reset the board");
+  }
+
 }
 }// namespace mgmt::device
