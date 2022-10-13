@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ranges>
 #include <boost/asio/steady_timer.hpp>
 
 #include <mqtt/async_client.hpp>
@@ -20,9 +21,15 @@ concept AsyncHandler = requires(Handler handler)
     } -> std::same_as<boost::asio::awaitable<Ret>>;
 };
 
-
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
 using ErrorHandler_t = std::function<void(const EntityError&)>;
+
+template<std::ranges::range Buffer1, std::ranges::range Buffer2>
+struct Will
+{
+  Buffer1 topic;
+  Buffer2 payload;
+};
 
 inline auto default_publish_handler() -> PublishHandler_t
 {
@@ -58,6 +65,8 @@ public:
     impl_->set_client_id(uid);
     impl_->set_clean_session(true);
     impl_->set_keep_alive_sec(config.keep_alive_interval);
+    impl_->set_user_name(config.username);
+    impl_->set_password(config.password);
 
     common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient, max connection attempts:{}", reconnect_.max_attempts);
   }
@@ -83,6 +92,15 @@ public:
     }
 
     co_return error_code;
+  }
+
+  template<std::ranges::range Buffer1, std::ranges::range Buffer2>
+  void set_will(const Will<Buffer1, Buffer2>& will)
+  {
+    auto topic_buffer = MQTT_NS::allocate_buffer(will.topic.begin(), will.topic.end());
+    auto payload_buffer = MQTT_NS::allocate_buffer(will.payload.begin(), will.payload.end());
+
+    impl_->set_will(MQTT_NS::will{std::move(topic_buffer), std::move(payload_buffer)});
   }
 
   template<AsyncHandler Handler>

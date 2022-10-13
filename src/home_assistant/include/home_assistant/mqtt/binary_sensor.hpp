@@ -17,9 +17,9 @@ enum class BinarySensorState { Off,
   On };
 struct BinarySensorConfig
 {
+  static constexpr inline auto EntityName = "binary_sensor";
   static constexpr inline auto StateTopicKey = std::string_view{ "state_topic" };
   static constexpr inline auto StateTopicValue = "state";
-  static constexpr inline auto TopicEntityName = "binary_sensor";
   static constexpr inline auto StateOffKey = "payload_off";
   static constexpr inline auto StateOnKey = "payload_on";
 };
@@ -42,7 +42,7 @@ public:
 
   BinarySensor() = delete;
   BinarySensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
-    : Base_t(std::move(uid), std::move(client))
+    : Base_t(BinarySensorConfig::EntityName, std::move(uid), std::move(client))
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
@@ -86,9 +86,9 @@ public:
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{
-    std::pair{ BinarySensorConfig::StateTopicKey, topic(BinarySensorConfig::TopicEntityName, BinarySensorConfig::StateTopicValue) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
-    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(BinarySensorConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
+    std::pair{ BinarySensorConfig::StateTopicKey, topic(BinarySensorConfig::StateTopicValue) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
+    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 };
 }// namespace mgmt::home_assistant::mqttc

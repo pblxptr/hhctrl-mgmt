@@ -15,9 +15,9 @@
 namespace mgmt::home_assistant::mqttc {
 struct ButtonConfig
 {
+  static constexpr inline auto EntityName = "button";
   static constexpr inline auto CommandTopicKey = std::string_view{ "command_topic" };
   static constexpr inline auto CommandTopicValue = "set";
-  static constexpr inline auto TopicEntityName = "button";
   static constexpr inline auto PayloadPressKey = "payload_press";
   static constexpr inline auto PayloadPressValue = "press";
 };
@@ -38,7 +38,7 @@ public:
 
   Button() = delete;
   Button(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
-    : Base_t(std::move(uid), std::move(client))
+    : Base_t(ButtonConfig::EntityName, std::move(uid), std::move(client))
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
@@ -67,7 +67,6 @@ public:
     config.set_override(ButtonConfig::CommandTopicKey, topics_.at(ButtonConfig::CommandTopicKey));
     config.set_override(ButtonConfig::PayloadPressKey, ButtonConfig::PayloadPressValue);
     config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
-    config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
     co_await async_subscribe(subs_.begin(), subs_.end());
@@ -83,12 +82,11 @@ public:
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
-    std::pair{ ButtonConfig::CommandTopicKey, topic(ButtonConfig::TopicEntityName, ButtonConfig::CommandTopicValue) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
-    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(ButtonConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
+    std::pair{ ButtonConfig::CommandTopicKey, topic(ButtonConfig::CommandTopicValue) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) }
   };
   std::unordered_map<std::string, PublishHandler_t> subs_{
-    std::pair{ topic(ButtonConfig::TopicEntityName, ButtonConfig::CommandTopicValue), default_publish_handler() }
+    std::pair{ topic(ButtonConfig::CommandTopicValue), default_publish_handler() }
   };
 };
 }// namespace mgmt::home_assistant::mqttc

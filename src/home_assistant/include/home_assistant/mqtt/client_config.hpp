@@ -12,7 +12,9 @@
 namespace mgmt::home_assistant::mqttc {
 struct EntityClientConfig
 {
-  std::string server_address{ "default-address" };
+  std::string username { "user" };
+  std::string password { "password" };
+  std::string server_address{ "localhost" };
   int server_port{ 0 };
   int keep_alive_interval{ 30 };
   int max_reconnect_attempts{ 5 };
@@ -42,6 +44,8 @@ inline mgmt::home_assistant::mqttc::EntityClientConfig tag_invoke(
 {
   const auto& obj = jvalue.as_object();
   return mgmt::home_assistant::mqttc::EntityClientConfig{
+    .username = boost::json::value_to<std::string>(obj.at("username")),
+    .password = boost::json::value_to<std::string>(obj.at("password")),
     .server_address = boost::json::value_to<std::string>(obj.at("server_address")),
     .server_port = boost::json::value_to<int>(obj.at("server_port")),
     .keep_alive_interval = boost::json::value_to<int>(obj.at("keep_alive_interval")),

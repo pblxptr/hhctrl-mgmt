@@ -14,7 +14,7 @@ namespace {
 constexpr auto MqttServerAddressOptionName = "--tp_mqtt_server_address";
 constexpr auto MqttServerPortOptionName = "--tp_mqtt_server_port";
 constexpr auto NumberOfClientsOptionName = "--tp_number_of_clients";
-constexpr auto NumberOfMessagesPerClientOptionName = "--tp_Messagesper_client";
+constexpr auto NumberOfMessagesPerClientOptionName = "--tp_messages_per_client_client";
 
 constexpr auto DefaultMqttServerAddress = "localhost";
 constexpr auto DefaultMqttServerPort = 8123;
@@ -178,12 +178,10 @@ SCENARIO("Async clients can send and receive messages")
   spdlog::debug("Number of messages per client: {}", Params.number_of_messages_per_client);
 
   //Arrange
-  auto config = mgmt::home_assistant::mqttc::EntityClientConfig{
-    .server_address = Params.server_address,
-    .server_port = Params.server_port
-  };
   auto factory = mgmt::home_assistant::mqttc::EntityClientFactory{ IoCtx,
     mgmt::home_assistant::mqttc::EntityClientConfig{
+      .username = "test_user",
+      .password = "test",
       .server_address = Params.server_address,
       .server_port = Params.server_port
     }

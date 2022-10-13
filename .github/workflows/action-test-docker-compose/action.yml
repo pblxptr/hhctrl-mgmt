@@ -13,3 +13,6 @@ runs:
     - name: "Run docker-compose"
       run: ARTIFACTS_DIR=`pwd`/${{ env.cache_artifacts_dir }} CMD_OPTIONS="${{ inputs.cmd_options }}" docker-compose -f ${{ inputs.docker_compose_path }} up --abort-on-container-exit
       shell: bash
+
+#CMD_OPTIONS="--tp_mqtt_server_port 1883" docker-compose -f `pwd`/test/integration_tests/home_assistant_itc1/docker-compose.yml up --build --force-recreate
+

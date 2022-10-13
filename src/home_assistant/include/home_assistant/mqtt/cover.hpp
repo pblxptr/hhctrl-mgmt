@@ -24,9 +24,9 @@ enum class CoverCommand { Open,
 
 struct CoverConfig
 {
+  static constexpr inline auto EntityName = "cover";
   static constexpr inline auto StateTopicKey = std::string_view{ "state_topic" };
   static constexpr inline auto CommandTopicKey = std::string_view{ "command_topic" };
-  static constexpr inline auto TopicEntityName = "cover";
   static constexpr inline auto StateTopicValue = "state";
   static constexpr inline auto CommandTopicValue = "set";
   static constexpr inline auto StateOpeningKey = "state_opening";
@@ -66,7 +66,7 @@ public:
 
   Cover() = delete;
   Cover(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
-    : Base_t(std::move(uid), std::move(client))
+    : Base_t(CoverConfig::EntityName, std::move(uid), std::move(client))
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
@@ -125,13 +125,13 @@ public:
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
-    std::pair{ CoverConfig::StateTopicKey, topic(CoverConfig::TopicEntityName, CoverConfig::StateTopicValue) },
-    std::pair{ CoverConfig::CommandTopicKey, topic(CoverConfig::TopicEntityName, CoverConfig::CommandTopicValue) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
-    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(CoverConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
+    std::pair{ CoverConfig::StateTopicKey, topic(CoverConfig::StateTopicValue) },
+    std::pair{ CoverConfig::CommandTopicKey, topic(CoverConfig::CommandTopicValue) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
+    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
   std::unordered_map<std::string, PublishHandler_t> subs_{
-    std::pair{ topic(CoverConfig::TopicEntityName, CoverConfig::CommandTopicValue), default_publish_handler() }
+    std::pair{ topic(CoverConfig::CommandTopicValue), default_publish_handler() }
   };
 };
 }// namespace mgmt::home_assistant::mqttc

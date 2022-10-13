@@ -66,6 +66,8 @@ echo "
 {
   \"dtree_file\" : \"/tmp/hhctrl-dtree.json\",
   \"entity_client_config\" : {
+    \"username\" : \"test_user\",
+    \"password\" : \"test\",
     \"server_address\" : \"192.168.0.115\",
     \"server_port\" : 1883,
     \"keep_alive_interval\" : 30,
