@@ -40,7 +40,7 @@ auto setup_logger(const std::string& logger_name, spdlog::level::level_enum leve
 
 namespace mgmt::app
 {
-  void init_logger(std::string_view log_dir)
+  void logger_init(std::string_view log_dir)
   {
     setup_logger("mgmt", spdlog::level::debug, log_dir);
     setup_logger(mgmt::app::Logger, spdlog::level::debug, log_dir);

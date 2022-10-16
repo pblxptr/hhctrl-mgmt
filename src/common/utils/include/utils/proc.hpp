@@ -20,4 +20,4 @@ namespace common::utils::proc
   {
     return getpid();
   }
-}
+} // namespace common::utils::proc
