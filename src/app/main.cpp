@@ -15,43 +15,26 @@
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/logger.hpp>
 #include <home_assistant/entity_factory.hpp>
-#include "spdlog/cfg/env.h"
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
+
 #include <cstdlib>
+#include <iostream>
 
 using WorkGuard_t =
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
-auto setup_logger(const std::string& logger_name, spdlog::level::level_enum level)
-{
-  auto logger = spdlog::stdout_color_mt(logger_name);
-  logger->set_level(level);
-}
-
 int main(int argc, char** argv)
 {
   try {
-    // Setup logger defaults
-    setup_logger("mgmt", spdlog::level::debug);
-    setup_logger(mgmt::app::Logger, spdlog::level::debug);
-    setup_logger(mgmt::device::Logger, spdlog::level::debug);
-    setup_logger(mgmt::poller::Logger, spdlog::level::debug);
-    setup_logger(mgmt::home_assistant::Logger, spdlog::level::debug);
-    // Override with env variables
-    spdlog::cfg::load_env_levels();
-
-    spdlog::get(mgmt::app::Logger)->info("Bootstrap mgmt");
-
     if (argc != 2) {
-      spdlog::get("mgmt")->error("Too few arguments");
+      common::logger::get(mgmt::app::Logger)->error("Too few arguments");
+      std::cerr << "Too few arguments.\n";
+      std::cerr << fmt::format("Example: {} /path/to/config.json\n", argv[0]);
 
       return EXIT_FAILURE;
     }
 
     auto config = mgmt::app::load_config(argv[1]);
-
-    using std::to_string;
+    mgmt::app::init_logger(config.log_dir);
 
     spdlog::get("mgmt")->info("App config: {}", pretty_format_config(config));
 

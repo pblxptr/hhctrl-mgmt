@@ -14,6 +14,7 @@ static mgmt::app::AppConfig tag_invoke(json::value_to_tag<mgmt::app::AppConfig> 
 {
   const json::object& obj = jvalue.as_object();
   return mgmt::app::AppConfig{
+    .log_dir = json::value_to<std::string>(obj.at("log_dir")),
     .dtree_file = json::value_to<std::string>(obj.at("dtree_file")),
     .entity_client_config = json::value_to<mgmt::home_assistant::mqttc::EntityClientConfig>(obj.at("entity_client_config"))
   };
@@ -49,13 +50,16 @@ AppConfig load_config(const std::string& path)
 std::string pretty_format_config(const mgmt::app::AppConfig& config)
 {
   return fmt::format(
-    "dtree_file: {}\n"
-    "entity_client_config:\n"
+    "\nGeneral: \n"
+    "\tlog_dir: {}\n"
+    "\tdtree_file: {}\n"
+    "Entity client config:\n"
     "\tserver_address: {}\n"
     "\tserver_port: {}\n"
     "\tkeep_alive_interval: {}\n"
     "\tmax_reconnect_attempts: {}\n"
     "\treconnect_delay(seconds): {}",
+    config.log_dir,
     config.dtree_file,
     config.entity_client_config.server_address,
     config.entity_client_config.server_port,

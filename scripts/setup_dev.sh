@@ -64,6 +64,7 @@ echo "40084" > /tmp/cpu_temp/temp
 
 echo "
 {
+  \"log_dir\" : \"/tmp/app_logs\",
   \"dtree_file\" : \"/tmp/hhctrl-dtree.json\",
   \"entity_client_config\" : {
     \"username\" : \"test_user\",
