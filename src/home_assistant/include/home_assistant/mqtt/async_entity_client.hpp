@@ -24,11 +24,10 @@ concept AsyncHandler = requires(Handler handler)
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
 using ErrorHandler_t = std::function<void(const EntityError&)>;
 
-template<std::ranges::range Buffer1, std::ranges::range Buffer2>
 struct Will
 {
-  Buffer1 topic;
-  Buffer2 payload;
+  std::string_view topic;
+  std::string_view payload;
 };
 
 inline auto default_publish_handler() -> PublishHandler_t
@@ -94,8 +93,7 @@ public:
     co_return error_code;
   }
 
-  template<std::ranges::range Buffer1, std::ranges::range Buffer2>
-  void set_will(const Will<Buffer1, Buffer2>& will)
+  void set_will(const Will& will)
   {
     auto topic_buffer = MQTT_NS::allocate_buffer(will.topic.begin(), will.topic.end());
     auto payload_buffer = MQTT_NS::allocate_buffer(will.payload.begin(), will.payload.end());
