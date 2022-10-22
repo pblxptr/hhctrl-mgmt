@@ -2,7 +2,7 @@
   "version": 3,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 23,
+    "minor": 21,
     "patch": 0
   },
   "configurePresets": [
@@ -11,6 +11,11 @@
       "hidden": true,
       "generator" : "Unix Makefiles",
       "toolchainFile" : "conan_paths.cmake"
+    },
+    {
+      "name": "Yocto_SDK",
+      "hidden": true,
+      "toolchainFile": "$env{OE_CMAKE_TOOLCHAIN_FILE}"
     },
     {
       "name": "Linux_GCC",
@@ -74,6 +79,16 @@
     {
       "name": "linux_gcc_debug_integration_tests",
       "inherits": ["Linux_GCC", "Debug", "Tests"]
+    },
+    {
+      "name": "yocto_gcc_debug",
+      "inherits": ["Yocto_SDK", "Debug"]
+    },
+    {
+      "name": "yocto_gcc_release",
+      "inherits": ["Yocto_SDK", "Release"]
     }
+
   ]
 }
+

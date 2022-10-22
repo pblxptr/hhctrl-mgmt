@@ -15,9 +15,9 @@
 namespace mgmt::home_assistant::mqttc {
 struct SensorConfig
 {
+  static constexpr inline auto EntityName = "sensor";
   static constexpr inline auto StateTopicKey = std::string_view{ "state_topic" };
   static constexpr inline auto StateTopicValue = "state";
-  static constexpr inline auto TopicEntityName = "sensor";
 };
 
 template<class EntityClient>
@@ -33,7 +33,7 @@ public:
 
   Sensor() = delete;
   Sensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
-    : Base_t(std::move(uid), std::move(client))
+    : Base_t(SensorConfig::EntityName, std::move(uid), std::move(client))
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
@@ -76,9 +76,9 @@ public:
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{
-    std::pair{ SensorConfig::StateTopicKey, topic(SensorConfig::TopicEntityName, SensorConfig::StateTopicValue) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(SensorConfig::TopicEntityName, GenericEntityConfig::AvailabilityTopic) },
-    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(SensorConfig::TopicEntityName, GenericEntityConfig::JsonAttributesTopic) },
+    std::pair{ SensorConfig::StateTopicKey, topic(SensorConfig::StateTopicValue) },
+    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
+    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 };
 }// namespace mgmt::home_assistant::mqttc

@@ -64,8 +64,11 @@ echo "40084" > /tmp/cpu_temp/temp
 
 echo "
 {
+  \"log_dir\" : \"/tmp/app_logs\",
   \"dtree_file\" : \"/tmp/hhctrl-dtree.json\",
   \"entity_client_config\" : {
+    \"username\" : \"test_user\",
+    \"password\" : \"test\",
     \"server_address\" : \"192.168.0.115\",
     \"server_port\" : 1883,
     \"keep_alive_interval\" : 30,

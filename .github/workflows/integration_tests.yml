@@ -151,7 +151,7 @@ jobs:
       - name: "home_assistant_itc1"
         uses: ./.github/workflows/action-test-docker-compose
         with:
-          docker_compose_path: test/integration_tests/home_assistant_itc1/docker-compose.yml
+          docker_compose_path: test/integration_tests/home_assistant_itc1/env/docker-compose.yml
           cmd_options: "--tp_mqtt_server_port 1883"
 
 

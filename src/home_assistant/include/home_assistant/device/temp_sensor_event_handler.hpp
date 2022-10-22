@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/asio/awaitable.hpp>
+#include <list>
 
 #include <device/temp_sensor_t.hpp>
 #include <event/device_created.hpp>
@@ -29,6 +30,6 @@ public:
 private:
   const EntityFactory& factory_;
   const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider_;
-  std::vector<TempSensorHandler> sensors_;
+  std::list<TempSensorHandler> sensors_;
 };
 }// namespace mgmt::home_assistant::device

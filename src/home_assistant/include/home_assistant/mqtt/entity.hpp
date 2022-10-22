@@ -8,15 +8,22 @@
 
 #include <home_assistant/availability.hpp>
 #include <home_assistant/logger.hpp>
+#include <utils/mapper.hpp>
 
 namespace mgmt::home_assistant::mqttc {
+namespace details {
+  constexpr static auto AvailabilityStateMapper = common::utils::Mapper{
+    std::pair{ Availability::Offline, "offline" },
+    std::pair{ Availability::Online, "online" }
+  };
+} // namespace details
+
 struct GenericEntityConfig
 {
   static constexpr inline auto AvailabilityTopic = std::string_view{ "availability_topic" };
   static constexpr inline auto JsonAttributesTopic = std::string_view{ "json_attributes_topic" };
   static constexpr inline auto JsonAttributesTemplate = std::string_view{ "json_attributes_template" };
 };
-
 
 template<class EntityClient>
 class Entity
@@ -62,10 +69,17 @@ public:
   }
 
 protected:
-  Entity(std::string unique_id, EntityClient client)
-    : unique_id_{ std::move(unique_id) }
+  Entity(std::string_view entity_name, std::string unique_id, EntityClient client)
+    : entity_name_{entity_name}
+    , unique_id_{ std::move(unique_id) }
     , client_{ std::move(client) }
-  {}
+  {
+    client_.set_will(Will {
+        .topic = topic(GenericEntityConfig::AvailabilityTopic),
+        .payload = details::AvailabilityStateMapper.map(Availability::Offline)
+      }
+    );
+  }
 
   // TODO(pp): Consider passing topic by ref
   template<class Payload>
@@ -84,27 +98,18 @@ protected:
   {
     common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
 
-    auto availability_str = std::string{};
-
-    switch (availability) {
-    case Availability::Offline:
-      availability_str = "offline";
-      break;
-    case Availability::Online:
-      availability_str = "online";
-      break;
-    }
-
-    co_await client_.async_publish(topic, availability_str);
+    //TODO(bielpa): Perhaps remove std::string {}
+    co_await client_.async_publish(topic, std::string{ details::AvailabilityStateMapper.map(availability) } );
   }
 
-  template<class T1, class T2>
-  std::string topic(const T1& entity_name, const T2& topic_spec) const
+  template<class T1>
+  std::string topic(const T1& topic) const
   {
-    return fmt::format("{}_{}/{}", entity_name, unique_id_, topic_spec);
+    return fmt::format("{}_{}/{}", entity_name_, unique_id_, topic);
   }
 
 private:
+  std::string_view entity_name_;
   std::string unique_id_;
   EntityClient client_;
 };

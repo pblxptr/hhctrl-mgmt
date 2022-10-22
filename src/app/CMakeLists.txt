@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.12)
 
-add_executable(${CMAKE_PROJECT_NAME} main.cpp app_config.cpp)
+add_executable(${CMAKE_PROJECT_NAME}
+  main.cpp app_config.cpp
+  logger.cpp home_assistant.cpp
+)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE include)
 target_link_libraries(${CMAKE_PROJECT_NAME}
   PRIVATE
     common_event common_executor poller device
-    home_assistant main_board event mqtt_cpp::mqtt_cpp
+    home_assistant main_board event
     common_utils
 )
 

@@ -11,6 +11,7 @@
 namespace mgmt::app {
 struct AppConfig
 {
+  std::string log_dir;
   std::string dtree_file;
   mgmt::home_assistant::mqttc::EntityClientConfig entity_client_config;
 };
@@ -20,8 +21,10 @@ inline std::string to_string(const AppConfig& config)
   using std::to_string;
 
   return fmt::format(
+    "log_dir: {}\n",
     "dtree_file: {}\n"
     "entity_client_config: {}\n",
+    config.log_dir,
     config.dtree_file,
     to_string(config.entity_client_config));
 }

@@ -3,7 +3,7 @@ services:
   mqtt_broker:
     build:
       dockerfile: mqtt_broker.dockerfile
-      context: ./
+      context: .
     network_mode: host
   test:
     depends_on: [ mqtt_broker ]

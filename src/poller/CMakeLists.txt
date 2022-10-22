@@ -10,6 +10,6 @@ target_include_directories(poller PUBLIC include)
 
 target_link_libraries(poller
   PRIVATE
-    Boost::coroutine device common_coro
+    Boost::boost device common_coro
     common_executor common_logger
 )

@@ -15,7 +15,7 @@ namespace {
 struct ChangePositionAttr
 {
   static constexpr const char* Name{ "change_position" };
-  static constexpr const char* Open{ "Open" };
+  static constexpr const char* Open{ "open" };
   static constexpr const char* Close{ "close" };
 };
 
@@ -25,7 +25,7 @@ struct StatusAttr
 };
 
 constexpr auto StatusMapping = common::utils::StaticMap<mgmt::device::HatchState, std::string_view, 5>{
-  std::pair(mgmt::device::HatchState::Open, "Open"sv),
+  std::pair(mgmt::device::HatchState::Open, "open"sv),
   std::pair(mgmt::device::HatchState::Closed, "closed"sv),
   std::pair(mgmt::device::HatchState::ChangingPosition, "changing_position"sv),
   std::pair(mgmt::device::HatchState::Faulty, "faulty"sv),
@@ -40,16 +40,22 @@ SysfsHatch::SysfsHatch(const std::string& sysfsdir)
 
 void SysfsHatch::open() const
 {
+  common::logger::get(mgmt::device::Logger)->debug("SysfsHatch::{}", __FUNCTION__);
+
   sysfs::write_attr(sysfsdir_ / ChangePositionAttr::Name, ChangePositionAttr::Open);
 }
 
 void SysfsHatch::close() const
 {
+  common::logger::get(mgmt::device::Logger)->debug("SysfsHatch::{}", __FUNCTION__);
+
   sysfs::write_attr(sysfsdir_ / ChangePositionAttr::Name, ChangePositionAttr::Close);
 }
 
 HatchState SysfsHatch::status() const
 {
+  common::logger::get(mgmt::device::Logger)->debug("SysfsHatch::{}", __FUNCTION__);
+
   const auto attr_val = sysfs::read_attr(sysfsdir_ / StatusAttr::Name);
 
   return StatusMapping.at(attr_val.data());

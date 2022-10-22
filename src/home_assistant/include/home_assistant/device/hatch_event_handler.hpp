@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/asio/awaitable.hpp>
+#include <list>
 
 #include <device/hatch_t.hpp>
 #include <event/device_created.hpp>
@@ -28,6 +29,6 @@ public:
 private:
   const EntityFactory& factory_;
   const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider_;
-  std::vector<HatchHandler> hatches_;
+  std::list<HatchHandler> hatches_;
 };
 }// namespace mgmt::home_assistant::device
