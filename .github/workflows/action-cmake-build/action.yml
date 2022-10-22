@@ -1,5 +1,5 @@
 name: 'Build'
-description: 'Build'
+description: 'Build target'
 inputs:
   preset:
     description: 'Selected preset'
@@ -7,16 +7,29 @@ inputs:
   build_type:
     description: "Build type e.g. Debug, Release"
     required: true
+  target:
+    description: "Target to build"
+    required: false
+    default: "all"
 runs:
   using: composite
   steps:
+    - name: "Create build directory"
+      shell: bash
+      run: |
+        mkdir -p ${{ env.build_dir }}
+
+    - name: "Install Conan dependencies"
+      working-directory: ${{ env.build_dir }}
+      run: conan install .. --build=missing -pr:h=/root/.conan/profiles/target-default -s build_type=${{ inputs.build_type }}
+      shell: bash
+
     - name: "Configure CMake"
-      uses: ./.github/workflows/action-cmake-configure
-      with:
-          preset: ${{ inputs.preset }}
-          build_type: ${{ inputs.build_type }}
+      working-directory: ${{ env.build_dir }}
+      run: cmake .. --preset ${{ inputs.preset }}
+      shell: bash
 
     - name: "Make"
       working-directory: ${{ env.build_dir }}
-      run: make -j$(nproc)
+      run: make -j$(nproc) ${{ inputs.target }}
       shell: bash

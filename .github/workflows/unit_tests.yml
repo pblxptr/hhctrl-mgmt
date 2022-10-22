@@ -1,29 +1,65 @@
 on: push
 
 jobs:
-  tests:
+  Default:
     runs-on: ubuntu-latest
     container: bicompb/gcc:11-root
     env:
-      build_dir: cmake-build-linux-unit-tests
+      build_dir: cmake-build-linux-unit-tests-default
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
 
-      - name: "Configure CMake"
-        uses: ./.github/workflows/action-cmake-configure
+      - name: "Run Unit Test default"
+        uses: ./.github/workflows/action-unit-tests
         with:
           preset: linux_gcc_debug_unit_tests
           build_type: Debug
 
-      - name: "Build unit tests"
-        working-directory: ${{ env.build_dir }}
-        run: make -j$(nproc) unit_tests
-        shell: bash
+  Address_Sanitizer:
+    runs-on: ubuntu-latest
+    container: bicompb/gcc:11-root
+    env:
+      build_dir: cmake-build-linux-unit-tests-asan
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
 
-      - name: "Run unit tests"
-        working-directory: ${{ env.build_dir }}
-        run: make test
-        shell: bash
+      - name: "Run Unit Test with Address Sanitizer"
+        uses: ./.github/workflows/action-unit-tests
+        with:
+          preset: linux_gcc_debug_unit_tests
+          build_type: Debug
+          sanitizer: "USE_ASAN"
 
+  Leak_Sanitizer:
+    runs-on: ubuntu-latest
+    container: bicompb/gcc:11-root
+    env:
+      build_dir: cmake-build-linux-unit-tests-leak
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
 
+      - name: "Run Unit Test with Leak Sanitizer"
+        uses: ./.github/workflows/action-unit-tests
+        with:
+          preset: linux_gcc_debug_unit_tests
+          build_type: Debug
+          sanitizer: "USE_LEAK"
+
+  UndefinedBehavior_Sanitizer:
+    runs-on: ubuntu-latest
+    container: bicompb/gcc:11-root
+    env:
+      build_dir: cmake-build-linux-unit-tests-undefined-behavior
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Run Unit Test with Leak Sanitizer"
+        uses: ./.github/workflows/action-unit-tests
+        with:
+          preset: linux_gcc_debug_unit_tests
+          build_type: Debug
+          sanitizer: "USE_UBSAN"

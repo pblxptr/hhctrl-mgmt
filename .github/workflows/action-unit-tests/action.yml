@@ -1,6 +1,6 @@
 # action.yml
-name: 'Configure'
-description: 'Configure'
+name: 'Unit test'
+description: 'Run unit tests'
 inputs:
   preset:
     description: 'Selected preset'
@@ -8,6 +8,10 @@ inputs:
   build_type:
     description: "Build type e.g. Debug, Release"
     required: true
+  sanitizer:
+    description: "Sanitizer"
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -22,6 +26,23 @@ runs:
       shell: bash
 
     - name: "Configure CMake"
+      if: ${{ inputs.sanitizer == '' }}
       working-directory: ${{ env.build_dir }}
       run: cmake .. --preset ${{ inputs.preset }}
+      shell: bash
+
+    - name: "Configure CMake"
+      if: ${{ inputs.sanitizer != '' }}
+      working-directory: ${{ env.build_dir }}
+      run: cmake .. --preset ${{ inputs.preset }} -D${{ inputs.sanitizer }}=ON
+      shell: bash
+
+    - name: "Make"
+      working-directory: ${{ env.build_dir }}
+      run: make -j$(nproc) unit_tests
+      shell: bash
+
+    - name: "Run unit tests"
+      working-directory: ${{ env.build_dir }}
+      run: make test
       shell: bash
