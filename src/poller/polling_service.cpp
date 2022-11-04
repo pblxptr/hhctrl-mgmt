@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/use_awaitable.hpp>
+#include <chrono>
 
 #include <poller/polling_service.hpp>
 #include <coro/co_spawn.hpp>
@@ -44,8 +45,19 @@ void PollingService::start_poller(Poller& poller)
           timer.reset();
           break;
         }
+
+        const auto start_time = std::chrono::system_clock::now();
+
         common::logger::get(mgmt::device::Logger)->debug("Poll device with id: {}", poller.device_id);
+
         co_await poller.poll();
+        const auto end_time = std::chrono::system_clock::now();
+        auto diff_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        common::logger::get(mgmt::device::Logger)->debug("Polling device with id: {} took: {} milliseconds",
+          poller.device_id,
+          diff_milliseconds.count()
+        );
+
       };
     };
     boost::asio::co_spawn(executor, std::move(poll), common::coro::rethrow);

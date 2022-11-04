@@ -18,7 +18,7 @@ SysfsLed::SysfsLed(const std::string& sysfsdir)
 
 int SysfsLed::brightness() const
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsLed::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->trace("SysfsLed::{}", __FUNCTION__);
 
   const auto path = sysfsdir_ / BrightnessAttr::Name;
   return std::stoi(sysfs::read_attr(path));
@@ -26,7 +26,7 @@ int SysfsLed::brightness() const
 
 void SysfsLed::set_brightness(int value)
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsLed::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->trace("SysfsLed::{}", __FUNCTION__);
 
   const auto path = sysfsdir_ / BrightnessAttr::Name;
   sysfs::write_attr(path, static_cast<int>(value));

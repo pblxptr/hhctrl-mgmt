@@ -19,7 +19,7 @@ SysfsCPUTempSensor::SysfsCPUTempSensor(const std::string& sysfsdir)
 
 float SysfsCPUTempSensor::value() const
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsCPUTempSensor::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->trace("SysfsCPUTempSensor::{}", __FUNCTION__);
 
   const auto attr_val = sysfs::read_attr(sysfsdir_ / ValueAttr);
 

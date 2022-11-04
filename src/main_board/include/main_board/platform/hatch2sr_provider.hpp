@@ -43,7 +43,7 @@ public:
           auto device_id = mgmt::device::register_device<mgmt::device::SysfsHatch>(sysfs_path);
           polling_service_.add_poller(
             device_id,
-            std::chrono::seconds(5),
+            std::chrono::seconds(2),
             poller_factory_.create_poller<mgmt::poller::HatchPoller>(device_id)
           );
           return device_id; },

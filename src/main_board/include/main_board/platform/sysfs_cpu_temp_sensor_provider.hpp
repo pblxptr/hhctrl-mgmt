@@ -45,7 +45,7 @@ public:
           );
           polling_service_.add_poller(
             device_id,
-            std::chrono::seconds(3),
+            std::chrono::seconds(2),
             poller_factory_.create_poller<mgmt::poller::TempSensorPoller>(device_id)
           );
           return device_id; },

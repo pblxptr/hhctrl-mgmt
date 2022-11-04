@@ -3,9 +3,7 @@
 boost/1.79.0
 spdlog/1.9.2
 libcurl/7.80.0
-protobuf/3.19.1
 gtest/cci.20210126
-zeromq/4.3.4
 redboltz-mqtt_cpp/13.0.0
 fmt/9.0.0
 catch2/3.1.0

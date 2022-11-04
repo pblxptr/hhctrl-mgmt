@@ -32,6 +32,8 @@ IndicatorType RGBIndicator::type() const
 
 IndicatorState RGBIndicator::state() const
 {
+  common::logger::get(mgmt::device::Logger)->trace("RGBIndicator::{}", __FUNCTION__);
+
   const auto brightness = rgbled_->brightness();
   const auto proxy_led_brightness = IndicatorMapping.at(type_);
 
@@ -46,6 +48,7 @@ IndicatorState RGBIndicator::state() const
 
 void RGBIndicator::set_state(IndicatorState state)
 {
+  common::logger::get(mgmt::device::Logger)->trace("RGBIndicator::{}", __FUNCTION__);
   common::logger::get(mgmt::device::Logger)->debug("RGBIndicator::{}, indicator: {}, state: {}", __FUNCTION__, to_string(type_), to_string(state));
 
   const auto& config = IndicatorMapping.at(type_);

@@ -27,10 +27,12 @@ public:
   boost::asio::awaitable<void> operator()()
   {
     const auto tmp_hash = current_hash();
+
+    common::logger::get(mgmt::poller::Logger)->debug("Polling Hatch({}): {}", device_id_, tmp_hash == hash_ ? "up to date" : "changed");
+
     if (tmp_hash != hash_) {
       update(tmp_hash);
     }
-    common::logger::get(mgmt::poller::Logger)->debug("Polling Hatch({}): {}", device_id_, tmp_hash == hash_ ? "up to date" : "changed");
     co_return;
   }
 

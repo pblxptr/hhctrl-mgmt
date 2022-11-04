@@ -40,21 +40,21 @@ SysfsHatch::SysfsHatch(const std::string& sysfsdir)
 
 void SysfsHatch::open() const
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsHatch::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->trace("SysfsHatch::{}", __FUNCTION__);
 
   sysfs::write_attr(sysfsdir_ / ChangePositionAttr::Name, ChangePositionAttr::Open);
 }
 
 void SysfsHatch::close() const
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsHatch::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->trace("SysfsHatch::{}", __FUNCTION__);
 
   sysfs::write_attr(sysfsdir_ / ChangePositionAttr::Name, ChangePositionAttr::Close);
 }
 
 HatchState SysfsHatch::status() const
 {
-  common::logger::get(mgmt::device::Logger)->debug("SysfsHatch::{}", __FUNCTION__);
+  common::logger::get(mgmt::device::Logger)->trace("SysfsHatch::{}", __FUNCTION__);
 
   const auto attr_val = sysfs::read_attr(sysfsdir_ / StatusAttr::Name);
 

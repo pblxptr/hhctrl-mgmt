@@ -3,6 +3,7 @@
 //
 
 #include <main_board/device/sysfs_rgbled.hpp>
+#include <device/logger.hpp>
 
 namespace mgmt::device {
 SysfsRGBLed::SysfsRGBLed(SysfsLed red, SysfsLed green, SysfsLed blue)
@@ -13,6 +14,8 @@ SysfsRGBLed::SysfsRGBLed(SysfsLed red, SysfsLed green, SysfsLed blue)
 
 RGBLedValue SysfsRGBLed::brightness() const
 {
+  common::logger::get(mgmt::device::Logger)->trace("SysfsRGBLed::{}", __FUNCTION__);
+
   return RGBLedValue{
     .red = red_.brightness(),
     .green = green_.brightness(),
@@ -22,6 +25,8 @@ RGBLedValue SysfsRGBLed::brightness() const
 
 void SysfsRGBLed::set_brightness(const RGBLedValue& value)
 {
+  common::logger::get(mgmt::device::Logger)->trace("SysfsRGBLed::{}", __FUNCTION__);
+
   red_.set_brightness(value.red);
   green_.set_brightness(value.green);
   blue_.set_brightness(value.blue);
