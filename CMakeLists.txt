@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(hhctrl-mgmt CXX)
+project(hhctrl-mgmt LANGUAGES CXX VERSION 1.0.1)
 
 add_compile_definitions(BOOST_ASIO_HAS_STD_COROUTINE)
 add_compile_definitions(BOOST_ASIO_HAS_CO_AWAIT)
