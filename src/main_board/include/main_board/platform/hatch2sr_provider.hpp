@@ -13,7 +13,7 @@ class HatchProvider
 {
 public:
   HatchProvider(
-    mgmt::device::PollingService& polling_service,
+    mgmt::poller::PollingService& polling_service,
     mgmt::poller::PollerFactory& poller_factory)
     : polling_service_{ polling_service }
     , poller_factory_{ poller_factory }
@@ -53,7 +53,7 @@ public:
   }
 
 private:
-  mgmt::device::PollingService& polling_service_;
+  mgmt::poller::PollingService& polling_service_;
   mgmt::poller::PollerFactory& poller_factory_;
 };
 }// namespace mgmt::platform_device

@@ -16,7 +16,7 @@
 #include <device/device_id.hpp>
 
 
-namespace mgmt::device {
+namespace mgmt::poller {
 class PollingService
 {
   using Poll_t = std::function<boost::asio::awaitable<void>()>;

@@ -23,7 +23,7 @@ inline void main_board_init(
   std::string pdtree_path,
   mgmt::device::DeviceTree& dtree,
   mgmt::device::HardwareIdentityStore_t& hw_identity_store,
-  mgmt::device::PollingService& polling_service,
+  mgmt::poller::PollingService& polling_service,
   common::event::AsyncEventBus& bus)
 {
   using namespace mgmt::platform_device;// NOLINT(google-build-using-namespace)

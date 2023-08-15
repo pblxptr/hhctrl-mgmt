@@ -47,7 +47,7 @@ public:
 
   boost::asio::awaitable<void> async_connect()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}", id(), __FUNCTION__);
 
     co_await client_.async_connect();
   }
@@ -55,7 +55,7 @@ public:
   template<class Handler>
   void set_ack_handler(Handler handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Entity::{}", __FUNCTION__);
 
     client_.set_connack_handler(std::move(handler));
   }
@@ -63,7 +63,7 @@ public:
   template<class Handler>
   void set_error_handler(Handler handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Entity::{}", __FUNCTION__);
 
     client_.set_error_handler(std::move(handler));
   }
@@ -96,16 +96,23 @@ protected:
 
   boost::asio::awaitable<void> async_set_availability(const std::string& topic, const Availability& availability)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}, availability: {}", id(), __FUNCTION__,
+      details::AvailabilityStateMapper.map(availability));
 
     //TODO(bielpa): Perhaps remove std::string {}
-    co_await client_.async_publish(topic, std::string{ details::AvailabilityStateMapper.map(availability) } );
+    co_await client_.async_publish(topic, std::string {details::AvailabilityStateMapper.map(availability)} );
   }
 
   template<class T1>
   std::string topic(const T1& topic) const
   {
     return fmt::format("{}_{}/{}", entity_name_, unique_id_, topic);
+  }
+
+private:
+  std::string id() const
+  {
+    return fmt::format("{}-{}", entity_name_, unique_id_);
   }
 
 private:

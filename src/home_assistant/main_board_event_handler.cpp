@@ -23,12 +23,13 @@ MainBoardEventHandler::MainBoardEventHandler(
   : factory_{ factory }
   , device_identity_provider_{ device_identity_provider }
 {
-  spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardEventHandler::{}", __FUNCTION__);
 }
 
 boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceCreated_t& event)
 {
-  spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardEventHandler::{}", __FUNCTION__);
+
   if (main_board_) {
     throw std::runtime_error("Unexpected value in std::optional<MainBoardHandler>");
   }
@@ -40,7 +41,8 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceCreat
 
 boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceRemoved_t& /* event */)
 {
-  spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardEventHandler::{}", __FUNCTION__);
+
   assert_has_value(main_board_);
 
   co_return;
@@ -48,7 +50,8 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceRemov
 
 boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceStateChanged_t& /* event */)
 {
-  spdlog::debug("MainBoardEventHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardEventHandler::{}", __FUNCTION__);
+
   assert_has_value(main_board_);
 
   co_await main_board_->async_sync_state();// NOLINT(bugprone-unchecked-optional-access)

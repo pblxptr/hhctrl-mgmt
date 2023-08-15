@@ -14,12 +14,12 @@ HatchEventHandler::HatchEventHandler(
   : factory_{ factory }
   , device_identity_provider_{ device_identity_provider }
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchEventHandler::{}", __FUNCTION__);
 }
 
 boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] const DeviceCreated_t& event)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}(DeviceCreated)", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchEventHandler::{}(DeviceCreated)", __FUNCTION__);
 
   hatches_.emplace_back(event.device_id, device_identity_provider_, factory_);
 
@@ -29,7 +29,7 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
 
 boost::asio::awaitable<void> HatchEventHandler::operator()(const DeviceRemoved_t& event)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}(DeviceRemoved)", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchEventHandler::{}(DeviceRemoved)", __FUNCTION__);
 
   const auto device_id = event.device_id;
   const auto erased = std::erase_if(hatches_, [device_id](auto& hatch) {
@@ -45,7 +45,7 @@ boost::asio::awaitable<void> HatchEventHandler::operator()(const DeviceRemoved_t
 
 boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] const DeviceStateChanged_t& event)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
 
   const auto device_id = event.device_id;
   auto hatch = std::ranges::find_if(hatches_, [device_id](auto& hatch) {

@@ -40,7 +40,7 @@ public:
   Button(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
     : Base_t(ButtonConfig::EntityName, std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}, unique_id: {}", __FUNCTION__, unique_id());
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Button::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
   // movable
   Button(Button&& rhs) noexcept = default;
@@ -53,16 +53,18 @@ public:
 
   void on_command(ButtonCommandHandler_t handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("ButtonConfig::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("ButtonConfig::{}", __FUNCTION__);
 
     subs_[topics_.at(ButtonConfig::CommandTopicKey)] = [handler = std::move(handler)](auto&& /* content */) {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("ButtonConfig handle on_command");
+
       handler();
     };
   }
 
   boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Button::{}", __FUNCTION__);
 
     config.set_override(ButtonConfig::CommandTopicKey, topics_.at(ButtonConfig::CommandTopicKey));
     config.set_override(ButtonConfig::PayloadPressKey, ButtonConfig::PayloadPressValue);
@@ -75,7 +77,7 @@ public:
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Button::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Button::{}", __FUNCTION__);
 
     co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }

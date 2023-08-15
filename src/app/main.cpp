@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     });
 
     /* Device Services */
-    auto polling_service = mgmt::device::PollingService{ std::ref(bctx) };
+    auto polling_service = mgmt::poller::PollingService{ std::ref(bctx) };
 
     spdlog::get("mgmt")->info("App config: {}", pretty_format_config(config));
 

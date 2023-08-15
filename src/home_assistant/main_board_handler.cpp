@@ -66,7 +66,7 @@ MainBoardHandler::MainBoardHandler(
   , indicators_{ create_indicators(device_id, factory, identity_provider) }
   , restart_button_{ create_restart_button(device_id, factory, identity_provider) }
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}, device id: {}", __FUNCTION__, device_id_);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardHandler::{}, device id: {}", __FUNCTION__, device_id_);
 
   setup();
 }
@@ -77,7 +77,7 @@ MainBoardHandler::MainBoardHandler(MainBoardHandler&& rhs) noexcept
   , indicators_{ std::move(rhs.indicators_) }
   , restart_button_{ std::move(rhs.restart_button_) }
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::(MainBoardHandler&&)");
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardHandler::(MainBoardHandler&&)");
 
   setup();
 }
@@ -100,7 +100,7 @@ mgmt::device::DeviceId_t MainBoardHandler::hardware_id() const
 
 boost::asio::awaitable<void> MainBoardHandler::async_connect()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardHandler::{}", __FUNCTION__);
 
   // Connect indicators
   for (auto&& [_, indicator] : indicators_) {
@@ -112,7 +112,7 @@ boost::asio::awaitable<void> MainBoardHandler::async_connect()
 
 boost::asio::awaitable<void> MainBoardHandler::async_sync_state()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardHandler::{}", __FUNCTION__);
 
   const auto& board = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
 
@@ -137,7 +137,7 @@ boost::asio::awaitable<void> MainBoardHandler::async_sync_state()
 
 void MainBoardHandler::setup()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("MainBoardHandler::{}", __FUNCTION__);
 
   // Setup indicators
   for (auto&& [type, indicator] : indicators_) {
@@ -191,8 +191,8 @@ boost::asio::awaitable<void> MainBoardHandler::async_set_config_restart_button()
   co_await restart_button_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online);
 }
 
-void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& /* error */)// NOLINT(readability-convert-member-functions-to-static)
+void MainBoardHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)// NOLINT(readability-convert-member-functions-to-static)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("MainBoardHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->error("MainBoardHandler::{}, error message: {}.", __FUNCTION__, error.message());
 }
 }// namespace mgmt::home_assistant::device

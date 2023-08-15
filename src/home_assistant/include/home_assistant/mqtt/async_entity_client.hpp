@@ -67,7 +67,7 @@ public:
     impl_->set_user_name(config.username);
     impl_->set_password(config.password);
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient, max connection attempts:{}", reconnect_.max_attempts);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient, max connection attempts:{}", reconnect_.max_attempts);
   }
 
   auto client_id() const
@@ -77,7 +77,7 @@ public:
 
   boost::asio::awaitable<MQTT_NS::error_code> async_connect()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}", __FUNCTION__);
 
     auto error_code = co_await do_async_connect(boost::asio::use_awaitable);
 
@@ -104,7 +104,7 @@ public:
   template<AsyncHandler Handler>
   void set_connack_handler(Handler handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}", __FUNCTION__);
 
     impl_->set_connack_handler([this, handler = std::move(handler)](bool session_present, auto return_code) mutable {
       // Without explicit 'this->...', clang complains about unused 'this' lambda capture, which in fact is required here
@@ -130,12 +130,12 @@ public:
   template<class Payload>
   boost::asio::awaitable<MQTT_NS::error_code> async_publish(std::string topic, Payload payload)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}", __FUNCTION__);
 
     // Working
     auto error_code = co_await do_async_publish(topic, std::move(payload));
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
     co_return error_code;
   }
@@ -143,7 +143,7 @@ public:
   template<class Iterator>
   boost::asio::awaitable<MQTT_NS::error_code> async_subscribe(Iterator begin, Iterator end)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}", __FUNCTION__);
 
     impl_->set_suback_handler([this, begin, end](auto packet_id, auto results) {
       common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::suback_handler, packet_id: {}", packet_id);
@@ -177,7 +177,7 @@ public:
 
     using MqttSub_t = std::tuple<std::string, MQTT_NS::subscribe_options>;
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, sending sub", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}, sending sub", __FUNCTION__);
 
     auto subs = std::vector<MqttSub_t>{};
     std::transform(begin, end, std::back_inserter(subs), [](auto&& sub) {
@@ -193,7 +193,7 @@ public:
 private:
   boost::asio::awaitable<bool> reconnect()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("AsyncMqttEntityClient::{}", __FUNCTION__);
 
     while (++reconnect_.attempt <= reconnect_.max_attempts) {
       auto error_code = boost::system::error_code{};
@@ -231,7 +231,7 @@ private:
 
   boost::asio::awaitable<void> on_error(const boost::system::error_code& error_code)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
+    common::logger::get(mgmt::home_assistant::Logger)->error("AsyncMqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
     if (not(co_await reconnect())) {
       error_handler_(EntityError{ EntityError::Code::Undefined, error_code.message() });

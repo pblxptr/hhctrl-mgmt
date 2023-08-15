@@ -85,13 +85,15 @@ public:
     common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
 
     subs_[topics_.at(CoverConfig::CommandTopicKey)] = [handler = std::move(handler)](auto&& content) {
+      common::logger::get(mgmt::home_assistant::Logger)->debug("Cover handle on_command, command: {}", content);
+
       handler(CoverCommandMapper.map(content));
     };
   }
 
   boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
 
     config.set_override(CoverConfig::StateTopicKey, topics_.at(CoverConfig::StateTopicKey));
     config.set_override(CoverConfig::CommandTopicKey, topics_.at(CoverConfig::CommandTopicKey));
@@ -113,13 +115,15 @@ public:
 
   boost::asio::awaitable<void> async_set_state(const CoverState& state)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}, state: {}", __FUNCTION__, CoverStateMapper.map(state));
 
     co_await async_publish(topics_.at(CoverConfig::StateTopicKey), std::string{ CoverStateMapper.map(state) });
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
+
     co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }
 

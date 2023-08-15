@@ -49,7 +49,7 @@ public:
 
   boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Sensor::{}", __FUNCTION__);
 
     config.set_override(SensorConfig::StateTopicKey, topics_.at(SensorConfig::StateTopicKey));
 
@@ -62,14 +62,14 @@ public:
 
   boost::asio::awaitable<void> async_set_value(const std::string& value)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}, value: {}", __FUNCTION__, value);
 
     co_await async_publish(topics_.at(SensorConfig::StateTopicKey), value);
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Sensor::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("Sensor::{}", __FUNCTION__);
 
     co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }

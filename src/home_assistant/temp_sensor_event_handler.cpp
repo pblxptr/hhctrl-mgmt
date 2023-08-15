@@ -14,12 +14,12 @@ TempSensorEventHandler::TempSensorEventHandler(
   : factory_{ factory }
   , device_identity_provider_{ device_identity_provider }
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorEventHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorEventHandler::{}", __FUNCTION__);
 }
 
 boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceCreated_t& event)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorEventHandler::{}(DeviceCreated)", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorEventHandler::{}(DeviceCreated)", __FUNCTION__);
 
   sensors_.emplace_back(event.device_id, device_identity_provider_, factory_);
 
@@ -29,7 +29,7 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
 
 boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceRemoved_t& event)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorEventHandler::{}(DeviceRemoved)", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorEventHandler::{}(DeviceRemoved)", __FUNCTION__);
 
   const auto device_id = event.device_id;
   const auto erased = std::erase_if(sensors_, [device_id](auto& sensor) {
@@ -45,7 +45,7 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
 
 boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceStateChanged_t& event)
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
 
   const auto device_id = event.device_id;
   auto sensor = std::ranges::find_if(sensors_, [device_id](auto& sensor) {

@@ -15,6 +15,7 @@
 namespace mgmt::home_assistant::mqttc {
 enum class BinarySensorState { Off,
   On };
+
 struct BinarySensorConfig
 {
   static constexpr inline auto EntityName = "binary_sensor";
@@ -44,7 +45,7 @@ public:
   BinarySensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
     : Base_t(BinarySensorConfig::EntityName, std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());
+    common::logger::get(mgmt::home_assistant::Logger)->trace("BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
   // movable
   BinarySensor(BinarySensor&& rhs) noexcept = default;
@@ -57,7 +58,7 @@ public:
 
   boost::asio::awaitable<void> async_set_config(EntityConfig config)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensor::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("BinarySensor::{}", __FUNCTION__);
 
     config.set_override(BinarySensorConfig::StateTopicKey, topics_.at(BinarySensorConfig::StateTopicKey));
     config.set_override(BinarySensorConfig::StateOffKey, std::string{ BinarySensorStateMapper.map(BinarySensorState::Off) });
@@ -72,14 +73,18 @@ public:
 
   boost::asio::awaitable<void> async_set_state(const BinarySensorState& state)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}", __FUNCTION__);
+    using std::string;
+
+    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}, state: {}", __FUNCTION__, BinarySensorStateMapper.map(state));
 
     co_await async_publish(topics_.at(BinarySensorConfig::StateTopicKey), std::string{ BinarySensorStateMapper.map(state) });
   }
 
   boost::asio::awaitable<void> async_set_availability(const Availability& availability)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}", __FUNCTION__);
+    using std::string;
+
+    common::logger::get(mgmt::home_assistant::Logger)->trace("BinarySensorState::{}", __FUNCTION__);
 
     co_await async_set_availability(topics_.at(GenericEntityConfig::AvailabilityTopic), availability);
   }

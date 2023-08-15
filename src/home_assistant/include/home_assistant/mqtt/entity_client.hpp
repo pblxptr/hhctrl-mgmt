@@ -47,7 +47,7 @@ public:
 
   void connect()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     auto error_code = boost::system::error_code{};
     impl_->connect(error_code);
@@ -60,7 +60,7 @@ public:
   template<class Handler>
   void set_connack_handler(Handler handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     impl_->set_connack_handler([this, client_handler = std::move(handler)](bool session_present, auto return_code) mutable {
       return on_ack(session_present, return_code, std::move(client_handler));
@@ -70,7 +70,7 @@ public:
   template<class Handler>
   void set_error_handler(Handler handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     error_handler_ = std::move(handler);
 
@@ -85,7 +85,7 @@ public:
   template<class Payload>
   void async_publish(const std::string& topic, Payload&& payload)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     impl_->publish(topic, std::forward<Payload>(payload));
   }
@@ -93,7 +93,7 @@ public:
   template<class Iterator>
   void subscribe(Iterator begin, Iterator end)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     impl_->set_suback_handler([this, begin, end](auto packet_id, auto results) {
       common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::suback_handler, packet_id: {}", packet_id);
@@ -128,7 +128,7 @@ public:
 
     using MqttSub_t = std::tuple<MQTT_NS::string_view, MQTT_NS::subscribe_options>;
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, sending sub", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}, sending sub", __FUNCTION__);
 
     auto subs = std::vector<MqttSub_t>{};
     std::transform(begin, end, std::back_inserter(subs), [](auto&& sub) {
@@ -143,7 +143,7 @@ public:
 private:
   bool reconnect()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     if (++reconnect_.attempt > reconnect_.max_attempts) {
       return false;
@@ -162,7 +162,7 @@ private:
   template<class Handler>
   bool on_ack(bool session_present, mqtt::connect_return_code connack_return_code, Handler&& client_handler)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, session_present, MQTT_NS::connect_return_code_to_str(connack_return_code));
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}, session present: {}, conack ret code: {}", __FUNCTION__, session_present, MQTT_NS::connect_return_code_to_str(connack_return_code));
 
     reconnect_.attempt = 0;
     client_handler();
@@ -172,7 +172,7 @@ private:
 
   void on_error(const boost::system::error_code& error_code)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
+    common::logger::get(mgmt::home_assistant::Logger)->error("MqttEntityClient::{}, error_code: {}", __FUNCTION__, error_code.message());
 
     if (not reconnect()) {
       error_handler_(EntityError{ EntityError::Code::Undefined, error_code.message() });
@@ -181,7 +181,7 @@ private:
 
   void on_close()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("MqttEntityClient::{}", __FUNCTION__);
+    common::logger::get(mgmt::home_assistant::Logger)->trace("MqttEntityClient::{}", __FUNCTION__);
 
     if (not reconnect()) {
       error_handler_(EntityError{ EntityError::Code::Disconnected, "Connection has been closed" });

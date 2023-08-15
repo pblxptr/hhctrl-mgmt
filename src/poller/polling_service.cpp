@@ -8,9 +8,9 @@
 
 #include <poller/polling_service.hpp>
 #include <coro/co_spawn.hpp>
-#include <device/logger.hpp>
+#include <poller/logger.hpp>
 
-namespace mgmt::device {
+namespace mgmt::poller {
 PollingService::PollingService(common::executor::Executor_t executor)
   : executor_{ std::move(executor) }
 {}
@@ -41,19 +41,19 @@ void PollingService::start_poller(Poller& poller)
         co_await timer->async_wait(boost::asio::use_awaitable);
 
         if (error_code) {
-          common::logger::get(mgmt::device::Logger)->debug("Poller error_code: {}", error_code.message());
+          common::logger::get(mgmt::poller::Logger)->debug("Poller error_code: {}", error_code.message());
           timer.reset();
           break;
         }
 
         const auto start_time = std::chrono::system_clock::now();
 
-        common::logger::get(mgmt::device::Logger)->debug("Poll device with id: {}", poller.device_id);
+        common::logger::get(mgmt::poller::Logger)->debug("Poll device with id: {}", poller.device_id);
 
         co_await poller.poll();
         const auto end_time = std::chrono::system_clock::now();
         auto diff_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-        common::logger::get(mgmt::device::Logger)->debug("Polling device with id: {} took: {} milliseconds",
+        common::logger::get(mgmt::poller::Logger)->debug("Polling device with id: {} took: {} milliseconds",
           poller.device_id,
           diff_milliseconds.count()
         );

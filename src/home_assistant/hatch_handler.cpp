@@ -47,14 +47,14 @@ mgmt::device::DeviceId_t HatchHandler::hardware_id() const
 
 boost::asio::awaitable<void> HatchHandler::async_connect()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchHandler::{}", __FUNCTION__);
 
   co_await cover_.async_connect();
 }
 
 boost::asio::awaitable<void> HatchHandler::async_sync_state()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchHandler::{}", __FUNCTION__);
 
   const auto& hatch = mgmt::device::get_device<mgmt::device::Hatch_t>(device_id_);
   auto cover_state = mgmt::home_assistant::mqttc::CoverState{};
@@ -76,7 +76,7 @@ boost::asio::awaitable<void> HatchHandler::async_sync_state()
 
 void HatchHandler::setup()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchHandler::{}", __FUNCTION__);
 
   cover_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config(); });
   cover_.set_error_handler([this](const auto& error_code) { on_error(error_code); });
@@ -87,7 +87,7 @@ void HatchHandler::setup()
 
 boost::asio::awaitable<void> HatchHandler::async_set_config()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchHandler::{}", __FUNCTION__);
 
   auto config = mgmt::home_assistant::mqttc::EntityConfig{ cover_.unique_id() };
   config.set("name", "Cover");
@@ -105,25 +105,30 @@ boost::asio::awaitable<void> HatchHandler::async_set_config()
 
 void HatchHandler::handle_command(const mgmt::home_assistant::mqttc::CoverCommand& cmd) const
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("HatchHandler::{}", __FUNCTION__);
+
+  using std::to_string;
 
   auto& hatch = mgmt::device::Inventory<mgmt::device::Hatch_t>.get(device_id_);
+  const auto status = hatch.status();
 
   switch (cmd) {
   case mgmt::home_assistant::mqttc::CoverCommand::Open:
+    common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}, current: {}, requested: 'open'.", __FUNCTION__, to_string(status));
     hatch.open();
     break;
   case mgmt::home_assistant::mqttc::CoverCommand::Close:
+    common::logger::get(mgmt::home_assistant::Logger)->debug("HatchHandler::{}, current: {}, requested: 'close'.", __FUNCTION__, to_string(status));
     hatch.close();
     break;
   case mgmt::home_assistant::mqttc::CoverCommand::Stop:
-    spdlog::error("Command not supported");// TODO(pp): Error just for the purpose of tests
+    common::logger::get(mgmt::home_assistant::Logger)->warn("HatchHandler::{}, command not supported.", __FUNCTION__);
     break;
   }
 }
 
 void HatchHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)// NOLINT(readability-convert-member-functions-to-static)
 {
-  spdlog::error("HatchHandler::{}, message: {}", __FUNCTION__, error.message());
+  common::logger::get(mgmt::home_assistant::Logger)->error("HatchHandler::{}, error message: {}.", __FUNCTION__, error.message());
 }
 }// namespace mgmt::home_assistant::device

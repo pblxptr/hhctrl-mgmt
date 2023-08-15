@@ -15,7 +15,7 @@ TempSensorHandler::TempSensorHandler(
   , identity_provider_{ identity_provider }
   , sensor_{ factory.create_sensor(get_unique_id(device_id_, identity_provider_.identity(device_id_))) }
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}, device id: {}", __FUNCTION__, device_id_);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorHandler::{}, device id: {}", __FUNCTION__, device_id_);
 
   setup();
 }
@@ -25,7 +25,7 @@ TempSensorHandler::TempSensorHandler(TempSensorHandler&& rhs) noexcept
   , identity_provider_{ rhs.identity_provider_ }
   , sensor_{ std::move(rhs.sensor_) }
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::(TempSensorHandler&&)");
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorHandler::(TempSensorHandler&&)");
 
   setup();
 }
@@ -47,14 +47,14 @@ mgmt::device::DeviceId_t TempSensorHandler::hardware_id() const
 
 boost::asio::awaitable<void> TempSensorHandler::async_connect()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorHandler::{}", __FUNCTION__);
 
   co_await sensor_.async_connect();
 }
 
 boost::asio::awaitable<void> TempSensorHandler::async_sync_state()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorHandler::{}", __FUNCTION__);
 
   const auto& temp_sensor = mgmt::device::get_device<mgmt::device::TempSensor_t>(device_id_);
   co_await sensor_.async_set_value(fmt::format("{:.1f}", temp_sensor.value()));
@@ -62,7 +62,7 @@ boost::asio::awaitable<void> TempSensorHandler::async_sync_state()
 
 void TempSensorHandler::setup()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorHandler::{}", __FUNCTION__);
 
   sensor_.set_ack_handler([this]() -> boost::asio::awaitable<void> { co_await async_set_config(); });
   sensor_.set_error_handler([this](const auto& error_code) { on_error(error_code); });
@@ -70,7 +70,7 @@ void TempSensorHandler::setup()
 
 boost::asio::awaitable<void> TempSensorHandler::async_set_config()
 {
-  common::logger::get(mgmt::home_assistant::Logger)->debug("TempSensorHandler::{}", __FUNCTION__);
+  common::logger::get(mgmt::home_assistant::Logger)->trace("TempSensorHandler::{}", __FUNCTION__);
 
   auto config = mgmt::home_assistant::mqttc::EntityConfig{ sensor_.unique_id() };
   config.set("name", "Temp sensor");
@@ -88,6 +88,6 @@ boost::asio::awaitable<void> TempSensorHandler::async_set_config()
 
 void TempSensorHandler::on_error(const mgmt::home_assistant::mqttc::EntityError& error)// NOLINT(readability-convert-member-functions-to-static)
 {
-  spdlog::error("TempSensorHandler::{}, message: {}", __FUNCTION__, error.message());
+  common::logger::get(mgmt::home_assistant::Logger)->error("TempSensorHandler::{}, error message: {}.", __FUNCTION__, error.message());
 }
 }// namespace mgmt::home_assistant::device
