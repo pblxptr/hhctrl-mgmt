@@ -1,8 +1,7 @@
 
 [requires]
-boost/1.79.0
+boost/1.82.0
 spdlog/1.9.2
-libcurl/7.80.0
 gtest/cci.20210126
 redboltz-mqtt_cpp/13.0.0
 fmt/9.0.0
