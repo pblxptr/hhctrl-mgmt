@@ -7,7 +7,7 @@
 
 __attribute__((weak)) void test_spec_setup()
 {
-  throw std::runtime_error{ "dupa" };
+//  throw std::runtime_error{ "dupa" };
 }
 
 int main(int argc, char* argv[])
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
   auto& config = TestConfig::get();
   test_spec_setup();
-  config.apply(session);
+//  config.apply(session);
 
   int returnCode = session.applyCommandLine(argc, argv);
   if (returnCode != 0)// Indicates a command line error
