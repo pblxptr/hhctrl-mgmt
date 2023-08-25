@@ -8,10 +8,10 @@ services:
   test:
     depends_on: [ mqtt_broker ]
     image: ubuntu:22.04
-    command: >
-        bash -c "chmod +x /home/bin/home_assistant_itc2 &&
-        /home/bin/home_assistant_itc2 ${CMD_OPTIONS}
-        "
-    volumes:
-      - ${ARTIFACTS_DIR}:/home/bin
+#    command: >
+#        bash -c "chmod +x /home/bin/home_assistant_itc2 &&
+#        /home/bin/home_assistant_itc2 ${CMD_OPTIONS}
+#        "
+#    volumes:
+#      - ${ARTIFACTS_DIR}:/home/bin
     network_mode: host

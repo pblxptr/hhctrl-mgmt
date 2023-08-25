@@ -6,14 +6,10 @@
 
 #include <home_assistant/device_identity.hpp>
 
-namespace mgmt::home_assistant::mqttc {
+namespace mgmt::home_assistant::v2 {
 class EntityConfig
 {
 public:
-  explicit EntityConfig(std::string unique_id) //TODO(bielpa): Consider removing unique_id from ctorr, and set in in Entity while sending a config
-    : unique_id_{ std::move(unique_id) }
-  {}
-
   template<class Value>
   void set(std::string_view key, const Value& value)
   {
@@ -39,16 +35,12 @@ public:
     set_override(key, value);
   }
 
-
   auto parse()
   {
-    object_["unique_id"] = unique_id_;
-
     return boost::json::serialize(object_);
   }
 
 private:
-  std::string unique_id_;
   boost::json::object object_;
 };
 

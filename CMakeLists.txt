@@ -18,6 +18,7 @@ include(cmake/date_ext_lib.cmake)
 include(cmake/mqtt_cpp.cmake)
 include(cmake/async_mqtt.cmake)
 include(cmake/range-v3.cmake)
+include(cmake/expected.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")

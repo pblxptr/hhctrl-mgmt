@@ -7,6 +7,7 @@
 #include <string>
 
 #include <home_assistant/availability.hpp>
+#include <home_assistant/mqtt/will.hpp>
 #include <home_assistant/logger.hpp>
 #include <utils/mapper.hpp>
 

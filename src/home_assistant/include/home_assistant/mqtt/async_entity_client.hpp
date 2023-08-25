@@ -10,6 +10,7 @@
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>
 #include <home_assistant/mqtt/client_config.hpp>
+#include <home_assistant/mqtt/will.hpp>
 
 namespace mgmt::home_assistant::mqttc {
 
@@ -24,11 +25,6 @@ concept AsyncHandler = requires(Handler handler)
 using PublishHandler_t = std::function<void(MQTT_NS::buffer)>;
 using ErrorHandler_t = std::function<void(const EntityError&)>;
 
-struct Will
-{
-  std::string_view topic;
-  std::string_view payload;
-};
 
 inline auto default_publish_handler() -> PublishHandler_t
 {

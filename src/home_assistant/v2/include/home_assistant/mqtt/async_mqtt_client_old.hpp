@@ -14,7 +14,6 @@
 #include <home_assistant/mqtt/error.hpp>
 #include <home_assistant/mqtt/will.hpp>
 #include <home_assistant/mqtt/expected.hpp>
-#include <home_assistant/mqtt/dump.hpp>
 
 namespace mgmt::home_assistant::v2
 {
@@ -30,36 +29,30 @@ namespace mgmt::home_assistant::v2
   using PublishAckPacket = async_mqtt::v3_1_1::puback_packet;
   using SubscriptionAckPacket = async_mqtt::v3_1_1::suback_packet;
 
-  using ReceiveResult = std::variant<PublishPacket, PublishAckPacket, SubscriptionAckPacket>;
+  using ReceiveResult = std::variant<PublishPacket, PublishAckPacket>;
 
-  class SubscriptionError
-  {
-  public:
-    SubscriptionError(std::vector<std::string> topics)
-      : topics_{std::move(topics)}
-      {}
+  namespace detail {
+    void dump_packet(const PublishPacket& pub_packet)
+    {
+      std::cout
+        << "MQTT PUBLISH recv"
+        << " pid:" << pub_packet.packet_id()
+        << " topic:" << pub_packet.topic()
+        << " payload:" << async_mqtt::to_string(pub_packet.payload())
+        << " qos:" << pub_packet.opts().get_qos()
+        << " retain:" << pub_packet.opts().get_retain()
+        << " dup:" << pub_packet.opts().get_dup()
+        << std::endl;
+    }
 
-      bool contains(const std::string& topic) const
-      {
-        return std::ranges::find(topics_, topic) != topics_.end();
-      }
-
-    private:
-      std::vector<std::string> topics_;
-  };
-
-  class PublishError
-  {
-    public:
-      explicit PublishError(std::string topic)
-        : topic_{std::move(topic)}
-        {}
-
-      private:
-        std::string topic_;
-  };
-
-
+    void dump_packet(const PublishAckPacket& puback_packet)
+    {
+      std::cout
+        << "MQTT PUBACK recv"
+        << " pid:" << puback_packet.packet_id()
+        << std::endl;
+    }
+  } // namespace detail
 
   struct ClientConfig
   {
@@ -71,6 +64,7 @@ namespace mgmt::home_assistant::v2
     bool clean_session { true };
     uint16_t keep_alive {};
   };
+
 
   template <typename Executor, ProtocolVersion protocolVersion = DefaultProtocolVersion>
   class AsyncMqttClient
@@ -100,10 +94,6 @@ namespace mgmt::home_assistant::v2
             [&](async_mqtt::v3_1_1::puback_packet puback_packet) -> Expected<ReceiveResult> {
               detail::dump_packet(puback_packet);
               return Expected<ReceiveResult>{std::move(puback_packet)};
-            },
-            [&](async_mqtt::v3_1_1::suback_packet subback_packet) -> Expected<ReceiveResult> {
-              detail::dump_packet(subback_packet);
-              return Expected<ReceiveResult>{std::move(subback_packet)};
             },
             [](auto const&) -> Expected<ReceiveResult> {
               return Unexpected {ClientError::UnknownPacket};
