@@ -15,6 +15,7 @@
 
 namespace mgmt::home_assistant::v2
 {
+
 enum class CoverState { Open,
   Opening,
   Closing,
@@ -105,8 +106,11 @@ public:
   {
     common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
 
+    // Configure subscription topics
+    config.set_override(CoverConfig::Property::CommandTopic, sub_topics_.at(CoverConfig::Property::CommandTopic));
+
+    // Configure
     config.set_override(CoverConfig::Property::StateTopic, topics_.at(CoverConfig::Property::StateTopic));
-    config.set_override(CoverConfig::Property::CommandTopic, topics_.at(CoverConfig::Property::CommandTopic));
     config.set_override(CoverConfig::Property::StateOpening, std::string{ CoverStateMapper.map(CoverState::Opening) });
     config.set_override(CoverConfig::Property::StateOpen, std::string{ CoverStateMapper.map(CoverState::Open) });
     config.set_override(CoverConfig::Property::StateClosing, std::string{ CoverStateMapper.map(CoverState::Closing) });
@@ -126,38 +130,38 @@ public:
 
   boost::asio::awaitable<Expected<CoverReceiveResult>> async_receive()
   {
-    const auto packet = co_await BaseType::async_receive();
+    auto map_command = [&](const auto& publish_packet) {
+      using std::to_string;
 
-    if (!packet) {
-      co_return Unexpected{ packet.error() };
+      const auto topic = static_cast<std::string_view>(publish_packet.topic());
+      const auto payload = to_string(publish_packet.payload());
 
-//      const auto& error = packet.error();
-//      std::visit(async_mqtt::overload {
-//        [](const SubscriptionError& error) Expected<CoverReceiveResult> {
-//          if (error.topic() == topics_) {
-//            return Unexpected{CoverError::CommandSubscriptionFailure};
-//          }
-//          else if (error.topic() == topics) {
-//            return Unexpected{CoverError::CommandTiltSubscriptionFailure};
-//          }
-//        },
-//        [](const PublishError& error) -> Expected<CoverReceiveResult> {}
-//      }, error);
+      if (topic == topics_.at(CoverConfig::Property::CommandTopic)) {
+        return CoverCommandMapper.map(payload);
+      }
 
+      assert(0 && "Not implemented");
+    };
 
-    }
+    while (true) {
+      const auto packet = co_await BaseType::async_receive();
 
+      if (!packet) {
+        co_return Unexpected{ packet.error() };
+      }
 
+      const auto& value = packet.value();
 
+      if (std::holds_alternative<PublishPacket>(value)) {
+        co_return map_command(std::get<PublishPacket>(value));
+      }
+      else if (std::holds_alternative<SubscriptionAckPacket>(value)) {
+        const auto& suback_packet = std::get<SubscriptionAckPacket>(value);
 
-
-    const auto& value = packet.value();
-
-    if (value.topic().find(topics_.at(CoverConfig::Property::CommandTopic))) {
-      co_return Expected<CoverReceiveResult>{CoverCommandMapper.map(async_mqtt::to_string(value.payload()))};
-    }
-    else {
-      co_return Unexpected{EntityError::UnknownPacket};
+        if (detail::any_suback_failure(suback_packet)) {
+          co_return Unexpected{EntityError::SubscriptionError};
+        }
+      }
     }
   }
 
@@ -179,11 +183,14 @@ public:
 
 private:
   std::string unique_id_;
+  common::utils::StaticMap<std::string_view, std::string, 2> sub_topics_ {
+    std::pair{ CoverConfig::Property::CommandTopic, topic(CoverConfig::Default::CommandTopic) }
+  };
   common::utils::StaticMap<std::string_view, std::string, 4> topics_{
     std::pair{ CoverConfig::Property::StateTopic, topic(CoverConfig::Default::StateTopic) },
-    std::pair{ CoverConfig::Property::CommandTopic, topic(CoverConfig::Default::CommandTopic) },
     std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
+
 };
 }

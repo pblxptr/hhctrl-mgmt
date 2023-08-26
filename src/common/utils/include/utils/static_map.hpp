@@ -12,6 +12,16 @@ class StaticMap
 public:
   using ValueType_t = std::array<std::pair<TKey, TValue>, size>;
 
+
+  constexpr decltype(auto) at(std::size_t index) const
+  {
+    if (index > size - 1) {
+      throw std::out_of_range{"Index is out of range"};
+    }
+
+    return data[index].second;
+  }
+
   // Find element by key
   // Throws if not found
   constexpr decltype(auto) at(const TKey& key) const

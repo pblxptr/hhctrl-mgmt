@@ -15,6 +15,7 @@
 #include <home_assistant/mqtt/will.hpp>
 #include <home_assistant/mqtt/expected.hpp>
 #include <home_assistant/mqtt/dump.hpp>
+#include <tl/expected.hpp>
 
 namespace mgmt::home_assistant::v2
 {
@@ -31,35 +32,6 @@ namespace mgmt::home_assistant::v2
   using SubscriptionAckPacket = async_mqtt::v3_1_1::suback_packet;
 
   using ReceiveResult = std::variant<PublishPacket, PublishAckPacket, SubscriptionAckPacket>;
-
-  class SubscriptionError
-  {
-  public:
-    SubscriptionError(std::vector<std::string> topics)
-      : topics_{std::move(topics)}
-      {}
-
-      bool contains(const std::string& topic) const
-      {
-        return std::ranges::find(topics_, topic) != topics_.end();
-      }
-
-    private:
-      std::vector<std::string> topics_;
-  };
-
-  class PublishError
-  {
-    public:
-      explicit PublishError(std::string topic)
-        : topic_{std::move(topic)}
-        {}
-
-      private:
-        std::string topic_;
-  };
-
-
 
   struct ClientConfig
   {
@@ -90,30 +62,30 @@ namespace mgmt::home_assistant::v2
 
     boost::asio::awaitable<Expected<ReceiveResult>> async_receive()
     {
-      if (auto packet = co_await ep_.recv(boost::asio::use_awaitable)) {
-        co_return packet.visit(
-          async_mqtt::overload {
-            [&](async_mqtt::v3_1_1::publish_packet pub_packet) -> Expected<ReceiveResult> {
-              detail::dump_packet(pub_packet);
-              return Expected<ReceiveResult>{std::move(pub_packet)};
-            },
-            [&](async_mqtt::v3_1_1::puback_packet puback_packet) -> Expected<ReceiveResult> {
-              detail::dump_packet(puback_packet);
-              return Expected<ReceiveResult>{std::move(puback_packet)};
-            },
-            [&](async_mqtt::v3_1_1::suback_packet subback_packet) -> Expected<ReceiveResult> {
-              detail::dump_packet(subback_packet);
-              return Expected<ReceiveResult>{std::move(subback_packet)};
-            },
-            [](auto const&) -> Expected<ReceiveResult> {
-              return Unexpected {ClientError::UnknownPacket};
+        if (auto packet = co_await ep_.recv(boost::asio::use_awaitable)) {
+          co_return packet.visit(
+            async_mqtt::overload {
+              [&](async_mqtt::v3_1_1::publish_packet pub_packet) -> Expected<ReceiveResult> {
+                detail::dump_packet(pub_packet);
+                return Expected<ReceiveResult>{std::move(pub_packet)};
+              },
+              [&](async_mqtt::v3_1_1::puback_packet puback_packet) -> Expected<ReceiveResult> {
+                detail::dump_packet(puback_packet);
+                return Expected<ReceiveResult>{std::move(puback_packet)};
+              },
+              [&](async_mqtt::v3_1_1::suback_packet subback_packet) -> Expected<ReceiveResult> {
+                detail::dump_packet(subback_packet);
+                return Expected<ReceiveResult>{std::move(subback_packet)};
+              },
+              [](auto const&) -> Expected<ReceiveResult> {
+                return Unexpected {ClientError::UnknownPacket};
+              }
             }
-          }
-        );
-      }
-      else {
-        co_return Unexpected{detail::map_error_code(packet.template get<async_mqtt::system_error>().code())};
-      }
+          );
+        }
+        else {
+          co_return Unexpected{detail::map_error_code(packet.template get<async_mqtt::system_error>().code())};
+        }
     }
 
     boost::asio::awaitable<std::error_code> async_connect()

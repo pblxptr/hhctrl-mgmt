@@ -23,13 +23,23 @@
 //TODO(bielpa) Use global qos per client.
 
 namespace mgmt::home_assistant::v2 {
+
 using PublishHandler = std::function<void(std::string)>;
 
 inline auto DefaultQoS = QOS::at_least_once;
 
 using Availability = mgmt::home_assistant::mqttc::Availability;
 
-namespace details {
+namespace detail {
+  bool any_suback_failure(const SubscriptionAckPacket& suback_packet)
+  {
+    return std::ranges::any_of(suback_packet.entries(), [](const auto& suback_code) {
+      return suback_code == async_mqtt::suback_return_code::failure;
+    });
+  }
+} // namespace detail
+
+namespace details { //TODO(bielpa): MOve details to detail
   constexpr static auto AvailabilityStateMapper = common::utils::Mapper{
     std::pair{ Availability::Offline, "offline" },
     std::pair{ Availability::Online, "online" }
@@ -42,6 +52,9 @@ struct GenericEntityConfig
   static constexpr inline auto JsonAttributesTopic = std::string_view{ "json_attributes_topic" };
   static constexpr inline auto JsonAttributesTemplate = std::string_view{ "json_attributes_template" };
 };
+
+//using EntityReceiveExpected = tl::expected<std::variant<PublishPacket, SubscriptionAckPacket>, std::error_code>;
+//using EntityReceiveUnexpected = tl::unexpected<std::error_code>;
 
 template<class EntityClient>
 class Entity
@@ -71,14 +84,6 @@ public:
     co_return co_await client_.async_connect();
   }
 
-  template<class Handler>
-  void set_error_handler(Handler handler)
-  {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("Entity::{}", __FUNCTION__);
-
-    client_.set_error_handler(std::move(handler));
-  }
-
 protected:
   Entity(std::string_view entity_name, std::string unique_id, EntityClient client)
     : entity_name_{entity_name}
@@ -92,38 +97,93 @@ protected:
     );
   }
 
-  boost::asio::awaitable<Expected<PublishPacket>> async_receive()
+  boost::asio::awaitable<Expected<PublishPakcet>> async_receive()
   {
-    const auto packet = co_await client_.async_receive();
+    while (true) {
+      const auto packet = co_await client_.async_receive();
 
-    if (!packet) {
-      common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}, packet error", id(), __FUNCTION__);
-      co_return Unexpected{packet.error()};
-    }
-    auto pub_packet = std::visit(
-      async_mqtt::overload {
-      [&](const PublishPacket& pub_packet) -> std::optional<PublishPacket> {
-        return pub_packet;
-      },
-      [&](const PublishAckPacket& puback_packet) -> std::optional<PublishPacket> {
-          if (pending_puback_.contains(puback_packet.packet_id())) {
-            pending_puback_.erase(puback_packet.packet_id());
-            std::cout << "Confirm ack\n";
-          }
+      if (!packet) {
+        common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}, packet error", id(), __FUNCTION__);
+        co_return Unexpected { packet.error() };
+      }
 
-          return std::nullopt;
-      },
-      [](const SubscriptionAckPacket& suback_packet) -> std::optional<PublishPacket> {
-        return std::nullopt;
-      }},
-    packet.value());
+      const auto& value = packet.value();
 
-    if (!pub_packet) {
-      std::cout << "No pub..., receive again\n";
-      co_await async_receive();
+      if (std::holds_alternative<PublishPacket>(value)) {
+        co_return Expected<PublishPacket>{std::get<PublishPacket>(value)};
+      }
+      else if (std::holds_alternative<SubscriptionAckPacket>(value)) {
+        co_return EntityReceiveExpected{std::get<SubscriptionAckPacket>(value)};
+      }
+      else if (std::holds_alternative<PublishAckPacket>(value)) {
+        const auto& puback_packet = std::get<PublishAckPacket>(value);
+        if (pending_puback_.contains(puback_packet.packet_id())) {
+          pending_puback_.erase(puback_packet.packet_id());
+        }
+      }
     }
 
-    co_return Expected<PublishPacket>{std::move(*pub_packet)};
+
+
+
+
+    //    auto pub_packet = std::visit(
+    //      async_mqtt::overload {
+    //      [&](const PublishPacket& pub_packet) -> std::optional<PublishPacket> {
+    //        return pub_packet;
+    //      },
+    //      [&](const PublishAckPacket& puback_packet) -> std::optional<PublishPacket> {
+    //          if (pending_puback_.contains(puback_packet.packet_id())) {
+    //            pending_puback_.erase(puback_packet.packet_id());
+    //            std::cout << "Confirm ack\n";
+    //          }
+    //
+    //          return std::nullopt;
+    //      },
+    //      [](const SubscriptionAckPacket& suback_packet) -> std::optional<PublishPacket> {
+    //        return std::nullopt;
+    //      }},
+    //    packet.value());
+    //
+    //    if (!pub_packet) {
+    //      std::cout << "No pub..., receive again\n";
+    //      co_await async_receive();
+    //    }
+    //
+    //    co_return Expected<PublishPacket>{std::move(*pub_packet)};
+
+
+
+
+
+//    if (!packet) {
+//      common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}, packet error", id(), __FUNCTION__);
+//      co_return Unexpected{packet.error()};
+//    }
+//    auto pub_packet = std::visit(
+//      async_mqtt::overload {
+//      [&](const PublishPacket& pub_packet) -> std::optional<PublishPacket> {
+//        return pub_packet;
+//      },
+//      [&](const PublishAckPacket& puback_packet) -> std::optional<PublishPacket> {
+//          if (pending_puback_.contains(puback_packet.packet_id())) {
+//            pending_puback_.erase(puback_packet.packet_id());
+//            std::cout << "Confirm ack\n";
+//          }
+//
+//          return std::nullopt;
+//      },
+//      [](const SubscriptionAckPacket& suback_packet) -> std::optional<PublishPacket> {
+//        return std::nullopt;
+//      }},
+//    packet.value());
+//
+//    if (!pub_packet) {
+//      std::cout << "No pub..., receive again\n";
+//      co_await async_receive();
+//    }
+//
+//    co_return Expected<PublishPacket>{std::move(*pub_packet)};
   }
 
   boost::asio::awaitable<std::error_code> async_set_config(EntityConfig config)

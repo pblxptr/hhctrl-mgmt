@@ -199,27 +199,6 @@ TEST_CASE("Cover")
 
     const auto result = co_await cover.async_receive();
 
-//    while (true) {
-//      const auto result = co_await cover.async_receive();
-//      if (!result) {
-//        switch (result.error_code()) {
-//            case : EntityError::ConfigError,
-//            case : EntityError::SubscriptionError
-//            case : EntityError::PublishError
-//            case : MqttClientError::Disconnected,
-//            case : MqttClientError::
-//        }
-//      }
-//
-//      auto command = result.value();
-//    }
-
-//    {
-//      const auto auto [ec, result] = co_await cover.async_receive();
-//    }
-
-//    ioc.stop();
-
 
     co_return;
 
