@@ -19,8 +19,6 @@
 
 namespace mgmt::home_assistant::v2
 {
-  constexpr inline auto DefaultProtocolVersion = async_mqtt::protocol_version::v3_1_1;
-
   using ProtocolVersion = async_mqtt::protocol_version;
   using QOS = async_mqtt::qos;
   using SubAckReturnCode = async_mqtt::suback_return_code;
@@ -30,8 +28,19 @@ namespace mgmt::home_assistant::v2
   using PublishPacket = async_mqtt::v3_1_1::publish_packet;
   using PublishAckPacket = async_mqtt::v3_1_1::puback_packet;
   using SubscriptionAckPacket = async_mqtt::v3_1_1::suback_packet;
-
+  using SubscriptionAckReturnCode = async_mqtt::suback_return_code;
   using ReceiveResult = std::variant<PublishPacket, PublishAckPacket, SubscriptionAckPacket>;
+
+  constexpr inline auto DefaultQoS = QOS::at_least_once;
+  constexpr inline auto DefaultProtocolVersion = ProtocolVersion::v3_1_1;
+
+
+  namespace detail {
+    bool supported_qos(QOS qos)
+    {
+      return qos == QOS::at_least_once || qos == QOS::at_most_once;
+    }
+  }
 
   struct ClientConfig
   {
@@ -130,36 +139,42 @@ namespace mgmt::home_assistant::v2
       co_return std::error_code{};
     }
 
-//    boost::asio::awaitable<SubscribeResult> async_subscribe(const std::string& topic, QOS qos)
-//    {
-//      auto subs = std::vector<async_mqtt::topic_subopts>{
-//        { async_mqtt::allocate_buffer(topic), qos }
-//      };
-//
-//      if (auto error_code = co_await async_send_sub(subs)) {
-//        co_return SubscribeResult { detail::map_error_code(error_code.code()), {} };
-//      }
-//
-//      auto [error_code, suback_codes] = co_await async_recv_suback();
-//
-//      if (error_code) {
-//        co_return SubscribeResult { detail::map_error_code(error_code.code()), {} };
-//      }
-//
-//      auto suback_results = std::vector<TopicSubAckResult>();
-//      std::ranges::transform(suback_codes, std::back_inserter(suback_results), [&subs, index = 0](auto ack_code) mutable {
-//        return TopicSubAckResult { subs[index++].topic(), ack_code };
-//      });
-//
-//      co_return SubscribeResult { std::error_code {}, std::move(suback_results) };
-//    }
+    boost::asio::awaitable<Expected<PacketId>> async_subscribe(std::vector<std::string> topics)
+    {
+        // Prepare subscription
+        auto subs = std::vector<async_mqtt::topic_subopts>{};
+        subs.reserve(topics.size());
+
+        std::ranges::transform(topics, std::back_inserter(subs), [](const auto& topic) {
+          return async_mqtt::topic_subopts{ async_mqtt::allocate_buffer(topic), DefaultQoS };
+        });
+
+        // Send subscription request
+        using boost::asio::use_awaitable;
+        auto packet_id = acquire_packet_id();
+
+        if (auto system_error = co_await ep_.send(
+              async_mqtt::v3_1_1::subscribe_packet{
+                packet_id,
+                async_mqtt::force_move(subs)// sub_entry variable is required to avoid g++ bug
+              },
+              use_awaitable)) {
+          co_return Unexpected{detail::map_error_code(system_error.code())};
+        }
+
+      co_return Expected<PacketId>{packet_id};
+    }
 
     template <typename Topic, typename Payload>
-    boost::asio::awaitable<Expected<PacketId>> async_publish(Topic&& topic, Payload&& payload, QOS qos = QOS::at_least_once)
+    boost::asio::awaitable<Expected<PacketId>> async_publish(Topic&& topic, Payload&& payload, QOS qos)
     {
-      auto packet_id = qos == QOS::at_most_once
-        ? async_mqtt::v3_1_1::puback_packet::packet_id_t { 0 }
-        : *ep_.acquire_unique_packet_id();
+      assert(detail::supported_qos(qos));
+
+      if (!detail::supported_qos(qos)) {
+        co_return Unexpected{ClientError::QosNotSupported};
+      }
+
+      auto packet_id = acquire_packet_id(qos);
 
       if (auto system_error = co_await ep_.send(
             async_mqtt::v3_1_1::publish_packet{
@@ -227,20 +242,19 @@ namespace mgmt::home_assistant::v2
       }
     }
 
-//    boost::asio::awaitable<async_mqtt::system_error> async_send_sub(std::vector<async_mqtt::topic_subopts> subs)
+//    boost::asio::awaitable<Expected<PacketId>> async_send_sub(std::vector<async_mqtt::topic_subopts> subs)
 //    {
 //      using boost::asio::use_awaitable;
 //
-//      //TODO(bielpa): Return packet id
+//      auto packet_id = acquire_packet_id();
 //
 //      if (auto system_error = co_await ep_.send(
 //            async_mqtt::v3_1_1::subscribe_packet{
-//              *ep_.acquire_unique_packet_id(),
+//              packet_id,
 //              async_mqtt::force_move(subs) // sub_entry variable is required to avoid g++ bug
 //            },
 //            use_awaitable)
 //      ) {
-//
 //        co_return system_error;
 //      }
 //
@@ -270,6 +284,18 @@ namespace mgmt::home_assistant::v2
 //        co_return std::tuple { packet_variant.get<async_mqtt::system_error>(), std::move(suback_codes) };
 //      }
 //    }
+
+    auto acquire_packet_id()
+    {
+      return *ep_.acquire_unique_packet_id();
+    }
+
+    auto acquire_packet_id(QOS qos)
+    {
+      return qos == QOS::at_most_once
+           ? async_mqtt::v3_1_1::puback_packet::packet_id_t { 0 }
+           : *ep_.acquire_unique_packet_id();
+    }
 
   private:
     Executor executor_; // TODO(bielpa): Possibly can be removed

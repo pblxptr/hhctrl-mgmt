@@ -30,7 +30,14 @@ namespace mgmt::home_assistant::v2
 
     void dump_packet(const async_mqtt::v3_1_1::suback_packet& suback_packet)
     {
-
+      using std::to_string;
+      std::cout
+        << "MQTT SUBACK recv"
+        << " pid: " << suback_packet.packet_id()
+        << "\n";
+        for (const auto& entry : suback_packet.entries()) {
+          std::cout << "suback qos: " << entry << '\n'; // suback_return_code_to_str(entry)
+        }
     }
   }
 }

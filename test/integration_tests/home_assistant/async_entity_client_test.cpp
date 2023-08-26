@@ -169,14 +169,32 @@ namespace {
 //}
 
 #include <home_assistant/mqtt/coverv2.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+auto setup_logger(const std::string& logger_name, spdlog::level::level_enum level)
+{
+    // Console sink
+    auto sinks = std::vector<spdlog::sink_ptr>{};
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(level);
+    sinks.push_back(console_sink);
+
+    auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+    logger->set_level(spdlog::level::trace);
+    spdlog::register_logger(logger);
+}
 
 TEST_CASE("Cover")
 {
   // NOLINTBEGIN
 
+  setup_logger(mgmt::home_assistant::Logger, spdlog::level::debug);
+
   using mgmt::home_assistant::v2::AsyncMqttClient;
   using mgmt::home_assistant::v2::Cover;
   using mgmt::home_assistant::v2::EntityConfig;
+  using mgmt::home_assistant::v2::CoverSwitchCommand;
+  using mgmt::home_assistant::v2::CoverTiltCommand;
 
   auto ioc = IoContext{};
   using ClientType = AsyncMqttClient<decltype(ioc.handle().get_executor())>;
@@ -194,11 +212,26 @@ TEST_CASE("Cover")
     }
 
     {
-      const auto error_code = co_await cover.async_set_config();
+      const auto error_code = co_await cover.async_configure();
+      if (error_code) {
+        spdlog::debug(error_code.message());
+      }
+      REQUIRE(!error_code);
     }
 
-    const auto result = co_await cover.async_receive();
+    while (true) {
+      const auto result = co_await cover.async_receive();
+      REQUIRE(result);
 
+      std::visit(async_mqtt::overload{
+        [](const CoverSwitchCommand& command) {
+          spdlog::debug("Switch command\n");
+        },
+        [](const CoverTiltCommand& command) {
+          spdlog::debug("Tilt command\n");
+        }}, result.value()
+      );
+    }
 
     co_return;
 

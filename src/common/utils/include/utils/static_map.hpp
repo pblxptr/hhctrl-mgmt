@@ -48,6 +48,13 @@ public:
     return elem->first;
   }
 
+  constexpr bool contains(const TKey& key) const
+  {
+    auto elem = std::find_if(std::begin(data), std::end(data), [&key](const auto& xelem) { return key == xelem.first; });
+
+    return elem != data.end();
+  }
+
   ValueType_t data;
 };
 }// namespace common::utils

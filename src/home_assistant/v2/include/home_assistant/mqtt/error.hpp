@@ -9,7 +9,7 @@
 
 namespace mgmt::home_assistant::v2
 {
-  enum class ClientError { Timeout = 1 , NoService, UnknownPacket } ;
+  enum class ClientError { Timeout = 1 , NoService, UnknownPacket, QosNotSupported} ;
 
   namespace detail {
     struct MqttClientErrorCategory : std::error_category
@@ -28,6 +28,8 @@ namespace mgmt::home_assistant::v2
             return "no_service";
           case ClientError::UnknownPacket:
             return "unknown_packet";
+          case ClientError::QosNotSupported:
+            return "qos_not_supported";
           default:
             return "unrecognized error";
         }

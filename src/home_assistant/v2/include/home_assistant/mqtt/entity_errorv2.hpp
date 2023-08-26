@@ -13,6 +13,7 @@ namespace mgmt::home_assistant::v2
     Timeout = 1 ,
     NoService,
     Disconnected,
+    ConfigError,
     PublishError,
     SubscriptionError,
     UnknownPacket
@@ -35,6 +36,8 @@ namespace mgmt::home_assistant::v2
             return "no_service";
           case EntityError::Disconnected:
             return "disconnected";
+          case EntityError::ConfigError:
+            return "config_error";
           case EntityError::PublishError:
             return "publish_error";
           case EntityError::SubscriptionError:
