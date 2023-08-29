@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <ranges>
 #include <async_mqtt/all.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -19,44 +20,42 @@
 
 namespace mgmt::home_assistant::v2
 {
-  using ProtocolVersion = async_mqtt::protocol_version;
-  using QOS = async_mqtt::qos;
-  using SubAckReturnCode = async_mqtt::suback_return_code;
-  using PacketId = std::uint32_t;
-  using Pubopts = async_mqtt::pub::opts;
-  using ConnectPacket = async_mqtt::v3_1_1::connect_packet;
-  using PublishPacket = async_mqtt::v3_1_1::publish_packet;
-  using PublishAckPacket = async_mqtt::v3_1_1::puback_packet;
-  using SubscriptionPacket = async_mqtt::v3_1_1::subscribe_packet;
-  using SubscriptionAckPacket = async_mqtt::v3_1_1::suback_packet;
-  using SubscriptionAckReturnCode = async_mqtt::suback_return_code;
-  using ReceiveResult = std::variant<PublishPacket, PublishAckPacket, SubscriptionAckPacket>;
-  using Will = async_mqtt::will;
+  using ProtocolVersion_t = async_mqtt::protocol_version;
+  using Qos_t = async_mqtt::qos;
+  using PacketId_t = std::uint32_t;
+  using Pubopts_t = async_mqtt::pub::opts;
+  using ConnectPacket_t = async_mqtt::v3_1_1::connect_packet;
+  using PublishPacket_t = async_mqtt::v3_1_1::publish_packet;
+  using PublishAckPacket_t = async_mqtt::v3_1_1::puback_packet;
+  using SubscriptionPacket_t = async_mqtt::v3_1_1::subscribe_packet;
+  using SubscriptionAckPacket_t = async_mqtt::v3_1_1::suback_packet;
+  using ReceiveResult_t = std::variant<PublishPacket_t, PublishAckPacket_t, SubscriptionAckPacket_t>;
+  using Will_t = async_mqtt::will;
 
   struct WillConfig
   {
     std::string topic {};
     std::string message {};
-    Pubopts pubopts {};
+    Pubopts_t pubopts {};
   };
 
-  constexpr inline auto DefaultQoS = QOS::at_least_once;
-  constexpr inline auto DefaultProtocolVersion = ProtocolVersion::v3_1_1;
+  constexpr inline auto DefaultQoS = Qos_t::at_least_once;
+  constexpr inline auto DefaultProtocolVersion = ProtocolVersion_t::v3_1_1;
 
-  inline bool any_suback_failure(const SubscriptionAckPacket& suback_packet)
+  inline bool any_suback_failure(const SubscriptionAckPacket_t& suback_packet)
   {
     return std::ranges::any_of(suback_packet.entries(), [](const auto& suback_code) {
       return suback_code == async_mqtt::suback_return_code::failure;
     });
   }
 
-  inline bool supported_qos(QOS qos)
+  inline bool supported_qos(Qos_t qos)
   {
-    return qos == QOS::at_least_once || qos == QOS::at_most_once;
+    return qos == Qos_t::at_least_once || qos == Qos_t::at_most_once;
   }
 
   namespace detail {
-    inline std::string to_string(const Will& will)
+    inline std::string to_string(const Will_t& will)
     {
       return fmt::format("topic: '{}', message: '{}', qos: '{}', retain: '{}'",
         static_cast<std::string_view>(will.topic()),
@@ -66,17 +65,17 @@ namespace mgmt::home_assistant::v2
       );
     }
 
-    inline std::string to_string(const ConnectPacket& packet)
+    inline std::string to_string(const ConnectPacket_t& packet)
     {
       return fmt::format("client_id: '{}', keep_alive: '{}', clean_session: '{}', will: '{}'",
         static_cast<std::string_view>(packet.client_id()),
         packet.keep_alive(),
         packet.clean_session(),
-        to_string(packet.get_will().value_or(Will{"null", "null"}))
+        to_string(packet.get_will().value_or(Will_t{"null", "null"}))
       );
     }
 
-    inline std::string to_string(const PublishPacket& packet)
+    inline std::string to_string(const PublishPacket_t& packet)
     {
       return fmt::format("pid: '{}', topic: '{}', payload: '{}', qos: '{}', retain: '{}', dup: '{}'",
         packet.packet_id(),
@@ -87,12 +86,12 @@ namespace mgmt::home_assistant::v2
         async_mqtt::pub::dup_to_str(packet.opts().get_dup()));
     }
 
-    inline std::string to_string(const PublishAckPacket& packet)
+    inline std::string to_string(const PublishAckPacket_t& packet)
     {
       return fmt::format("pid: '{}'", packet.packet_id());
     }
 
-    inline std::string to_string(const SubscriptionPacket& packet)
+    inline std::string to_string(const SubscriptionPacket_t& packet)
     {
       auto format_subopt = [](const auto& subopt) mutable {
         return fmt::format("topic: '{}', qos: '{}'",
@@ -105,7 +104,7 @@ namespace mgmt::home_assistant::v2
       return fmt::format("pid: {}, {}", packet.packet_id(), fmt::join(new_range, ","));
     }
 
-    inline std::string to_string(const SubscriptionAckPacket& packet)
+    inline std::string to_string(const SubscriptionAckPacket_t& packet)
     {
       auto format_suback_retcode = [idx = 0](const auto& code) mutable {
         return fmt::format("- suback idx: '{}' suback retcode: '{}'", idx++, async_mqtt::suback_return_code_to_str(code));
@@ -128,7 +127,7 @@ namespace mgmt::home_assistant::v2
     uint16_t keep_alive {};
   };
 
-  template <typename Executor, ProtocolVersion protocolVersion = DefaultProtocolVersion>
+  template <typename Executor, ProtocolVersion_t protocolVersion = DefaultProtocolVersion>
   class AsyncMqttClient
   {
   public:
@@ -141,33 +140,33 @@ namespace mgmt::home_assistant::v2
 
     void set_will(const WillConfig& will)
     {
-      will_ = Will {
+      will_ = Will_t {
         async_mqtt::allocate_buffer(will.topic),
         async_mqtt::allocate_buffer(will.message),
         will.pubopts
       };
     }
 
-    boost::asio::awaitable<Expected<ReceiveResult>> async_receive()
+    boost::asio::awaitable<Expected<ReceiveResult_t>> async_receive()
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
 
         if (auto packet = co_await ep_.recv(boost::asio::use_awaitable)) {
           co_return packet.visit(
             async_mqtt::overload {
-              [&](PublishPacket pub_packet) -> Expected<ReceiveResult> {
+              [&](PublishPacket_t pub_packet) -> Expected<ReceiveResult_t> {
                 logger::debug(logger::AsyncMqttClient, "Received Publish packet: '{}'", detail::to_string(pub_packet));
-                return Expected<ReceiveResult>{std::move(pub_packet)};
+                return Expected<ReceiveResult_t>{std::move(pub_packet)};
               },
-              [&](PublishAckPacket puback_packet) -> Expected<ReceiveResult> {
+              [&](PublishAckPacket_t puback_packet) -> Expected<ReceiveResult_t> {
                 logger::debug(logger::AsyncMqttClient, "Received PublishAck packet: '{}'", detail::to_string(puback_packet));
-                return Expected<ReceiveResult>{std::move(puback_packet)};
+                return Expected<ReceiveResult_t>{std::move(puback_packet)};
               },
-              [&](SubscriptionAckPacket subback_packet) -> Expected<ReceiveResult> {
+              [&](SubscriptionAckPacket_t subback_packet) -> Expected<ReceiveResult_t> {
                 logger::debug(logger::AsyncMqttClient, "Received SubscribeAck packet: '{}'", detail::to_string(subback_packet));
-                return Expected<ReceiveResult>{std::move(subback_packet)};
+                return Expected<ReceiveResult_t>{std::move(subback_packet)};
               },
-              [](auto const&) -> Expected<ReceiveResult> {
+              [](auto const&) -> Expected<ReceiveResult_t> {
                 logger::warn(logger::AsyncMqttClient, "Unknown packet has been received");
                 return Unexpected {ErrorCode::UnknownPacket, "Unknown packet has been received"};
               }
@@ -211,9 +210,9 @@ namespace mgmt::home_assistant::v2
         }
       }
 
-      // Send ConnectPacket message
+      // Send ConnectPacket_t message
       if (auto error_code = co_await async_send_con(); error_code) {
-        logger::err(logger::AsyncMqttClient, "Error while sending ConnectPacket: '{}'", error_code.message());
+        logger::err(logger::AsyncMqttClient, "Error while sending ConnectPacket_t: '{}'", error_code.message());
         co_return detail::map_error_code(error_code.code());
       }
 
@@ -226,7 +225,7 @@ namespace mgmt::home_assistant::v2
       co_return std::error_code{};
     }
 
-    boost::asio::awaitable<Expected<PacketId>> async_subscribe(std::vector<std::string> topics)
+    boost::asio::awaitable<Expected<PacketId_t>> async_subscribe(std::vector<std::string> topics)
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
 
@@ -242,7 +241,7 @@ namespace mgmt::home_assistant::v2
         using boost::asio::use_awaitable;
 
         auto packet_id = acquire_packet_id();
-        auto packet = SubscriptionPacket {
+        SubscriptionPacket_t packet = SubscriptionPacket_t {
           packet_id,
           async_mqtt::force_move(subs)
         };
@@ -253,11 +252,11 @@ namespace mgmt::home_assistant::v2
           co_return Unexpected{detail::map_error_code(system_error.code())};
         }
 
-      co_return Expected<PacketId>{packet_id};
+      co_return Expected<PacketId_t>{packet_id};
     }
 
     template <typename Topic, typename Payload>
-    boost::asio::awaitable<Expected<PacketId>> async_publish(Topic&& topic, Payload&& payload, QOS qos)
+    boost::asio::awaitable<Expected<PacketId_t>> async_publish(Topic&& topic, Payload&& payload, Qos_t qos)
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
 
@@ -268,7 +267,7 @@ namespace mgmt::home_assistant::v2
       }
 
       auto packet_id = acquire_packet_id(qos);
-      auto packet = PublishPacket {
+      PublishPacket_t packet = PublishPacket_t {
         packet_id,
         async_mqtt::allocate_buffer(std::forward<Topic>(topic)),
         async_mqtt::allocate_buffer(std::forward<Payload>(payload)),
@@ -281,7 +280,7 @@ namespace mgmt::home_assistant::v2
         co_return Unexpected{detail::map_error_code(system_error.code())};
       }
 
-      co_return Expected<PacketId>{packet_id};
+      co_return Expected<PacketId_t>{packet_id};
     }
 
   private:
@@ -298,7 +297,7 @@ namespace mgmt::home_assistant::v2
         return std::optional{async_mqtt::allocate_buffer(credential)};
       };
 
-      auto packet = ConnectPacket {
+      ConnectPacket_t packet = ConnectPacket_t {
         config_.clean_session,
         config_.keep_alive,
         async_mqtt::allocate_buffer(config_.unique_id),
@@ -338,9 +337,9 @@ namespace mgmt::home_assistant::v2
       return *ep_.acquire_unique_packet_id();
     }
 
-    auto acquire_packet_id(QOS qos)
+    auto acquire_packet_id(Qos_t qos)
     {
-      return qos == QOS::at_most_once
+      return qos == Qos_t::at_most_once
            ? async_mqtt::v3_1_1::puback_packet::packet_id_t { 0 }
            : *ep_.acquire_unique_packet_id();
     }
@@ -349,6 +348,6 @@ namespace mgmt::home_assistant::v2
     Executor executor_; // TODO(bielpa): Possibly can be removed
     ClientConfig config_;
     async_mqtt::endpoint<async_mqtt::role::client, async_mqtt::protocol::mqtt> ep_;
-    std::optional<Will> will_ {std::nullopt};
+    std::optional<Will_t> will_ {std::nullopt};
   };
 } // namespace mgmt::home_assistant::v2

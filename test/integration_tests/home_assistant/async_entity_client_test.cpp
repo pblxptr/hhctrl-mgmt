@@ -4,16 +4,15 @@
 
 #include <catch2/catch_all.hpp>
 
-#include <test_support/test_config.hpp>
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
 
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"
 
 using mgmt::home_assistant::v2::AsyncMqttClient;
-using mgmt::home_assistant::v2::QOS;
-using mgmt::home_assistant::v2::PublishPacket;
-using mgmt::home_assistant::v2::PublishAckPacket;
+using mgmt::home_assistant::v2::Qos_t;
+using mgmt::home_assistant::v2::PublishPacket_t;
+using mgmt::home_assistant::v2::PublishAckPacket_t;
 
 TEST_CASE("Client can connect to broker")
 {
@@ -48,20 +47,21 @@ TEST_CASE("Client can communicate with a broker")
     {
         SECTION("Client can publish a message to a topic")
         {
-            const auto& result = co_await client.async_publish("some-topic", "some-message", QOS::at_most_once);
+            const auto& result = co_await client.async_publish("some-topic", "some-message", Qos_t::at_most_once);
+            REQUIRE(result);
         }
 
-        SECTION("When client publishes a message with QOS equal to QOS::at_least_once it receives puback")
+        SECTION("When client publishes a message with Qos_t equal to Qos_t::at_least_once it receives puback")
         {
             {
-                const auto& result = co_await client.async_publish("some-topic", "some-message", QOS::at_least_once);
+                const auto& result = co_await client.async_publish("some-topic", "some-message", Qos_t::at_least_once);
                 REQUIRE(result);
             }
 
             {
                 const auto& result = co_await client.async_receive();
                 REQUIRE(result);
-                REQUIRE(std::holds_alternative<PublishAckPacket>(result.value()));
+                REQUIRE(std::holds_alternative<PublishAckPacket_t>(result.value()));
             }
         }
     }
@@ -90,12 +90,12 @@ TEST_CASE("Client can communicate with a broker")
             using std::to_string;
 
             constexpr static auto message = "some_message";
-            REQUIRE((co_await client.async_publish(sub_topic, message, QOS::at_most_once)));
+            REQUIRE((co_await client.async_publish(sub_topic, message, Qos_t::at_most_once)));
 
             const auto& result = co_await client.async_receive();
             REQUIRE(result);
-            REQUIRE(std::holds_alternative<PublishPacket>(result.value()));
-            const auto& payload = to_string(std::get<PublishPacket>(result.value()).payload());
+            REQUIRE(std::holds_alternative<PublishPacket_t>(result.value()));
+            const auto& payload = to_string(std::get<PublishPacket_t>(result.value()).payload());
             REQUIRE(payload == message);
         }
       }
