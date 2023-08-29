@@ -8,236 +8,103 @@
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
 
 #include <boost/asio/co_spawn.hpp>
+#include "tools.hpp"
 
-namespace {
-  constexpr auto MqttServerAddressOptionName = "--tp_mqtt_server_address";
-  constexpr auto MqttServerPortOptionName = "--tp_mqtt_server_port";
+using mgmt::home_assistant::v2::AsyncMqttClient;
+using mgmt::home_assistant::v2::QOS;
+using mgmt::home_assistant::v2::PublishPacket;
+using mgmt::home_assistant::v2::PublishAckPacket;
 
-  constexpr auto DefaultMqttServerAddress = "broker.hivemq.com";
-  constexpr auto DefaultMqttServerPort = "1883";
-  constexpr auto DefaultUsername = "";
-  constexpr auto DefaultPassword = "";
-
-  constexpr auto LocalMqttServerAddress = "127.0.0.1";
-  constexpr auto LocalMqttServerPort = "1883";
-  constexpr auto LocalUsername = "test_user";
-  constexpr auto LocalPassword = "test";
-
-  constexpr auto DefaultUniqueId = "unique_id_test";
-
-  using mgmt::home_assistant::v2::AsyncMqttClient;
-  using mgmt::home_assistant::v2::ClientConfig;
-
-  struct IoContext
-  {
-
-    void stop()
-    {
-      ioc_.stop();
-    }
-
-    void run()
-    {
-      ioc_.run();
-    }
-
-    boost::asio::io_context& handle()
-    {
-      return ioc_;
-    }
-
-    boost::asio::io_context ioc_ {};
-    boost::asio::executor_work_guard<decltype(ioc_.get_executor())> work {ioc_.get_executor()};
-  };
-
-  auto get_broker()
-  {
-    return TestConfig::get().option_value(MqttServerAddressOptionName).value_or(DefaultMqttServerAddress);
-  }
-
-  auto get_port()
-  {
-    return TestConfig::get().option_value(MqttServerPortOptionName).value_or(DefaultMqttServerPort);
-  }
-
-  auto default_config()
-  {
-    return ClientConfig{
-      .unique_id = DefaultUniqueId,
-      .username = DefaultUsername,
-      .password = DefaultPassword,
-      .host = DefaultMqttServerAddress,
-      .port = DefaultMqttServerPort
-    };
-  }
-
-  auto local_config()
-  {
-    return ClientConfig{
-      .unique_id = DefaultUniqueId,
-      .username = LocalUsername,
-      .password = LocalPassword,
-      .host = LocalMqttServerAddress,
-      .port = LocalMqttServerPort,
-      .keep_alive = 0x1234
-    };
-  }
-
-  auto rethrow(const std::exception_ptr& eptr)
-  {
-    if (eptr) {
-      std::rethrow_exception(eptr);
-    }
-  }
-
-} // namespace
-
-//TEST_CASE("Client can connect to broker")
-//{
-//  auto ioc = IoContext();
-//  auto client = AsyncMqttClient{ioc.handle().get_executor(), default_config()};
-//
-//  // NOLINTBEGIN
-//  boost::asio::co_spawn(ioc.handle(), [&client, &ioc]() -> boost::asio::awaitable<void> {
-//    const auto error_code = co_await client.async_connect(get_broker(), get_port());
-//    REQUIRE(!error_code);
-//    ioc.stop();
-//
-//  }, rethrow);
-//  // NOLINTEND
-//
-//  ioc.run();
-//}
-//
-//TEST_CASE("Client can subscribe to a topic") {
-//  // NOLINTBEGIN(mqtt when subscription may be rejected
-//  using mgmt::home_assistant::v2::QOS;
-//
-//  auto ioc = IoContext{};
-//
-//  boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
-//      auto client = AsyncMqttClient{ioc.handle().get_executor(), default_config()};
-//      {
-//        const auto error_code = co_await client.async_connect(get_broker(), get_port());
-//        REQUIRE(!error_code);
-//      }
-//
-//      SECTION("The number of subscription ack results matches the number of topics requested to subscribe to") {
-//        static constexpr auto sub_topic = "some_topic";
-//        const auto [error_code, sub_ack_results] = co_await client.async_subscribe(sub_topic, QOS::at_most_once);
-//        REQUIRE(!error_code);
-//        REQUIRE(sub_ack_results.size() == 1); // size == number of topics, in this case 1
-//        const auto [sub_ack_topic, sub_ack_qos] = sub_ack_results[0];
-//        REQUIRE(sub_ack_topic == sub_topic);
-//
-//        ioc.stop();
-//      }
-//    }, rethrow);
-//
-//  ioc.run();
-//  // NOLINTEND
-//}
-//
-//TEST_CASE("Client can publish messages to a topic")
-//{
-//  // NOLINTBEGIN(mqtt when subscription may be rejected
-//  using mgmt::home_assistant::v2::QOS;
-//
-//  auto ioc = IoContext{};
-//
-//  boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
-//      auto client = AsyncMqttClient{ioc.handle().get_executor(), default_config()};
-//      {
-//        const auto error_code = co_await client.async_connect(get_broker(), get_port());
-//        REQUIRE(!error_code);
-//      }
-//
-//      SECTION("The number of subscription ack results matches the number of topics requested to subscribe to") {
-//        static constexpr auto sub_topic = "some_topic";
-//        const auto [error_code, sub_ack_results] = co_await client.async_subscribe(sub_topic, QOS::at_most_once);
-//        REQUIRE(!error_code);
-//        REQUIRE(sub_ack_results.size() == 1); // size == number of topics, in this case 1
-//        const auto [sub_ack_topic, sub_ack_qos] = sub_ack_results[0];
-//        REQUIRE(sub_ack_topic == sub_topic);
-//
-//        ioc.stop();
-//      }
-//    }, rethrow);
-//
-//  ioc.run();
-//  // NOLINTEND
-//}
-
-#include <home_assistant/mqtt/coverv2.hpp>
-#include <spdlog/sinks/stdout_color_sinks.h>
-
-auto setup_logger(const std::string& logger_name, spdlog::level::level_enum level)
+TEST_CASE("Client can connect to broker")
 {
-    // Console sink
-    auto sinks = std::vector<spdlog::sink_ptr>{};
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(level);
-    sinks.push_back(console_sink);
+  auto ioc = IoContext();
+  auto client = AsyncMqttClient{ioc.handle().get_executor(), default_config()};
 
-    auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
-    logger->set_level(spdlog::level::trace);
-    spdlog::register_logger(logger);
-}
-
-TEST_CASE("Cover")
-{
   // NOLINTBEGIN
-
-  setup_logger(mgmt::home_assistant::Logger, spdlog::level::debug);
-
-  using mgmt::home_assistant::v2::AsyncMqttClient;
-  using mgmt::home_assistant::v2::Cover;
-  using mgmt::home_assistant::v2::EntityConfig;
-  using mgmt::home_assistant::v2::CoverSwitchCommand;
-  using mgmt::home_assistant::v2::CoverTiltCommand;
-
-  auto ioc = IoContext{};
-  using ClientType = AsyncMqttClient<decltype(ioc.handle().get_executor())>;
-
-  static constexpr auto unique_id = "test_unique_id";
-
-  spdlog::set_level(spdlog::level::debug);
-  boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
-    auto client = ClientType{ioc.handle().get_executor(), local_config()};
-    auto cover = Cover{unique_id, std::move(client)};
-
-    {
-      const auto error_code = co_await cover.async_connect();
-      REQUIRE(!error_code);
-    }
-
-    {
-      const auto error_code = co_await cover.async_configure();
-      if (error_code) {
-        spdlog::debug(error_code.message());
-      }
-      REQUIRE(!error_code);
-    }
-
-    while (true) {
-      const auto result = co_await cover.async_receive();
-      REQUIRE(result);
-
-      std::visit(async_mqtt::overload{
-        [](const CoverSwitchCommand& command) {
-          spdlog::debug("Switch command\n");
-        },
-        [](const CoverTiltCommand& command) {
-          spdlog::debug("Tilt command\n");
-        }}, result.value()
-      );
-    }
-
-    co_return;
+  boost::asio::co_spawn(ioc.handle(), [&client, &ioc]() -> boost::asio::awaitable<void> {
+    const auto error_code = co_await client.async_connect();
+    REQUIRE(!error_code);
+    ioc.stop();
 
   }, rethrow);
+  // NOLINTEND
 
   ioc.run();
+}
 
+TEST_CASE("Client can communicate with a broker")
+{
+  // NOLINTBEGIN
+  auto ioc = IoContext{};
+
+  boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
+    auto client = AsyncMqttClient{ioc.handle().get_executor(), local_config()};
+
+    // Connect
+    const auto error_code = co_await client.async_connect();
+    REQUIRE(!error_code);
+
+    SECTION("Client can publish messages to a topic")
+    {
+        SECTION("Client can publish a message to a topic")
+        {
+            const auto& result = co_await client.async_publish("some-topic", "some-message", QOS::at_most_once);
+        }
+
+        SECTION("When client publishes a message with QOS equal to QOS::at_least_once it receives puback")
+        {
+            {
+                const auto& result = co_await client.async_publish("some-topic", "some-message", QOS::at_least_once);
+                REQUIRE(result);
+            }
+
+            {
+                const auto& result = co_await client.async_receive();
+                REQUIRE(result);
+                REQUIRE(std::holds_alternative<PublishAckPacket>(result.value()));
+            }
+        }
+    }
+
+    SECTION("Client can subscribe to a topic and receive a message submitted to this topic")
+    {
+      SECTION("Client subscribes to a topic")
+      {
+        static constexpr auto sub_topic = "some_topic";
+        auto subs = std::vector<std::string>{
+            sub_topic
+        };
+
+        {
+          const auto result = co_await client.async_subscribe(std::move(subs));
+          REQUIRE(result);
+        }
+
+        {
+          const auto result = co_await client.async_receive();
+          REQUIRE(result);
+        }
+
+        SECTION("Client receives a message from topic it has subscribed to")
+        {
+            using std::to_string;
+
+            constexpr static auto message = "some_message";
+            REQUIRE((co_await client.async_publish(sub_topic, message, QOS::at_most_once)));
+
+            const auto& result = co_await client.async_receive();
+            REQUIRE(result);
+            REQUIRE(std::holds_alternative<PublishPacket>(result.value()));
+            const auto& payload = to_string(std::get<PublishPacket>(result.value()).payload());
+            REQUIRE(payload == message);
+        }
+      }
+    }
+
+    ioc.stop();
+    }, rethrow
+  );
+
+  ioc.run();
   // NOLINTEND
 }

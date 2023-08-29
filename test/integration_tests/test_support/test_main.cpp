@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
   auto& config = TestConfig::get();
   test_spec_setup();
-//  config.apply(session);
+  config.apply(session);
 
   int returnCode = session.applyCommandLine(argc, argv);
   if (returnCode != 0)// Indicates a command line error

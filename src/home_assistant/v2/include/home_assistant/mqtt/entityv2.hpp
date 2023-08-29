@@ -18,34 +18,21 @@
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_configv2.hpp>
 #include <utils/mapper.hpp>
-#include <home_assistant/mqtt/entity_errorv2.hpp>
-#include <home_assistant/logger.hpp>
+#include <home_assistant/mqtt/logger.hpp>
 
 //TODO(bielpa) Use global qos per client.
 
 namespace mgmt::home_assistant::v2 {
 
-using PublishHandler = std::function<void(std::string)>;
-
-
 using Availability = mgmt::home_assistant::mqttc::Availability;
 
 namespace detail {
-  bool any_suback_failure(const SubscriptionAckPacket& suback_packet)
-  {
-    return std::ranges::any_of(suback_packet.entries(), [](const auto& suback_code) {
-      return suback_code == async_mqtt::suback_return_code::failure;
-    });
-  }
-
-} // namespace detail
-
-namespace details { //TODO(bielpa): MOve details to detail
   constexpr static auto AvailabilityStateMapper = common::utils::Mapper{
     std::pair{ Availability::Offline, "offline" },
     std::pair{ Availability::Online, "online" }
   };
-} // namespace details
+
+} // namespace detail
 
 struct GenericEntityConfig
 {
@@ -54,13 +41,9 @@ struct GenericEntityConfig
   static constexpr inline auto JsonAttributesTemplate = std::string_view{ "json_attributes_template" };
 };
 
-//using EntityReceiveExpected = tl::expected<std::variant<PublishPacket, SubscriptionAckPacket>, std::error_code>;
-//using EntityReceiveUnexpected = tl::unexpected<std::error_code>;
-
 template<class EntityClient>
 class Entity
 {
-  using Will = mgmt::home_assistant::mqttc::Will;
 public:
   Entity() = delete;
 
@@ -80,33 +63,38 @@ public:
 
   boost::asio::awaitable<std::error_code> async_connect()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}", id(), __FUNCTION__);
+    logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     co_return co_await client_.async_connect();
   }
 
 protected:
   Entity(std::string_view entity_name, std::string unique_id, EntityClient client)
-    : entity_name_{entity_name}
+    : entity_name_{ entity_name }
     , unique_id_{ std::move(unique_id) }
     , client_{ std::move(client) }
   {
-    client_.set_will(Will {
+    client_.set_will(WillConfig {
       .topic = topic(GenericEntityConfig::AvailabilityTopic),
-      .payload = details::AvailabilityStateMapper.map(Availability::Offline)
+      .message = std::string{detail::AvailabilityStateMapper.map(Availability::Offline)}
     }
     );
   }
 
+  void set_will(const WillConfig& will)
+  {
+    client_.set_will(will);
+  }
+
   boost::asio::awaitable<Expected<PublishPacket>> async_receive()
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}", id(), __FUNCTION__);
+    logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     while (true) {
       const auto& packet = co_await client_.async_receive();
 
       if (!packet) {
-        common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}, packet error", id(), __FUNCTION__);
+        common::logger::get(mgmt::home_assistant::Logger)->debug("Entity: {}, error: {}", full_id(), packet.error().what());
         co_return Unexpected { packet.error() };
       }
 
@@ -118,8 +106,8 @@ protected:
       else if (std::holds_alternative<SubscriptionAckPacket>(value)) {
         const auto& suback_packet = std::get<SubscriptionAckPacket>(value);
 
-        if (detail::any_suback_failure(suback_packet)) {
-          co_return Unexpected{EntityError::SubscriptionError};
+        if (any_suback_failure(suback_packet)) {
+          co_return Unexpected{ErrorCode::SubscriptionFailure};
         }
       }
       else if (std::holds_alternative<PublishAckPacket>(value)) {
@@ -131,19 +119,19 @@ protected:
     }
   }
 
-  boost::asio::awaitable<std::error_code> async_set_config(EntityConfig config, QOS qos)
+  boost::asio::awaitable<Error> async_set_config(EntityConfig config, QOS qos)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}", id(), __FUNCTION__);
+    logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     config.set_override("unique_id", unique_id_);
 
     {
-      const auto error_code = co_await async_publish(fmt::format("homeassistant/{}/{}/config", entity_name_, unique_id()), config.parse());
+      const auto error = co_await async_publish(fmt::format("homeassistant/{}/{}/config", entity_name_, unique_id()), config.parse());
 
-      if (error_code) {
-        common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, error: {}", __FUNCTION__, unique_id(), error_code.message());
+      if (error) {
+        logger::err(logger::Entity, "Entity {}, error: {}", full_id(), error.what());
 
-        co_return EntityError::ConfigError;
+        co_return Error { ErrorCode::InvalidConfig, error.what() };
       }
     }
 
@@ -151,13 +139,16 @@ protected:
       if (qos > QOS::at_most_once) {
         auto packet = co_await client_.async_receive();
         if (!packet) {
-          common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, error: {}", __FUNCTION__, unique_id(), packet.error().message());
-          co_return EntityError::ConfigError;
+          logger::err(logger::Entity, "Entity {}, error: {}", full_id(), packet.error().what());
+
+          co_return Error { ErrorCode::InvalidConfig, packet.error().what() };
         }
         const auto& value = packet.value();
         if (!std::holds_alternative<PublishAckPacket >(value)) {
-          common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, error: Expected PublishAckPacket was not received.", __FUNCTION__, unique_id());
-          co_return EntityError::ConfigError;
+          auto err = Error { ErrorCode::InvalidConfig, "Expected PublishAckPacket was not received" };
+          logger::err(logger::Entity, "Entity , {}, error: {}", full_id(), err.what());
+
+          co_return err;
         }
       }
     }
@@ -166,9 +157,9 @@ protected:
   }
 
   template<typename Topic, class Payload>
-  boost::asio::awaitable<std::error_code> async_publish(Topic&& topic, Payload&& payload, QOS qos = DefaultQoS)
+  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, QOS qos = DefaultQoS)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}", id(), __FUNCTION__);
+    logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     const auto result = co_await client_.async_publish(std::forward<Topic>(topic), std::forward<Payload>(payload), qos);
 
@@ -183,45 +174,44 @@ protected:
     co_return std::error_code{};
   }
 
-  boost::asio::awaitable<std::error_code> async_subscribe(std::vector<std::string> sub_topics)
+  boost::asio::awaitable<Error> async_subscribe(std::vector<std::string> sub_topics)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Entity({})::{}", id(), __FUNCTION__);
+    logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     {
       const auto result = co_await client_.async_subscribe(sub_topics);
 
       if (!result) {
-        common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, error: {}", __FUNCTION__, unique_id(), result.error().message());
-        co_return EntityError::SubscriptionError;
+        logger::err(logger::Entity, "Entity {}, error: {}", full_id(), result.error().what());
+
+        co_return Error { ErrorCode::SubscriptionFailure, result.error().what() };
       }
     }
 
     {
       auto packet = co_await client_.async_receive();
       if (!packet) {
-        common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, error: {}", __FUNCTION__, unique_id(), packet.error().message());
-        co_return EntityError::SubscriptionError;
+        logger::err(logger::Entity, "Entity {}, error: {}", full_id(), packet.error().what());
+
+        co_return Error { ErrorCode::SubscriptionFailure, packet.error().what() };
       }
 
       const auto& value = packet.value();
       if (!std::holds_alternative<SubscriptionAckPacket>(value)) {
-        common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, error: Expected SubscriptionAckPacket was not received.", __FUNCTION__, unique_id());
-        co_return EntityError::SubscriptionError;
+        auto err = Error { ErrorCode::SubscriptionFailure, "Expected SubscriptionAckPacket was not received" };
+        logger::err(logger::Entity, "Entity {}, error: {}", full_id(), err.what());
+
+        co_return err;
       }
       const auto& suback_packet = std::get<SubscriptionAckPacket>(value);
-      if (detail::any_suback_failure(suback_packet)) {
-        for (std::size_t idx = 0; idx < suback_packet.entries().size(); idx++) {
-          if (suback_packet.entries()[idx] == SubscriptionAckReturnCode::failure) {
-            common::logger::get(mgmt::home_assistant::Logger)->error("Entity::{}, unique_id: {}, sub topic: {} failure",
-              __FUNCTION__, unique_id(), sub_topics[idx]);
-          }
-        }
-        co_return EntityError::SubscriptionError;
+      if (any_suback_failure(suback_packet)) {
+        co_return Error { ErrorCode::SubscriptionFailure, "One of the subscribed topic has not received the required subscription acknowledge" };
       }
-      common::logger::get(mgmt::home_assistant::Logger)->debug("Entity::{}, unique_id: {}, subscription confirmed.", __FUNCTION__, unique_id());
+
+      logger::debug(logger::Entity, "Entity {} subscription confirmed", full_id());
     }
 
-    co_return std::error_code{};
+    co_return Error{};
   }
 
   template<class T1>
@@ -234,6 +224,11 @@ private:
   std::string id() const
   {
     return fmt::format("{}-{}", entity_name_, unique_id_);
+  }
+
+  std::string full_id() const
+  {
+    return fmt::format("name: '{}', unique_id: '{}'", entity_name_, unique_id_);
   }
 
 private:

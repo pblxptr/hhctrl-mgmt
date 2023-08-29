@@ -14,11 +14,13 @@
 
 #include <tl/expected.hpp>
 #include <system_error>
+#include <fmt/format.h>
 
 namespace mgmt::home_assistant::v2 {
+  using Error = async_mqtt::system_error;
+
   template <typename T>
-  using Expected = tl::expected<T, std::error_code>;
+  using Expected = tl::expected<T, Error>;
 
-  using Unexpected = tl::unexpected<std::error_code>;
-
+  using Unexpected = tl::unexpected<Error>;
 }

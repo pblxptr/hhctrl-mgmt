@@ -9,51 +9,68 @@
 
 namespace mgmt::home_assistant::v2
 {
-  enum class ClientError { Timeout = 1 , NoService, UnknownPacket, QosNotSupported} ;
+  enum class ErrorCode {
+    Timeout = 1 ,
+    NoService,
+    UnknownPacket,
+    QosNotSupported,
+    Disconnected,
+    InvalidConfig,
+    PublishFailure,
+    SubscriptionFailure,
+  };
 
   namespace detail {
-    struct MqttClientErrorCategory : std::error_category
+    struct ErrorCategory : std::error_category
     {
       const char* name() const noexcept override
       {
-        return "mqtt_client";
+        return "mqtt_home_assistant";
       }
 
       std::string message(int error) const override
       {
-        switch (static_cast<ClientError>(error)) {
-          case ClientError::Timeout:
+        switch (static_cast<ErrorCode>(error)) {
+          case ErrorCode::Timeout:
             return "timeout";
-          case ClientError::NoService:
+          case ErrorCode::NoService:
             return "no_service";
-          case ClientError::UnknownPacket:
+          case ErrorCode::UnknownPacket:
             return "unknown_packet";
-          case ClientError::QosNotSupported:
+          case ErrorCode::QosNotSupported:
             return "qos_not_supported";
+          case ErrorCode::Disconnected:
+            return "disconnected";
+          case ErrorCode::InvalidConfig:
+            return "invalid_config";
+          case ErrorCode::PublishFailure:
+            return "publish_failure";
+          case ErrorCode::SubscriptionFailure:
+            return "subscription_failure";
           default:
-            return "unrecognized error";
+            return "unrecognized_error";
         }
       }
     };
 
-    ClientError map_error_code(boost::system::error_code error_code)
+    inline ErrorCode map_error_code(boost::system::error_code error_code)
     {
       switch (error_code.value()) {
       case boost::system::errc::timed_out:
-        return ClientError::Timeout;
+        return ErrorCode::Timeout;
       case boost::system::errc::no_such_file_or_directory:
-        return ClientError::NoService;
+        return ErrorCode::NoService;
       default:
         throw std::runtime_error{ error_code.message() };
       }
     }
 
-    static const inline auto MqttClientCategoryInstance = MqttClientErrorCategory{};
+    static const inline auto ErrorCategoryInstance = ErrorCategory{};
   } // namespace detail
 
-  std::error_code make_error_code(ClientError error)
+  inline std::error_code make_error_code(ErrorCode error)
   {
-    return {static_cast<int>(error), detail::MqttClientCategoryInstance};
+    return {static_cast<int>(error), detail::ErrorCategoryInstance};
   }
 } // namespace mgmt::home_assistant::v2
 
@@ -61,7 +78,7 @@ namespace mgmt::home_assistant::v2
 namespace std
 {
   template <>
-  struct is_error_code_enum<mgmt::home_assistant::v2::ClientError> : true_type {};
+  struct is_error_code_enum<mgmt::home_assistant::v2::ErrorCode> : true_type {};
 } // namespace std
 
 

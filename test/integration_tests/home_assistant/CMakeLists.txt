@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 add_executable(home_assistant_itc2
-  async_entity_client_test.cpp
+  test_spec_setup.cpp async_entity_client_test.cpp
 )
 
 target_include_directories(home_assistant_itc2 PRIVATE .)

@@ -117,7 +117,7 @@ public:
 
   ~Cover() = default;
 
-  boost::asio::awaitable<std::error_code> async_configure(EntityConfig config = EntityConfig{}, QOS qos = DefaultQoS)
+  boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, QOS qos = DefaultQoS)
   {
     common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
 
@@ -136,8 +136,8 @@ public:
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
     // Set config
-    if (const auto error_code = co_await BaseType::async_set_config(std::move(config), qos); error_code) {
-      co_return error_code;
+    if (const auto error = co_await BaseType::async_set_config(std::move(config), qos); error) {
+      co_return error;
     }
 
     // Set subscriptions
@@ -145,11 +145,11 @@ public:
       topics_.at(CoverConfig::Property::SwitchCommandTopic)
     };
 
-    if (const auto error_code = co_await BaseType::async_subscribe(std::move(sub_topics)); error_code) {
-      co_return error_code;
+    if (const auto error = co_await BaseType::async_subscribe(std::move(sub_topics)); error) {
+      co_return error;
     }
 
-    co_return std::error_code();
+    co_return Error{};
   }
 
   boost::asio::awaitable<Expected<CoverCommand>> async_receive()
@@ -163,7 +163,7 @@ public:
       if (auto command = detail::map_command(topics_, packet.value()); command) {
         co_return *command;
       }
-      co_return Unexpected { EntityError::UnknownPacket };
+      co_return Unexpected { ErrorCode::UnknownPacket };
   }
 
 private:
