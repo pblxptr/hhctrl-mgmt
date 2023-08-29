@@ -22,6 +22,7 @@ constexpr auto DefaultUsername = "";
 constexpr auto DefaultPassword = "";
 constexpr auto DefaultUniqueId = "unique_id_test";
 constexpr std::uint16_t DefaultKeepAlive = 0x1234;
+constexpr auto DefaultDiscoveryTopicPrefix = "homeassistant";
 
 constexpr auto LocalMqttServerAddress = "127.0.0.1";
 constexpr auto LocalMqttServerPort = "1883";
@@ -94,6 +95,11 @@ inline auto config_from_options()
     .clean_session = true,
     .keep_alive = DefaultKeepAlive
   };
+}
+
+inline auto get_config()
+{
+    return local_config();
 }
 
 inline auto rethrow(const std::exception_ptr& eptr)

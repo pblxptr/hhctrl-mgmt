@@ -79,7 +79,7 @@ namespace mgmt::home_assistant::v2
     {
       return fmt::format("pid: '{}', topic: '{}', payload: '{}', qos: '{}', retain: '{}', dup: '{}'",
         packet.packet_id(),
-        packet.topic().data(),
+        static_cast<std::string_view>(packet.topic()),
         async_mqtt::to_string(packet.payload()),
         async_mqtt::qos_to_str(packet.opts().get_qos()),
         async_mqtt::pub::retain_to_str(packet.opts().get_retain()),
@@ -211,15 +211,15 @@ namespace mgmt::home_assistant::v2
       }
 
       // Send ConnectPacket_t message
-      if (auto error_code = co_await async_send_con(); error_code) {
-        logger::err(logger::AsyncMqttClient, "Error while sending ConnectPacket_t: '{}'", error_code.message());
-        co_return detail::map_error_code(error_code.code());
+      if (auto system_error = co_await async_send_con(); system_error) {
+        logger::err(logger::AsyncMqttClient, "Error while sending ConnectPacket_t: '{}'", system_error.what());
+        co_return detail::map_error_code(system_error.code());
       }
 
       // Receive con ack
-      if (auto error_code = co_await async_recv_conack(); error_code) {
-        logger::err(logger::AsyncMqttClient, "Error while receiving ConnectPacketAck error: '{}'", error_code.message());
-        co_return detail::map_error_code(error_code.code());
+      if (auto system_error = co_await async_recv_conack(); system_error) {
+        logger::err(logger::AsyncMqttClient, "Error while receiving ConnectPacketAck error: '{}'", system_error.what());
+        co_return detail::map_error_code(system_error.code());
       }
 
       co_return std::error_code{};

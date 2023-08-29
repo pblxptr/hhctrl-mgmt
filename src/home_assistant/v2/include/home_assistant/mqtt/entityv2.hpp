@@ -86,7 +86,7 @@ protected:
     client_.set_will(will);
   }
 
-  boost::asio::awaitable<Expected<PublishPacket>> async_receive()
+  boost::asio::awaitable<Expected<PublishPacket_t>> async_receive()
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
@@ -100,18 +100,18 @@ protected:
 
       const auto& value = packet.value();
 
-      if (std::holds_alternative<PublishPacket>(value)) {
-        co_return Expected<PublishPacket>{std::get<PublishPacket>(value)};
+      if (std::holds_alternative<PublishPacket_t>(value)) {
+        co_return Expected<PublishPacket_t>{std::get<PublishPacket_t>(value)};
       }
-      else if (std::holds_alternative<SubscriptionAckPacket>(value)) {
-        const auto& suback_packet = std::get<SubscriptionAckPacket>(value);
+      else if (std::holds_alternative<SubscriptionAckPacket_t>(value)) {
+        const auto& suback_packet = std::get<SubscriptionAckPacket_t>(value);
 
         if (any_suback_failure(suback_packet)) {
           co_return Unexpected{ErrorCode::SubscriptionFailure};
         }
       }
-      else if (std::holds_alternative<PublishAckPacket>(value)) {
-        const auto& puback_packet = std::get<PublishAckPacket>(value);
+      else if (std::holds_alternative<PublishAckPacket_t>(value)) {
+        const auto& puback_packet = std::get<PublishAckPacket_t>(value);
         if (pending_puback_.contains(puback_packet.packet_id())) {
           pending_puback_.erase(puback_packet.packet_id());
         }
@@ -119,7 +119,7 @@ protected:
     }
   }
 
-  boost::asio::awaitable<Error> async_set_config(EntityConfig config, QOS qos)
+  boost::asio::awaitable<Error> async_set_config(EntityConfig config, Qos_t qos)
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
@@ -136,7 +136,7 @@ protected:
     }
 
     {
-      if (qos > QOS::at_most_once) {
+      if (qos > Qos_t::at_most_once) {
         auto packet = co_await client_.async_receive();
         if (!packet) {
           logger::err(logger::Entity, "Entity {}, error: {}", full_id(), packet.error().what());
@@ -144,8 +144,8 @@ protected:
           co_return Error { ErrorCode::InvalidConfig, packet.error().what() };
         }
         const auto& value = packet.value();
-        if (!std::holds_alternative<PublishAckPacket >(value)) {
-          auto err = Error { ErrorCode::InvalidConfig, "Expected PublishAckPacket was not received" };
+        if (!std::holds_alternative<PublishAckPacket_t >(value)) {
+          auto err = Error { ErrorCode::InvalidConfig, "Expected PublishAckPacket_t was not received" };
           logger::err(logger::Entity, "Entity , {}, error: {}", full_id(), err.what());
 
           co_return err;
@@ -157,7 +157,7 @@ protected:
   }
 
   template<typename Topic, class Payload>
-  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, QOS qos = DefaultQoS)
+  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, Qos_t qos = DefaultQoS)
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
@@ -167,7 +167,7 @@ protected:
       co_return result.error();
     }
 
-    if (qos > QOS::at_most_once) {
+    if (qos > Qos_t::at_most_once) {
       pending_puback_.insert(result.value());
     }
 
@@ -197,13 +197,13 @@ protected:
       }
 
       const auto& value = packet.value();
-      if (!std::holds_alternative<SubscriptionAckPacket>(value)) {
-        auto err = Error { ErrorCode::SubscriptionFailure, "Expected SubscriptionAckPacket was not received" };
+      if (!std::holds_alternative<SubscriptionAckPacket_t>(value)) {
+        auto err = Error { ErrorCode::SubscriptionFailure, "Expected SubscriptionAckPacket_t was not received" };
         logger::err(logger::Entity, "Entity {}, error: {}", full_id(), err.what());
 
         co_return err;
       }
-      const auto& suback_packet = std::get<SubscriptionAckPacket>(value);
+      const auto& suback_packet = std::get<SubscriptionAckPacket_t>(value);
       if (any_suback_failure(suback_packet)) {
         co_return Error { ErrorCode::SubscriptionFailure, "One of the subscribed topic has not received the required subscription acknowledge" };
       }
@@ -235,6 +235,6 @@ private:
   std::string_view entity_name_;
   std::string unique_id_;
   EntityClient client_;
-  std::unordered_set<PacketId> pending_puback_;
+  std::unordered_set<PacketId_t> pending_puback_;
 };
 }// namespace mgmt::home_assistant::v2

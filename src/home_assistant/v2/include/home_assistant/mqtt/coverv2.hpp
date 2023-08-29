@@ -69,12 +69,11 @@ constexpr static auto CoverSwitchCommandMapper = common::utils::Mapper{
   std::pair{ CoverSwitchCommand::Close, "close" },
   std::pair{ CoverSwitchCommand::Stop, "stop" }
 };
-using CoverSwitchCommandHandler_t = std::function<void(const CoverSwitchCommand&)>;
 
 using CoverCommand = std::variant<CoverSwitchCommand, CoverTiltCommand>;
 
 namespace detail {
-  std::optional<CoverCommand> map_command(const auto& topics, const PublishPacket& pub_packet)
+  std::optional<CoverCommand> map_command(const auto& topics, const PublishPacket_t& pub_packet)
   {
     const auto topic = static_cast<std::string_view>(pub_packet.topic());
 
@@ -117,7 +116,7 @@ public:
 
   ~Cover() = default;
 
-  boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, QOS qos = DefaultQoS)
+  boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Qos_t qos = DefaultQoS)
   {
     common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
 
