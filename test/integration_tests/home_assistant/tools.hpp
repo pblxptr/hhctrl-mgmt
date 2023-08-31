@@ -5,6 +5,8 @@
 #pragma once
 
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/use_awaitable.hpp>
+#include <boost/asio/redirect_error.hpp>
 #include "test_support/test_config.hpp"
 
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
@@ -29,6 +31,13 @@ constexpr auto LocalMqttServerPort = "1883";
 constexpr auto LocalUsername = "test_user";
 constexpr auto LocalPassword = "test";
 
+inline auto rethrow(const std::exception_ptr& eptr)
+{
+    if (eptr) {
+        std::rethrow_exception(eptr);
+    }
+}
+
 struct IoContext
 {
   void stop()
@@ -36,8 +45,25 @@ struct IoContext
     ioc_.stop();
   }
 
-  void run()
+  void run(std::chrono::seconds timeout = std::chrono::seconds { 30 })
   {
+//    // NOLINTBEGIN
+    boost::asio::co_spawn(ioc_, [this, timeout]() -> boost::asio::awaitable<void> {
+        auto timer = boost::asio::steady_timer {ioc_.get_executor()};
+        timer.expires_after(timeout);
+
+        auto ec = boost::system::error_code {};
+
+        co_await timer.async_wait(boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+        if (!ec) {
+            WARN("Test timeout!");
+            REQUIRE(false);
+            co_return;
+        }
+
+    }, rethrow);
+//    // NOLINTEND
+
     ioc_.run();
   }
 
@@ -100,13 +126,6 @@ inline auto config_from_options()
 inline auto get_config()
 {
     return local_config();
-}
-
-inline auto rethrow(const std::exception_ptr& eptr)
-{
-  if (eptr) {
-    std::rethrow_exception(eptr);
-  }
 }
 
 inline auto setup_logger(const std::string& logger_name, spdlog::level::level_enum level)

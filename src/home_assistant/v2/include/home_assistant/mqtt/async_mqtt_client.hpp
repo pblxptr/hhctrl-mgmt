@@ -130,6 +130,7 @@ namespace mgmt::home_assistant::v2
   template <typename Executor, ProtocolVersion_t protocolVersion = DefaultProtocolVersion>
   class AsyncMqttClient
   {
+      using EndpointType = async_mqtt::endpoint<async_mqtt::role::client, async_mqtt::protocol::mqtt>;
   public:
     AsyncMqttClient(Executor executor, ClientConfig config)
       : executor_{executor}
@@ -240,7 +241,7 @@ namespace mgmt::home_assistant::v2
         // Send subscription request
         using boost::asio::use_awaitable;
 
-        auto packet_id = acquire_packet_id();
+        auto packet_id = co_await acquire_packet_id();
         SubscriptionPacket_t packet = SubscriptionPacket_t {
           packet_id,
           async_mqtt::force_move(subs)
@@ -266,14 +267,14 @@ namespace mgmt::home_assistant::v2
         co_return Unexpected{ErrorCode::QosNotSupported};
       }
 
-      auto packet_id = acquire_packet_id(qos);
+      auto packet_id = co_await acquire_packet_id(qos);
       PublishPacket_t packet = PublishPacket_t {
         packet_id,
         async_mqtt::allocate_buffer(std::forward<Topic>(topic)),
         async_mqtt::allocate_buffer(std::forward<Payload>(payload)),
         qos
       };
-      logger::debug(logger::AsyncMqttClient, "Publish packet: '{}'", detail::to_string(packet));
+      logger::debug(logger::AsyncMqttClient, "Sending Publish packet: '{}'", detail::to_string(packet));
 
       if (auto system_error = co_await ep_.send(std::move(packet), boost::asio::use_awaitable)) {
         logger::err(logger::AsyncMqttClient, "Error while sending Publish packet: '{}'",system_error.what());
@@ -332,22 +333,30 @@ namespace mgmt::home_assistant::v2
       }
     }
 
-    auto acquire_packet_id()
+    boost::asio::awaitable<EndpointType::packet_id_t> acquire_packet_id()
     {
-      return *ep_.acquire_unique_packet_id();
+        auto result = co_await ep_.acquire_unique_packet_id(boost::asio::use_awaitable);
+
+        co_return *result;
     }
 
-    auto acquire_packet_id(Qos_t qos)
+    boost::asio::awaitable<EndpointType::packet_id_t>  acquire_packet_id(Qos_t qos)
     {
-      return qos == Qos_t::at_most_once
-           ? async_mqtt::v3_1_1::puback_packet::packet_id_t { 0 }
-           : *ep_.acquire_unique_packet_id();
+        if (qos == Qos_t::at_most_once) {
+            co_return EndpointType::packet_id_t { 0 };
+        }
+
+        co_return co_await acquire_packet_id();
+
+        //      return qos == Qos_t::at_most_once
+//           ? async_mqtt::v3_1_1::puback_packet::packet_id_t { 0 }
+//           : *ep_.acquire_unique_packet_id();
     }
 
   private:
     Executor executor_; // TODO(bielpa): Possibly can be removed
     ClientConfig config_;
-    async_mqtt::endpoint<async_mqtt::role::client, async_mqtt::protocol::mqtt> ep_;
+    EndpointType ep_;
     std::optional<Will_t> will_ {std::nullopt};
   };
 } // namespace mgmt::home_assistant::v2

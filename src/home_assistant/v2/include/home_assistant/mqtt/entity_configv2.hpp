@@ -37,6 +37,20 @@ public:
     set_override(key, value);
   }
 
+  bool contains(std::string_view key) const
+  {
+      return object_.contains(key.data());
+  }
+
+  std::optional<std::string> get(std::string_view key) const
+  {
+      if (!contains(key)) {
+          return std::nullopt;
+      }
+
+      return boost::json::value_to<std::string>(object_.at(key.data()));
+  }
+
   auto parse()
   {
     return boost::json::serialize(object_);

@@ -13,12 +13,14 @@ using mgmt::home_assistant::v2::Qos_t;
 using mgmt::home_assistant::v2::PublishPacket_t;
 using mgmt::home_assistant::v2::PublishAckPacket_t;
 using mgmt::home_assistant::v2::SubscriptionAckPacket_t;
+using mgmt::home_assistant::v2::EntityConfig;
+using mgmt::home_assistant::v2::ProtocolVersion_t;
 
 namespace {
-    const auto CoverDiscoveryTopic = fmt::format("{}/{}/{}/config", DefaultDiscoveryTopicPrefix, CoverConfig::EntityName, DefaultUniqueId);
     constexpr auto CoverUniqueId = "cover_unique_id";
+    const auto CoverDiscoveryTopic = fmt::format("{}/{}/{}/config", DefaultDiscoveryTopicPrefix, CoverConfig::EntityName, CoverUniqueId);
 
-    auto cover_config()
+    auto cover_client_config()
     {
         auto config = get_config();
         config.unique_id = CoverUniqueId;
@@ -27,13 +29,11 @@ namespace {
     }
 }
 
-
-
 TEST_CASE("Cover entity can connect to a broker")
 {
     auto ioc = IoContext();
     auto cover = Cover{CoverUniqueId, AsyncMqttClient{
-        ioc.handle().get_executor(), cover_config()}
+        ioc.handle().get_executor(), cover_client_config()}
     };
 
     // NOLINTBEGIN
@@ -48,11 +48,20 @@ TEST_CASE("Cover entity can connect to a broker")
     ioc.run();
 }
 
-template <typename Executor>
-boost::asio::awaitable<AsyncMqttClient<Executor>> async_create_and_prepare_helper_client(Executor executor)
+template <typename Executor, ProtocolVersion_t protocolVersion>
+boost::asio::awaitable<PublishPacket_t> async_get_publish_packet(AsyncMqttClient<Executor, protocolVersion>& client)
 {
-    auto client = AsyncMqttClient(executor, get_config());
+    const auto& result = co_await client.async_receive();
+    REQUIRE(result);
+    const auto& value = result.value();
+    REQUIRE(std::holds_alternative<PublishPacket_t>(value));
 
+    co_return std::get<PublishPacket_t>(value);
+}
+
+template <typename Executor, ProtocolVersion_t protocolVersion>
+boost::asio::awaitable<void> async_setup(AsyncMqttClient<Executor, protocolVersion>& client)
+{
     const auto error_code = co_await client.async_connect();
     REQUIRE(!error_code);
 
@@ -67,53 +76,86 @@ boost::asio::awaitable<AsyncMqttClient<Executor>> async_create_and_prepare_helpe
         REQUIRE(result);
         REQUIRE(std::holds_alternative<SubscriptionAckPacket_t>(result.value()));
     }
-
-    co_return client;
 }
 
-template <typename Executor>
-boost::asio::awaitable<Cover<AsyncMqttClient<Executor>>> async_create_and_prepare_cover(Executor executor)
+template <typename Executor, ProtocolVersion_t protocolVersion>
+boost::asio::awaitable<void> async_setup(Cover<AsyncMqttClient<Executor, protocolVersion>>& cover)
 {
-    auto cover = Cover{CoverUniqueId, AsyncMqttClient{executor, cover_config()}};
-
     const auto error_code = co_await cover.async_connect();
     REQUIRE(!error_code);
-
-    co_return cover;
 }
 
 TEST_CASE("Cover is configured properly")
 {
     auto ioc = IoContext();
+    using std::to_string;
 
     // NOLINTBEGIN
     boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
-        auto cover = co_await async_create_and_prepare_cover(ioc.handle().get_executor());
-        auto helper_client = co_await async_create_and_prepare_helper_client(ioc.handle().get_executor());
+        auto cover = Cover{CoverUniqueId, AsyncMqttClient{ioc.handle().get_executor(), cover_client_config()}};
+        co_await async_setup(cover);
 
-        SECTION("Cover entity sends a valid config to discovery topic")
+        auto helper_client = AsyncMqttClient(ioc.handle().get_executor(), get_config());
+        co_await async_setup(helper_client);
+
+        SECTION("Cover entity sends a config with required properties to a discovery topic")
         {
+            // Send config
+            const auto configure_error = co_await cover.async_configure(EntityConfig{});
+            REQUIRE(!configure_error);
 
+            // Verify config by helper client
+            const auto packet = co_await async_get_publish_packet(helper_client);
+            const auto topic = static_cast<std::string_view>(packet.topic());
+            REQUIRE(topic.data() == CoverDiscoveryTopic);
+
+            const auto config = EntityConfig::from_json(to_string(packet.payload()));
+            REQUIRE(config);
+            REQUIRE(config->contains(CoverConfig::Property::StateTopic));
+            REQUIRE(config->contains(CoverConfig::Property::SwitchCommandTopic));
+
+            SECTION("Cover receives a valid switch open command")
+            {
+                using mgmt::home_assistant::v2::CoverSwitchCommand;
+
+                const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
+                const auto switch_command_value = config->get(CoverConfig::Property::PayloadOpen);
+                REQUIRE(switch_command_topic);
+                REQUIRE(switch_command_topic);
+
+                const auto publish_result = co_await helper_client.async_publish(*switch_command_topic, *switch_command_value, Qos_t::at_most_once);
+                REQUIRE(publish_result);
+
+                const auto command = co_await cover.async_receive();
+                REQUIRE(command);
+                REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
+                REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Open);
+            }
+
+            SECTION("Cover receives a valid switch close command")
+            {
+                using mgmt::home_assistant::v2::CoverSwitchCommand;
+
+                const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
+                const auto switch_command_value = config->get(CoverConfig::Property::PayloadClose);
+                REQUIRE(switch_command_topic);
+                REQUIRE(switch_command_topic);
+
+                const auto publish_result = co_await helper_client.async_publish(*switch_command_topic, *switch_command_value, Qos_t::at_most_once);
+                REQUIRE(publish_result);
+
+                const auto command = co_await cover.async_receive();
+                REQUIRE(command);
+                REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
+                REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Close);
+            }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         ioc.stop();
 
     }, rethrow);
     // NOLINTEND
 
-    ioc.run();
+    ioc.run(std::chrono::seconds{5});
 }
 

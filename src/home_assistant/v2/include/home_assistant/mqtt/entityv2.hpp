@@ -61,7 +61,7 @@ public:
     return unique_id_;
   }
 
-  boost::asio::awaitable<std::error_code> async_connect()
+  boost::asio::awaitable<Error> async_connect()
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
