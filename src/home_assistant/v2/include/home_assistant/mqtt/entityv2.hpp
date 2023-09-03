@@ -119,7 +119,7 @@ protected:
     }
   }
 
-  boost::asio::awaitable<Error> async_set_config(EntityConfig config, Qos_t qos)
+  boost::asio::awaitable<Error> async_set_config(EntityConfig config, Pubopts_t pubopts)
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
@@ -136,7 +136,7 @@ protected:
     }
 
     {
-      if (qos > Qos_t::at_most_once) {
+      if (pubopts.get_qos() > Qos_t::at_most_once) {
         auto packet = co_await client_.async_receive();
         if (!packet) {
           logger::err(logger::Entity, "Entity {}, error: {}", full_id(), packet.error().what());
@@ -157,17 +157,17 @@ protected:
   }
 
   template<typename Topic, class Payload>
-  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, Qos_t qos = DefaultQoS)
+  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, Pubopts_t pubopts = DefaultPubOpts)
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
-    const auto result = co_await client_.async_publish(std::forward<Topic>(topic), std::forward<Payload>(payload), qos);
+    const auto result = co_await client_.async_publish(std::forward<Topic>(topic), std::forward<Payload>(payload), pubopts);
 
     if (!result) {
       co_return result.error();
     }
 
-    if (qos > Qos_t::at_most_once) {
+    if (pubopts.get_qos() > Qos_t::at_most_once) {
       pending_puback_.insert(result.value());
     }
 

@@ -57,7 +57,17 @@ public:
     const auto& [k, v] = Base_t::Kvp;
 
     return value == v ? k : Next.map(value);
+
   }
+
+    template<
+        class Provided,
+        class Actual,
+        class Ret>
+    constexpr auto automap(const Provided& provided, const Actual& actual, const Ret& ret) const
+    {
+        return provided == actual ? ret : Next.map(provided);
+    }
 };
 
 template<

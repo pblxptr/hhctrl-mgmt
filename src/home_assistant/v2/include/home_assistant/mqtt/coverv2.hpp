@@ -116,9 +116,11 @@ public:
 
   ~Cover() = default;
 
-  boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Qos_t qos = DefaultQoS)
+  boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Pubopts_t pubopts = DefaultPubOpts)
   {
     common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
+
+    //TODO(bielpa) Check if connected
 
     config.set_override(CoverConfig::Property::SwitchCommandTopic, topics_.at(CoverConfig::Property::SwitchCommandTopic));
     config.set_override(CoverConfig::Property::StateTopic, topics_.at(CoverConfig::Property::StateTopic));
@@ -135,7 +137,7 @@ public:
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
     // Set config
-    if (const auto error = co_await BaseType::async_set_config(std::move(config), qos); error) {
+    if (const auto error = co_await BaseType::async_set_config(std::move(config), pubopts); error) {
       co_return error;
     }
 
@@ -149,6 +151,13 @@ public:
     }
 
     co_return Error{};
+  }
+
+  boost::asio::awaitable<Error> async_set_state(const CoverState& state, Pubopts_t pubopts = DefaultPubOpts)
+  {
+      co_return co_await BaseType::async_publish(topics_.at(CoverConfig::Property::StateTopic),
+                                       std::string{ CoverStateMapper.map(state) }, pubopts
+      );
   }
 
   boost::asio::awaitable<Expected<CoverCommand>> async_receive()

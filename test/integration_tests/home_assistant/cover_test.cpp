@@ -15,6 +15,7 @@ using mgmt::home_assistant::v2::PublishAckPacket_t;
 using mgmt::home_assistant::v2::SubscriptionAckPacket_t;
 using mgmt::home_assistant::v2::EntityConfig;
 using mgmt::home_assistant::v2::ProtocolVersion_t;
+using mgmt::home_assistant::v2::CoverState;
 
 namespace {
     constexpr auto CoverUniqueId = "cover_unique_id";
@@ -48,8 +49,8 @@ TEST_CASE("Cover entity can connect to a broker")
     ioc.run();
 }
 
-template <typename Executor, ProtocolVersion_t protocolVersion>
-boost::asio::awaitable<PublishPacket_t> async_get_publish_packet(AsyncMqttClient<Executor, protocolVersion>& client)
+template <typename T>
+boost::asio::awaitable<PublishPacket_t> async_get_publish_packet(T& client)
 {
     const auto& result = co_await client.async_receive();
     REQUIRE(result);
@@ -59,14 +60,11 @@ boost::asio::awaitable<PublishPacket_t> async_get_publish_packet(AsyncMqttClient
     co_return std::get<PublishPacket_t>(value);
 }
 
-template <typename Executor, ProtocolVersion_t protocolVersion>
-boost::asio::awaitable<void> async_setup(AsyncMqttClient<Executor, protocolVersion>& client)
+template <typename T>
+boost::asio::awaitable<void> async_subscribe(T& client, const std::string& topic)
 {
-    const auto error_code = co_await client.async_connect();
-    REQUIRE(!error_code);
-
     {
-        auto sub_topics = std::vector<std::string>{CoverDiscoveryTopic};
+        auto sub_topics = std::vector<std::string>{topic};
         const auto result = co_await client.async_subscribe(std::move(sub_topics));
         REQUIRE(result);
     }
@@ -78,10 +76,10 @@ boost::asio::awaitable<void> async_setup(AsyncMqttClient<Executor, protocolVersi
     }
 }
 
-template <typename Executor, ProtocolVersion_t protocolVersion>
-boost::asio::awaitable<void> async_setup(Cover<AsyncMqttClient<Executor, protocolVersion>>& cover)
+template <typename T>
+boost::asio::awaitable<void> async_connect(T& client)
 {
-    const auto error_code = co_await cover.async_connect();
+    const auto error_code = co_await client.async_connect();
     REQUIRE(!error_code);
 }
 
@@ -92,19 +90,22 @@ TEST_CASE("Cover is configured properly")
 
     // NOLINTBEGIN
     boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
+
+        // Arrange
         auto cover = Cover{CoverUniqueId, AsyncMqttClient{ioc.handle().get_executor(), cover_client_config()}};
-        co_await async_setup(cover);
+        co_await async_connect(cover);
 
         auto helper_client = AsyncMqttClient(ioc.handle().get_executor(), get_config());
-        co_await async_setup(helper_client);
+        co_await async_connect(helper_client);
+        co_await async_subscribe(helper_client, CoverDiscoveryTopic);
 
         SECTION("Cover entity sends a config with required properties to a discovery topic")
         {
-            // Send config
+            // Act
             const auto configure_error = co_await cover.async_configure(EntityConfig{});
             REQUIRE(!configure_error);
 
-            // Verify config by helper client
+            // Assert
             const auto packet = co_await async_get_publish_packet(helper_client);
             const auto topic = static_cast<std::string_view>(packet.topic());
             REQUIRE(topic.data() == CoverDiscoveryTopic);
@@ -114,42 +115,140 @@ TEST_CASE("Cover is configured properly")
             REQUIRE(config->contains(CoverConfig::Property::StateTopic));
             REQUIRE(config->contains(CoverConfig::Property::SwitchCommandTopic));
 
-            SECTION("Cover receives a valid switch open command")
+            SECTION("Cover handles command")
             {
-                using mgmt::home_assistant::v2::CoverSwitchCommand;
+                SECTION("Cover receives a valid switch open command")
+                {
+                    // Arrange
+                    using mgmt::home_assistant::v2::CoverSwitchCommand;
 
-                const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
-                const auto switch_command_value = config->get(CoverConfig::Property::PayloadOpen);
-                REQUIRE(switch_command_topic);
-                REQUIRE(switch_command_topic);
+                    const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
+                    const auto switch_command_value = config->get(CoverConfig::Property::PayloadOpen);
+                    REQUIRE(switch_command_topic);
+                    REQUIRE(switch_command_topic);
 
-                const auto publish_result = co_await helper_client.async_publish(*switch_command_topic, *switch_command_value, Qos_t::at_most_once);
-                REQUIRE(publish_result);
+                    // Act
+                    const auto publish_result = co_await helper_client.async_publish(*switch_command_topic,
+                                                                                     *switch_command_value,
+                                                                                     Qos_t::at_most_once);
+                    REQUIRE(publish_result);
+                    const auto command = co_await cover.async_receive();
 
-                const auto command = co_await cover.async_receive();
-                REQUIRE(command);
-                REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
-                REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Open);
+                    // Assert
+                    REQUIRE(command);
+                    REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
+                    REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Open);
+                }
+
+                SECTION("Cover receives a valid switch close command")
+                {
+                    // Arrange
+                    using mgmt::home_assistant::v2::CoverSwitchCommand;
+
+                    const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
+                    const auto switch_command_value = config->get(CoverConfig::Property::PayloadClose);
+                    REQUIRE(switch_command_topic);
+                    REQUIRE(switch_command_topic);
+
+                    // Act
+                    const auto publish_result = co_await helper_client.async_publish(*switch_command_topic,
+                                                                                     *switch_command_value,
+                                                                                     Qos_t::at_most_once);
+                    REQUIRE(publish_result);
+                    const auto command = co_await cover.async_receive();
+
+                    // Assert
+                    REQUIRE(command);
+                    REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
+                    REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Close);
+                }
+
+                SECTION("Cover receives a valid switch stop command")
+                {
+                    // Arrange
+                    using mgmt::home_assistant::v2::CoverSwitchCommand;
+
+                    const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
+                    const auto switch_command_value = config->get(CoverConfig::Property::PayloadStop);
+                    REQUIRE(switch_command_topic);
+                    REQUIRE(switch_command_topic);
+
+                    // Act
+                    const auto publish_result = co_await helper_client.async_publish(*switch_command_topic,
+                                                                                     *switch_command_value,
+                                                                                     Qos_t::at_most_once);
+                    REQUIRE(publish_result);
+                    const auto command = co_await cover.async_receive();
+
+                    // Assert
+                    REQUIRE(command);
+                    REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
+                    REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Stop);
+                }
+
+                SECTION("Cover throws and exception  when an invalid packet with invalid payload is submitted to a command topic")
+                {
+                    // Arrange
+                    using mgmt::home_assistant::v2::CoverSwitchCommand;
+                    using mgmt::home_assistant::v2::ErrorCode;
+
+                    const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
+                    const auto switch_command_value = config->get(CoverConfig::Property::PayloadOpen);
+                    REQUIRE(switch_command_topic);
+                    REQUIRE(switch_command_topic);
+
+                    // Act
+                    const auto publish_result = co_await helper_client.async_publish(*switch_command_topic,
+                                                                                     *switch_command_value + "invalid_payload",
+                                                                                     Qos_t::at_most_once);
+                    // Assert
+                    REQUIRE(publish_result);
+                    REQUIRE_THROWS(co_await cover.async_receive());
+                }
             }
 
-            SECTION("Cover receives a valid switch close command")
+            SECTION("Cover sends its sate")
             {
-                using mgmt::home_assistant::v2::CoverSwitchCommand;
+                SECTION("Cover sends 'open' state")
+                {
+                    // Arrange
+                    const auto state_topic = config->get(CoverConfig::Property::StateTopic);
+                    const auto state_value = config->get(CoverConfig::Property::StateOpen);
+                    REQUIRE(state_topic);
+                    REQUIRE(state_value);
+                    co_await async_subscribe(helper_client, *state_topic);
 
-                const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
-                const auto switch_command_value = config->get(CoverConfig::Property::PayloadClose);
-                REQUIRE(switch_command_topic);
-                REQUIRE(switch_command_topic);
+                    // Act
+                    const auto state_error = co_await cover.async_set_state(CoverState::Open, Qos_t::at_most_once);
 
-                const auto publish_result = co_await helper_client.async_publish(*switch_command_topic, *switch_command_value, Qos_t::at_most_once);
-                REQUIRE(publish_result);
+                    // Assert
+                    REQUIRE(!state_error);
 
-                const auto command = co_await cover.async_receive();
-                REQUIRE(command);
-                REQUIRE(std::holds_alternative<CoverSwitchCommand>(command.value()));
-                REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Close);
+                    const auto state_packet = co_await async_get_publish_packet(helper_client);
+                    REQUIRE(to_string(state_packet.payload()) == *state_value);
+                }
+
+                SECTION("Cover sends 'closed' state")
+                {
+                    // Arrange
+                    const auto state_topic = config->get(CoverConfig::Property::StateTopic);
+                    const auto state_value = config->get(CoverConfig::Property::StateClosed);
+                    REQUIRE(state_topic);
+                    REQUIRE(state_value);
+                    co_await async_subscribe(helper_client, *state_topic);
+
+                    // Act
+                    const auto state_error = co_await cover.async_set_state(CoverState::Closed, Qos_t::at_most_once);
+
+                    // Assert
+                    REQUIRE(!state_error);
+
+                    const auto state_packet = co_await async_get_publish_packet(helper_client);
+                    REQUIRE(to_string(state_packet.payload()) == *state_value);
+                }
             }
         }
+
 
         ioc.stop();
 

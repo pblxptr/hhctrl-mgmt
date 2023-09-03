@@ -40,6 +40,7 @@ namespace mgmt::home_assistant::v2
   };
 
   constexpr inline auto DefaultQoS = Qos_t::at_least_once;
+  constexpr inline auto DefaultPubOpts = Qos_t::at_least_once;
   constexpr inline auto DefaultProtocolVersion = ProtocolVersion_t::v3_1_1;
 
   inline bool any_suback_failure(const SubscriptionAckPacket_t& suback_packet)
@@ -257,22 +258,22 @@ namespace mgmt::home_assistant::v2
     }
 
     template <typename Topic, typename Payload>
-    boost::asio::awaitable<Expected<PacketId_t>> async_publish(Topic&& topic, Payload&& payload, Qos_t qos)
+    boost::asio::awaitable<Expected<PacketId_t>> async_publish(Topic&& topic, Payload&& payload, Pubopts_t pubopts)
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
 
-      assert(supported_qos(qos));
+      assert(supported_qos(pubopts.get_qos()));
 
-      if (!supported_qos(qos)) {
+      if (!supported_qos(pubopts.get_qos())) {
         co_return Unexpected{ErrorCode::QosNotSupported};
       }
 
-      auto packet_id = co_await acquire_packet_id(qos);
+      auto packet_id = co_await acquire_packet_id(pubopts.get_qos());
       PublishPacket_t packet = PublishPacket_t {
         packet_id,
         async_mqtt::allocate_buffer(std::forward<Topic>(topic)),
         async_mqtt::allocate_buffer(std::forward<Payload>(payload)),
-        qos
+        pubopts
       };
       logger::debug(logger::AsyncMqttClient, "Sending Publish packet: '{}'", detail::to_string(packet));
 
