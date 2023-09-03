@@ -13,12 +13,19 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
 
+#      - name: Build Debug
+#        uses: ./.github/workflows/action-cmake-build
+#        with:
+#          preset: linux_gcc_debug_integration_tests
+#          build_type: Debug
+#          target: home_assistant_itc1
+
       - name: Build Debug
         uses: ./.github/workflows/action-cmake-build
         with:
           preset: linux_gcc_debug_integration_tests
           build_type: Debug
-          target: home_assistant_itc1
+          target: home_assistant_it_v2
 
       - name: "Cache artifacts"
         uses: actions/upload-artifact@v3
