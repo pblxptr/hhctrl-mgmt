@@ -210,8 +210,8 @@ namespace mgmt::home_assistant::v2
         auto eps = co_await resolver.async_resolve(config_.host, config_.port, redirect_error(use_awaitable, res_ec));
 
         if (res_ec) {
-          logger::err(logger::AsyncMqttClient, "Error while resolving name: '{}'", res_ec.message());
-          co_return Error { detail::map_error_code(res_ec), "Error while resolving name of the broker" };
+          logger::err(logger::AsyncMqttClient, "Error while resolving name: '{}', errc: '{}'", res_ec.message(), res_ec.value());
+          co_return Error { ErrorCode::NoService, "Error while resolving name of the broker" };
         }
 
         // Connect to broker
