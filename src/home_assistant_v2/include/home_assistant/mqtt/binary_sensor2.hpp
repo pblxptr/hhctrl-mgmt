@@ -80,9 +80,8 @@ public:
       co_return Error{};
   }
 
-    boost::asio::awaitable<Error> async_set_state(const BinarySensorState& state, Pubopts_t pubopts = DefaultPubOpts)
+  boost::asio::awaitable<Error> async_set_state(const BinarySensorState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
-    using std::string;
 
     common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}, state: {}", __FUNCTION__, BinarySensorStateMapper.map(state));
 
