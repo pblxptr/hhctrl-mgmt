@@ -25,6 +25,7 @@ namespace mgmt::home_assistant::v2
   using PacketId_t = std::uint32_t;
   using Pubopts_t = async_mqtt::pub::opts;
   using ConnectPacket_t = async_mqtt::v3_1_1::connect_packet;
+  using ConnectAckPacket_t = async_mqtt::v3_1_1::connack_packet;
   using PublishPacket_t = async_mqtt::v3_1_1::publish_packet;
   using PublishAckPacket_t = async_mqtt::v3_1_1::puback_packet;
   using SubscriptionPacket_t = async_mqtt::v3_1_1::subscribe_packet;
@@ -74,6 +75,11 @@ namespace mgmt::home_assistant::v2
         packet.clean_session(),
         to_string(packet.get_will().value_or(Will_t{"null", "null"}))
       );
+    }
+
+    inline std::string to_string(const ConnectAckPacket_t& packet)
+    {
+        return fmt::format("session present: '{}', return code: '{}'", packet.session_present(), async_mqtt::connect_return_code_to_str(packet.code()));
     }
 
     inline std::string to_string(const PublishPacket_t& packet)
@@ -149,9 +155,18 @@ namespace mgmt::home_assistant::v2
       };
     }
 
+    bool connected() const
+    {
+        return connected_;
+    }
+
     boost::asio::awaitable<Expected<ReceiveResult_t>> async_receive()
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
+
+        if (!connected()) {
+            co_return Unexpected { ErrorCode::Disconnected, "Cannot receive on disconnected client " };
+        }
 
         if (auto packet = co_await ep_.recv(boost::asio::use_awaitable)) {
           co_return packet.visit(
@@ -176,11 +191,11 @@ namespace mgmt::home_assistant::v2
           );
         }
         else {
-          co_return Unexpected{detail::map_error_code(packet.template get<async_mqtt::system_error>().code())};
+            co_return Unexpected{handle_invalid_recv(packet.template get<async_mqtt::system_error>())};
         }
     }
 
-    boost::asio::awaitable<std::error_code> async_connect()
+    boost::asio::awaitable<Error> async_connect()
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
 
@@ -196,7 +211,7 @@ namespace mgmt::home_assistant::v2
 
         if (res_ec) {
           logger::err(logger::AsyncMqttClient, "Error while resolving name: '{}'", res_ec.message());
-          co_return detail::map_error_code(res_ec);
+          co_return Error { detail::map_error_code(res_ec), "Error while resolving name of the broker" };
         }
 
         // Connect to broker
@@ -208,28 +223,32 @@ namespace mgmt::home_assistant::v2
         );
         if (con_ec) {
           logger::err(logger::AsyncMqttClient, "Error while establishing connection error: '{}'", con_ec.message());
-          co_return detail::map_error_code(con_ec);
+          co_return Error { detail::map_error_code(con_ec), "Error while establishing connection" };
         }
       }
 
       // Send ConnectPacket_t message
       if (auto system_error = co_await async_send_con(); system_error) {
-        logger::err(logger::AsyncMqttClient, "Error while sending ConnectPacket_t: '{}'", system_error.what());
-        co_return detail::map_error_code(system_error.code());
+        logger::err(logger::AsyncMqttClient, "Error while sending ConnectPacket: '{}'", system_error.what());
+        co_return Error { detail::map_error_code(system_error.code()), "Error while sending ConnectPacket" };
       }
 
       // Receive con ack
       if (auto system_error = co_await async_recv_conack(); system_error) {
         logger::err(logger::AsyncMqttClient, "Error while receiving ConnectPacketAck error: '{}'", system_error.what());
-        co_return detail::map_error_code(system_error.code());
+        co_return Error{ detail::map_error_code(system_error.code()), "Error while receiving ConnectAckPacket" };
       }
 
-      co_return std::error_code{};
+      co_return Error{};
     }
 
     boost::asio::awaitable<Expected<PacketId_t>> async_subscribe(std::vector<std::string> topics)
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
+
+        if (!connected()) {
+            co_return Unexpected { ErrorCode::Disconnected, "Cannot subscribe when client is disconnected" };
+        }
 
         // Prepare subscription
         auto subs = std::vector<async_mqtt::topic_subopts>{};
@@ -261,6 +280,10 @@ namespace mgmt::home_assistant::v2
     boost::asio::awaitable<Expected<PacketId_t>> async_publish(Topic&& topic, Payload&& payload, Pubopts_t pubopts)
     {
       logger::trace(logger::AsyncMqttClient, "AsyncMqttClient::{}", __FUNCTION__);
+
+      if (!connected()) {
+          co_return Unexpected { ErrorCode::Disconnected, "Cannot publish when client is disconnected" };
+      }
 
       assert(supported_qos(pubopts.get_qos()));
 
@@ -324,13 +347,17 @@ namespace mgmt::home_assistant::v2
       if (async_mqtt::packet_variant packet_variant = co_await ep_.recv(use_awaitable)) {
         packet_variant.visit(
           async_mqtt::overload{
-            [&](const async_mqtt::v3_1_1::connack_packet& packet) {
+            [&](const ConnectAckPacket_t& packet) {
+                logger::debug(logger::AsyncMqttClient, "Received ConnectAckPacket packet: '{}'", detail::to_string(packet));
+                connected_ = true;
             },
-            [](const auto&) {}
+            [](const auto&) {
+                logger::warn(logger::AsyncMqttClient, "Expected ConnectAckPacket packet, got some other packet");
+            }
           });
         co_return async_mqtt::system_error{};
       } else {
-        co_return packet_variant.get<async_mqtt::system_error>();
+        co_return handle_invalid_recv(packet_variant.get<async_mqtt::system_error>());
       }
     }
 
@@ -348,10 +375,17 @@ namespace mgmt::home_assistant::v2
         }
 
         co_return co_await acquire_packet_id();
+    }
 
-        //      return qos == Qos_t::at_most_once
-//           ? async_mqtt::v3_1_1::puback_packet::packet_id_t { 0 }
-//           : *ep_.acquire_unique_packet_id();
+    Error handle_invalid_recv(const boost::system::system_error& error)
+    {
+        if (connected_) {
+            connected_ = false;
+
+            return Error { ErrorCode::Disconnected, "Cannot perform recv operation on disconnected client" };
+        }
+
+        return Error {detail::map_error_code(error.code())};
     }
 
   private:
@@ -359,5 +393,6 @@ namespace mgmt::home_assistant::v2
     ClientConfig config_;
     EndpointType ep_;
     std::optional<Will_t> will_ {std::nullopt};
+    bool connected_ { false };
   };
 } // namespace mgmt::home_assistant::v2

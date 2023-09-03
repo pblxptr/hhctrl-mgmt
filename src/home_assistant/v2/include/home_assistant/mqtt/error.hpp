@@ -6,12 +6,14 @@
 
 #include <system_error>
 #include <boost/system/errc.hpp>
+#include <fmt/format.h>
 
 namespace mgmt::home_assistant::v2
 {
   enum class ErrorCode {
     Timeout = 1 ,
     NoService,
+    ConnectionRefused,
     UnknownPacket,
     QosNotSupported,
     Disconnected,
@@ -35,6 +37,8 @@ namespace mgmt::home_assistant::v2
             return "timeout";
           case ErrorCode::NoService:
             return "no_service";
+            case ErrorCode::ConnectionRefused:
+                return "connection_refused";
           case ErrorCode::UnknownPacket:
             return "unknown_packet";
           case ErrorCode::QosNotSupported:
@@ -60,8 +64,10 @@ namespace mgmt::home_assistant::v2
         return ErrorCode::Timeout;
       case boost::system::errc::no_such_file_or_directory:
         return ErrorCode::NoService;
+      case boost::system::errc::connection_refused:
+          return ErrorCode::ConnectionRefused;
       default:
-        throw std::runtime_error{ error_code.message() };
+        throw std::runtime_error{ fmt::format("Error does not have appropriate mapping: {}", error_code.message()) };
       }
     }
 
