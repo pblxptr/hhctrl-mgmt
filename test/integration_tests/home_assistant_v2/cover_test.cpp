@@ -152,6 +152,7 @@ TEST_CASE("Cover is configured properly")
                     REQUIRE(std::get<CoverSwitchCommand>(command.value()) == CoverSwitchCommand::Stop);
                 }
 
+                // TODO(bielpa): Return error code instead of throwing exception. It requires some modification in mapper
                 SECTION("Cover throws and exception  when an invalid packet with invalid payload is submitted to a command topic")
                 {
                     // Arrange

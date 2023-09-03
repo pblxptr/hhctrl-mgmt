@@ -6,6 +6,7 @@ add_executable(home_assistant_it_v2
   cover_test.cpp
   binary_sensor_test.cpp
         sensor_test.cpp
+        button_test.cpp
 )
 
 target_include_directories(home_assistant_it_v2 PRIVATE .)
