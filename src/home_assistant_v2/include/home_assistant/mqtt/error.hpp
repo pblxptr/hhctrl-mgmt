@@ -37,8 +37,8 @@ namespace mgmt::home_assistant::v2
             return "timeout";
           case ErrorCode::NoService:
             return "no_service";
-            case ErrorCode::ConnectionRefused:
-                return "connection_refused";
+        case ErrorCode::ConnectionRefused:
+            return "connection_refused";
           case ErrorCode::UnknownPacket:
             return "unknown_packet";
           case ErrorCode::QosNotSupported:
@@ -67,7 +67,7 @@ namespace mgmt::home_assistant::v2
       case boost::system::errc::connection_refused:
           return ErrorCode::ConnectionRefused;
       default:
-        throw std::runtime_error{ fmt::format("Error does not have appropriate mapping: {}", error_code.message()) };
+        throw std::runtime_error{ fmt::format("Error does not have appropriate mapping: {}, errc: {}", error_code.what(), error_code.value())};
       }
     }
 
