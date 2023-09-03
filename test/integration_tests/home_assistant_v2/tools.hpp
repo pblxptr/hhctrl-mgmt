@@ -140,3 +140,38 @@ inline auto setup_logger(const std::string& logger_name, spdlog::level::level_en
     logger->set_level(spdlog::level::trace);
     spdlog::register_logger(logger);
 }
+
+
+template <typename T>
+boost::asio::awaitable<mgmt::home_assistant::v2::PublishPacket_t> async_get_publish_packet(T& client)
+{
+    const auto& result = co_await client.async_receive();
+    REQUIRE(result);
+    const auto& value = result.value();
+    REQUIRE(std::holds_alternative<mgmt::home_assistant::v2::PublishPacket_t>(value));
+
+    co_return std::get<mgmt::home_assistant::v2::PublishPacket_t>(value);
+}
+
+template <typename T>
+boost::asio::awaitable<void> async_subscribe(T& client, const std::string& topic)
+{
+    {
+        auto sub_topics = std::vector<std::string>{topic};
+        const auto result = co_await client.async_subscribe(std::move(sub_topics));
+        REQUIRE(result);
+    }
+
+    {
+        const auto result = co_await client.async_receive();
+        REQUIRE(result);
+        REQUIRE(std::holds_alternative<mgmt::home_assistant::v2::SubscriptionAckPacket_t>(result.value()));
+    }
+}
+
+template <typename T>
+boost::asio::awaitable<void> async_connect(T& client)
+{
+    const auto error_code = co_await client.async_connect();
+    REQUIRE(!error_code);
+}

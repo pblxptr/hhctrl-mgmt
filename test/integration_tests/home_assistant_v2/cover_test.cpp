@@ -49,40 +49,6 @@ TEST_CASE("Cover entity can connect to a broker")
     ioc.run();
 }
 
-template <typename T>
-boost::asio::awaitable<PublishPacket_t> async_get_publish_packet(T& client)
-{
-    const auto& result = co_await client.async_receive();
-    REQUIRE(result);
-    const auto& value = result.value();
-    REQUIRE(std::holds_alternative<PublishPacket_t>(value));
-
-    co_return std::get<PublishPacket_t>(value);
-}
-
-template <typename T>
-boost::asio::awaitable<void> async_subscribe(T& client, const std::string& topic)
-{
-    {
-        auto sub_topics = std::vector<std::string>{topic};
-        const auto result = co_await client.async_subscribe(std::move(sub_topics));
-        REQUIRE(result);
-    }
-
-    {
-        const auto result = co_await client.async_receive();
-        REQUIRE(result);
-        REQUIRE(std::holds_alternative<SubscriptionAckPacket_t>(result.value()));
-    }
-}
-
-template <typename T>
-boost::asio::awaitable<void> async_connect(T& client)
-{
-    const auto error_code = co_await client.async_connect();
-    REQUIRE(!error_code);
-}
-
 TEST_CASE("Cover is configured properly")
 {
     auto ioc = IoContext();
@@ -255,6 +221,6 @@ TEST_CASE("Cover is configured properly")
     }, rethrow);
     // NOLINTEND
 
-    ioc.run(std::chrono::seconds{5});
+    ioc.run();
 }
 
