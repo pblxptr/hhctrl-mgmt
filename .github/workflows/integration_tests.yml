@@ -39,13 +39,18 @@ jobs:
           name: integration_test_binaries
           path: ${{ env.cache_artifacts_dir }}
 
-      - name: "home_assistant_itc1"
+#      - name: "home_assistant_itc1"
+#        uses: ./.github/workflows/action-test-docker-compose
+#        with:
+#          docker_compose_path: test/integration_tests/home_assistant_itc1/env/docker-compose.yml
+#          cmd_options: "--tp_mqtt_server_port 1883"
+
+
+      - name: "Home Assistant Integration Tests V2"
         uses: ./.github/workflows/action-test-docker-compose
         with:
-          docker_compose_path: test/integration_tests/home_assistant_itc1/env/docker-compose.yml
+          docker_compose_path: test/integration_tests/home_assistant_v2/env/docker-compose.yml
           cmd_options: "--tp_mqtt_server_port 1883"
-
-
 
 
 
