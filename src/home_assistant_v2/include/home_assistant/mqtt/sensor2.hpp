@@ -9,6 +9,7 @@
 #include <utils/mapper.hpp>
 #include <utils/static_map.hpp>
 #include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/logger.hpp>
 
 namespace mgmt::home_assistant::v2 {
 
@@ -36,10 +37,10 @@ public:
 
 
   Sensor() = delete;
-  Sensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
+  Sensor(std::string uid, EntityClient client)
     : BaseType(SensorConfig::EntityName, std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("Sensor::{}, unique_id: {}", __FUNCTION__, unique_id());
+    logger::trace(logger::Entity, "Sensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
   // movable
   Sensor(Sensor&& rhs) noexcept = default;
@@ -52,7 +53,7 @@ public:
 
     boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Pubopts_t pubopts = DefaultPubOpts)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("Sensor::{}", __FUNCTION__);
+    logger::trace(logger::Entity, "Sensor::{}", __FUNCTION__);
 
     config.set_override(SensorConfig::Property::StateTopic, topics_.at(SensorConfig::Property::StateTopic));
 
@@ -68,9 +69,9 @@ public:
       co_return Error{};
   }
 
-    boost::asio::awaitable<Error> async_set_state(const std::string& state, Pubopts_t pubopts = DefaultPubOpts)
+  boost::asio::awaitable<Error> async_set_state(const std::string& state, Pubopts_t pubopts = DefaultPubOpts)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("SensorState::{}, state: {}", __FUNCTION__, state);
+    logger::debug(logger::Entity, "SensorState::{}, state: {}", __FUNCTION__, state);
 
     co_return co_await BaseType::async_publish(topics_.at(SensorConfig::Property::StateTopic), state, pubopts);
   }

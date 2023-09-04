@@ -37,7 +37,7 @@ public:
   using Base_t::unique_id;
 
   Button() = delete;
-  Button(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
+  Button(std::string uid, EntityClient client)
     : Base_t(ButtonConfig::EntityName, std::move(uid), std::move(client))
   {
     common::logger::get(mgmt::home_assistant::Logger)->trace("Button::{}, unique_id: {}", __FUNCTION__, unique_id());

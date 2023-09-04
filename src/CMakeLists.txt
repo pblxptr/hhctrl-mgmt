@@ -9,6 +9,7 @@ add_subdirectory(poller)
 add_subdirectory(main_board)
 add_subdirectory(home_assistant)
 add_subdirectory(home_assistant_v2)
+add_subdirectory(home_assistant_adapter)
 add_subdirectory(app)
 
 

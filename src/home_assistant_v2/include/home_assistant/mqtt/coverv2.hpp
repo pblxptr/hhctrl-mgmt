@@ -2,6 +2,7 @@
 // Created by bielpa on 24.08.23.
 //
 
+#pragma once
 
 #include <functional>
 #include <spdlog/spdlog.h>
@@ -12,6 +13,7 @@
 #include <utils/static_map.hpp>
 
 #include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/logger.hpp>
 
 namespace mgmt::home_assistant::v2
 {
@@ -101,10 +103,10 @@ public:
   using BaseType::async_receive;
 
   Cover() = delete;
-  Cover(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
+  Cover(std::string uid, EntityClient client)
     : Entity<EntityClient>(CoverConfig::EntityName, std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->debug("Cover::{}, unique_id: {}", __FUNCTION__, unique_id());
+    logger::debug(logger::Entity, "Cover::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
 
   // movable
@@ -118,9 +120,7 @@ public:
 
   boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Pubopts_t pubopts = DefaultPubOpts)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("Cover::{}", __FUNCTION__);
-
-    //TODO(bielpa) Check if connected
+    logger::trace(logger::Entity, "Cover::{}", __FUNCTION__);
 
     config.set_override(CoverConfig::Property::SwitchCommandTopic, topics_.at(CoverConfig::Property::SwitchCommandTopic));
     config.set_override(CoverConfig::Property::StateTopic, topics_.at(CoverConfig::Property::StateTopic));

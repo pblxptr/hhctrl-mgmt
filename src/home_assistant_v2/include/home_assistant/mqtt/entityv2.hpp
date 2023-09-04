@@ -13,9 +13,8 @@
 #include <string>
 #include <unordered_set>
 
-#include <home_assistant/availability.hpp>
-#include <home_assistant/mqtt/will.hpp>
-#include <home_assistant/logger.hpp>
+#include <home_assistant/mqtt/availability2.hpp>
+#include <home_assistant/mqtt/async_mqtt_client.hpp>
 #include <home_assistant/mqtt/entity_configv2.hpp>
 #include <utils/mapper.hpp>
 #include <home_assistant/mqtt/logger.hpp>
@@ -23,8 +22,6 @@
 //TODO(bielpa) Use global qos per client.
 
 namespace mgmt::home_assistant::v2 {
-
-using Availability = mgmt::home_assistant::mqttc::Availability;
 
 namespace detail {
   constexpr static auto AvailabilityStateMapper = common::utils::Mapper{
@@ -94,7 +91,7 @@ protected:
       const auto& packet = co_await client_.async_receive();
 
       if (!packet) {
-        common::logger::get(mgmt::home_assistant::Logger)->debug("Entity: {}, error: {}", full_id(), packet.error().what());
+        logger::debug(logger::Entity, "Entity: {}, error: {}", full_id(), packet.error().what());
         co_return Unexpected { packet.error() };
       }
 

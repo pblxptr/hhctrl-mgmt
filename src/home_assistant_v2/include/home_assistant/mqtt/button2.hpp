@@ -9,6 +9,7 @@
 #include <utils/mapper.hpp>
 #include <utils/static_map.hpp>
 #include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/logger.hpp>
 
 namespace mgmt::home_assistant::v2 {
 struct ButtonConfig
@@ -42,10 +43,10 @@ public:
     using BaseType::async_receive;
 
   Button() = delete;
-  Button(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
+  Button(std::string uid, EntityClient client)
     : BaseType(ButtonConfig::EntityName, std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("Button::{}, unique_id: {}", __FUNCTION__, unique_id());
+    logger::trace(logger::Entity, "Button::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
   // movable
   Button(Button&& rhs) noexcept = default;
@@ -59,7 +60,7 @@ public:
 
   boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Pubopts_t pubopts = DefaultPubOpts)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("Button::{}", __FUNCTION__);
+    logger::trace(logger::Entity, "Button::{}", __FUNCTION__);
 
     config.set_override(ButtonConfig::Property::CommandTopic, topics_.at(ButtonConfig::Property::CommandTopic));
     config.set_override(ButtonConfig::Property::PayloadPress, ButtonConfig::Default::PayloadPress);

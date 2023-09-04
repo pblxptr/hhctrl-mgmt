@@ -9,6 +9,7 @@
 #include <utils/mapper.hpp>
 #include <utils/static_map.hpp>
 #include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/logger.hpp>
 
 namespace mgmt::home_assistant::v2 {
 enum class BinarySensorState { Off,
@@ -44,12 +45,11 @@ class BinarySensor : public Entity<EntityClient>
 public:
     using BaseType::unique_id;
 
-
   BinarySensor() = delete;
-  BinarySensor(std::string uid, EntityClient client)// TODO(pp): Consider passing EntityClient by rvalue ref
+  BinarySensor(std::string uid, EntityClient client)
     : BaseType(BinarySensorConfig::EntityName, std::move(uid), std::move(client))
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());
+    logger::trace(logger::Entity, "BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());
   }
   // movable
   BinarySensor(BinarySensor&& rhs) noexcept = default;
@@ -60,9 +60,9 @@ public:
 
   ~BinarySensor() = default;
 
-    boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Pubopts_t pubopts = DefaultPubOpts)
+  boost::asio::awaitable<Error> async_configure(EntityConfig config = EntityConfig{}, Pubopts_t pubopts = DefaultPubOpts)
   {
-    common::logger::get(mgmt::home_assistant::Logger)->trace("BinarySensor::{}", __FUNCTION__);
+    logger::trace(logger::Entity, "BinarySensor::{}", __FUNCTION__);
 
     config.set_override(BinarySensorConfig::Property::StateTopic, topics_.at(BinarySensorConfig::Property::StateTopic));
     config.set_override(BinarySensorConfig::Property::StateOff, std::string{ BinarySensorStateMapper.map(BinarySensorState::Off) });
@@ -83,7 +83,7 @@ public:
   boost::asio::awaitable<Error> async_set_state(const BinarySensorState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
 
-    common::logger::get(mgmt::home_assistant::Logger)->debug("BinarySensorState::{}, state: {}", __FUNCTION__, BinarySensorStateMapper.map(state));
+    logger::debug(logger::Entity, "BinarySensorState::{}, state: {}", __FUNCTION__, BinarySensorStateMapper.map(state));
 
     co_return co_await BaseType::async_publish(topics_.at(BinarySensorConfig::Property::StateTopic), std::string{ BinarySensorStateMapper.map(state) }, pubopts);
   }

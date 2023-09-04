@@ -4,7 +4,7 @@
 #include <string_view>
 #include <boost/json.hpp>
 
-#include <home_assistant/device_identity.hpp>
+#include <home_assistant/mqtt/device_identity.hpp>
 
 namespace mgmt::home_assistant::v2 {
 class EntityConfig
@@ -80,7 +80,7 @@ private:
 };
 
 namespace helper {
-  inline auto entity_config_basic_device(const mgmt::home_assistant::DeviceIdentity& identity)
+  inline auto entity_config_basic_device(const DeviceIdentity& identity)
   {
     return boost::json::value{
       { "identifiers", boost::json::value_from(std::vector<std::string>{ identity.serial_number }) },
