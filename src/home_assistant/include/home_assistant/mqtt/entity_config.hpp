@@ -53,7 +53,8 @@ private:
 };
 
 namespace helper {
-  inline auto entity_config_basic_device(const mgmt::home_assistant::DeviceIdentity& identity)
+  template <typename DeviceIdentity>
+  inline auto entity_config_basic_device(const DeviceIdentity& identity)
   {
     return boost::json::value{
       { "identifiers", boost::json::value_from(std::vector<std::string>{ identity.serial_number }) },

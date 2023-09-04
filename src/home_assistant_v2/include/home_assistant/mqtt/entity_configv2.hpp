@@ -80,6 +80,7 @@ private:
 };
 
 namespace helper {
+  template <typename DeviceIdentity>
   inline auto entity_config_basic_device(const DeviceIdentity& identity)
   {
     return boost::json::value{

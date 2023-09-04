@@ -78,6 +78,12 @@ protected:
     );
   }
 
+//  template <typename Handler>
+//  void on_reconnected(Handler handler)
+//  {
+//      client_.on_reconnected(std::move(handler));
+//  }
+
   void set_will(const WillConfig& will)
   {
     client_.set_will(will);
@@ -151,6 +157,12 @@ protected:
     }
 
     co_return std::error_code{};
+  }
+
+  template <typename Topic>
+  boost::asio::awaitable<Error> async_set_availability(Topic&& topic, Availability availability, Pubopts_t pubopts = DefaultPubOpts)
+  {
+      co_return co_await async_publish(std::forward<Topic>(topic), detail::AvailabilityStateMapper.map(availability), pubopts);
   }
 
   template<typename Topic, class Payload>

@@ -17,6 +17,7 @@ namespace mgmt::home_assistant::v2
     UnknownPacket,
     QosNotSupported,
     Disconnected,
+    Reconnected,
     InvalidConfig,
     PublishFailure,
     SubscriptionFailure,
@@ -43,6 +44,8 @@ namespace mgmt::home_assistant::v2
             return "unknown_packet";
           case ErrorCode::QosNotSupported:
             return "qos_not_supported";
+          case ErrorCode::Reconnected:
+            return "reconnected";
           case ErrorCode::Disconnected:
             return "disconnected";
           case ErrorCode::InvalidConfig:

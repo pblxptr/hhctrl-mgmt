@@ -13,5 +13,5 @@ target_link_libraries(home-assistant-adapter
     PRIVATE
         main_board device event common_utils
     PUBLIC
-        home-assistant-v2 common_coro common_logger
+        home-assistant-v2 home_assistant common_coro common_logger
 )

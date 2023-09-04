@@ -10,5 +10,8 @@ namespace mgmt::home_assistant::adapter
         std::string password {};
         std::string host {};
         std::string port {};
+        int keep_alive_interval{ 30 };
+        int max_reconnect_attempts{ 5 };
+        std::chrono::seconds reconnect_delay{ std::chrono::seconds(5) };
     };
 }

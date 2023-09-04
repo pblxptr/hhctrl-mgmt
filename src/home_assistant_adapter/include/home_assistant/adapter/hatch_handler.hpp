@@ -3,8 +3,8 @@
 #include <utility>
 
 #include <home_assistant/mqtt/coverv2.hpp>
-#include <home_assistant/mqtt/device_identity.hpp>
-#include <home_assistant/adapter/device_identity_provider.hpp>
+#include <home_assistant/device_identity.hpp>
+#include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/adapter/entity_factory.hpp>
 #include <home_assistant/adapter/unique_id.hpp>
 #include <device/device_id.hpp>
@@ -35,14 +35,16 @@ public:
   boost::asio::awaitable<void> async_sync_state();
 
 private:
-  HatchHandler(mgmt::device::DeviceId_t device_id, Cover_t cover, v2::DeviceIdentity device_identity);
+  HatchHandler(mgmt::device::DeviceId_t device_id, Cover_t cover, DeviceIdentity device_identity);
+  boost::asio::awaitable<bool> async_connect();
   boost::asio::awaitable<bool> async_configure();
   boost::asio::awaitable<void> async_handle_command(const v2::CoverCommand& command);
-  boost::asio::awaitable<void> async_handle_error(const v2::Error& error);
+  boost::asio::awaitable<bool> async_handle_disconnected_error();
+  boost::asio::awaitable<bool> async_handle_reconnected_error();
 
 private:
   mgmt::device::DeviceId_t device_id_;
   Cover_t cover_;
-  v2::DeviceIdentity device_identity_;
+  DeviceIdentity device_identity_;
 };
-}// namespace mgmt::home_assistant::device
+}// namespace mgmt::home_assistant::adapter

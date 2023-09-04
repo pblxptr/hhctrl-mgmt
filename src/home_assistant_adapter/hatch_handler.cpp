@@ -4,16 +4,21 @@
 
 #include <home_assistant/adapter/hatch_handler.hpp>
 #include <home_assistant/adapter/logger.hpp>
+#include <home_assistant/device_identity_provider.hpp>
 #include <device/hatch_t.hpp>
 #include <coro/async_wait.hpp>
 
 namespace mgmt::home_assistant::adapter {
-HatchHandler::HatchHandler(mgmt::device::DeviceId_t device_id, Cover_t cover, v2::DeviceIdentity device_identity)
+HatchHandler::HatchHandler(mgmt::device::DeviceId_t device_id, Cover_t cover, DeviceIdentity device_identity)
     : device_id_{std::move(device_id)}
     , cover_{std::move(cover)}
     , device_identity_{std::move(device_identity)}
 {
   common::logger::get(mgmt::home_assistant::adapter::Logger)->debug("HatchHandler::{}, device id: {}", __FUNCTION__, device_id_);
+
+//  cover_.on_reconnected([this]() -> boost::asio::awaitable<void> {
+//      co_await async_configure();
+//  });
 }
 
 boost::asio::awaitable<std::optional<HatchHandler>> HatchHandler::async_create(
@@ -23,6 +28,11 @@ boost::asio::awaitable<std::optional<HatchHandler>> HatchHandler::async_create(
 {
     auto cover = factory.create_cover(get_unique_id(device_id, identity_provider.identity(device_id)));
     auto handler = HatchHandler{device_id, std::move(cover), identity_provider.identity(device_id)};
+
+    const auto connected = co_await handler.async_connect();
+    if (!connected) {
+        co_return std::nullopt;
+    }
 
     const auto configured = co_await handler.async_configure();
     if (!configured) {
@@ -48,7 +58,21 @@ boost::asio::awaitable<void> HatchHandler::async_run()
             co_await async_handle_command(command.value());
         }
         else {
-            co_await async_handle_error(command.error());
+            bool recovered = false;
+
+            if (command.error().code() == v2::ErrorCode::Disconnected) {
+                recovered = co_await async_handle_disconnected_error();
+            }
+            else if (command.error().code() == v2::ErrorCode::Reconnected) {
+                recovered = co_await async_handle_reconnected_error();
+            }
+            else {
+                common::logger::get(mgmt::home_assistant::adapter::Logger)->error("HatchHandler unhandled error: '{}'", command.error().what());
+            }
+
+            if (!recovered) {
+                common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchHandler could not recover from error: '{}'", command.error().what());
+            }
         }
     }
 }
@@ -78,19 +102,22 @@ boost::asio::awaitable<void> HatchHandler::async_sync_state()
   }
 }
 
-boost::asio::awaitable<bool> HatchHandler::async_configure()
+boost::asio::awaitable<bool> HatchHandler::async_connect()
 {
     common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchHandler::{}", __FUNCTION__);
 
-    // Connect
-    {
-        const auto error = co_await cover_.async_connect();
-        if (error) {
-            common::logger::get(mgmt::home_assistant::adapter::Logger)->error("Cannot establish connection for cover entity with unique id: '{}'", cover_.unique_id());
-            co_return false;
-        }
+    const auto error = co_await cover_.async_connect();
+    if (error) {
+        common::logger::get(mgmt::home_assistant::adapter::Logger)->error("Cannot establish connection for cover entity with unique id: '{}'", cover_.unique_id());
+        co_return false;
     }
 
+    co_return true;
+}
+
+boost::asio::awaitable<bool> HatchHandler::async_configure()
+{
+    common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchHandler::{}", __FUNCTION__);
     // Configure
     {
         auto config = mgmt::home_assistant::v2::EntityConfig{};
@@ -110,8 +137,10 @@ boost::asio::awaitable<bool> HatchHandler::async_configure()
     // Wait until entity is configured on remote
     co_await common::coro::async_wait(std::chrono::seconds(1));
 
-//    co_await cover_.async_set_availability(mgmt::home_assistant::mqttc::Availability::Online); //TODO(bielpa): Uncomment
+    co_await cover_.async_set_availability(v2::Availability::Online);
     co_await async_sync_state();
+
+    co_return true;
 }
 
 boost::asio::awaitable<void> HatchHandler::async_handle_command(const v2::CoverCommand& command)
@@ -141,18 +170,26 @@ boost::asio::awaitable<void> HatchHandler::async_handle_command(const v2::CoverC
     }
 }
 
-boost::asio::awaitable<void> HatchHandler::async_handle_error(const v2::Error& error)
-{
-    common::logger::get(mgmt::home_assistant::adapter::Logger)->error("HatchHandler error: '{}'", error.what());
 
-//    switch (error.code().value()) {
-//        case v2::ErrorCode::Disconnected:
-//            co_await async_configure();
-//            break;
-//        default:
-//            common::logger::get(mgmt::home_assistant::adapter::Logger)->error("Unhandled HatchHandler error: '{}', errc: '{}'", error.what(), error.code().value());
-//    }
-    co_return;
+boost::asio::awaitable<bool> HatchHandler::async_handle_disconnected_error()
+{
+    common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchHandler::{}", __FUNCTION__);
+
+    const auto error_code = co_await async_connect();
+
+    if (error_code) {
+        co_return false;
+    }
+
+    co_return co_await async_configure();
 }
+
+boost::asio::awaitable<bool> HatchHandler::async_handle_reconnected_error()
+{
+    common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchHandler::{}", __FUNCTION__);
+
+    co_return co_await async_configure();
+}
+
 
 }// namespace mgmt::home_assistant::device

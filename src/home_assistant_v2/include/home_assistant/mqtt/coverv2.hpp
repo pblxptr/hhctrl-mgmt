@@ -100,7 +100,7 @@ class Cover : public Entity<EntityClient>
 
 public:
   using BaseType::unique_id;
-  using BaseType::async_receive;
+//  using BaseType::on_reconnected;
 
   Cover() = delete;
   Cover(std::string uid, EntityClient client)
@@ -151,6 +151,15 @@ public:
     }
 
     co_return Error{};
+  }
+
+  boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts = DefaultPubOpts)
+  {
+      co_return co_await BaseType::async_set_availability(
+              topics_.at(GenericEntityConfig::AvailabilityTopic),
+              availability,
+              pubopts
+      );
   }
 
   boost::asio::awaitable<Error> async_set_state(const CoverState& state, Pubopts_t pubopts = DefaultPubOpts)

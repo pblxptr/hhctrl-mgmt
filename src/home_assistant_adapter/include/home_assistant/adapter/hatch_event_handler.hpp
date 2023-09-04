@@ -8,7 +8,8 @@
 #include <event/device_removed.hpp>
 #include <event/device_state_changed.hpp>
 #include <home_assistant/adapter/hatch_handler.hpp>
-#include <home_assistant/adapter/device_identity_provider.hpp>
+//#include <home_assistant/adapter/device_identity_provider.hpp>
+#include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/adapter/entity_factory.hpp>
 
 namespace mgmt::home_assistant::adapter {
