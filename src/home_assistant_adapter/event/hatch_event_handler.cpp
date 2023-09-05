@@ -4,27 +4,27 @@
 
 #include <algorithm>
 
-#include <home_assistant/adapter/hatch_event_handler.hpp>
-#include <home_assistant/adapter/logger.hpp>
+#include <home_assistant/event/hatch_event_handler.hpp>
+#include <home_assistant/event/logger.hpp>
 #include <coro/co_spawn.hpp>
 
-namespace mgmt::home_assistant::adapter {
+namespace mgmt::home_assistant::event {
 HatchEventHandler::HatchEventHandler(
-  const EntityFactory& factory,
+  const adapter::EntityFactory& factory,
   const DeviceIdentityProvider& device_identity_provider)
   : factory_{ factory }
   , device_identity_provider_{ device_identity_provider }
 {
-  common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchEventHandler::{}", __FUNCTION__);
+  common::logger::get(Logger)->trace("HatchEventHandler::{}", __FUNCTION__);
 }
 
 boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] const DeviceCreated_t& event)
 {
-  common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchEventHandler::{}(DeviceCreated)", __FUNCTION__);
+  common::logger::get(Logger)->trace("HatchEventHandler::{}(DeviceCreated)", __FUNCTION__);
 
-  auto hatch_handler = co_await HatchHandler::async_create(event.device_id, device_identity_provider_, factory_);
+  auto hatch_handler = co_await adapter::HatchHandler::async_create(event.device_id, device_identity_provider_, factory_);
   if (!hatch_handler) {
-      common::logger::get(mgmt::home_assistant::adapter::Logger)->error("HatchEventHandler, cannot create HatchHandler");
+      common::logger::get(Logger)->error("HatchEventHandler, cannot create HatchHandler");
 
       co_return;
   }
@@ -38,7 +38,7 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
 
 boost::asio::awaitable<void> HatchEventHandler::operator()(const DeviceRemoved_t& event)
 {
-  common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchEventHandler::{}(DeviceRemoved)", __FUNCTION__);
+  common::logger::get(Logger)->trace("HatchEventHandler::{}(DeviceRemoved)", __FUNCTION__);
 
   const auto device_id = event.device_id;
   const auto erased = std::erase_if(hatches_, [device_id](auto& hatch) {
@@ -54,7 +54,7 @@ boost::asio::awaitable<void> HatchEventHandler::operator()(const DeviceRemoved_t
 
 boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] const DeviceStateChanged_t& event)
 {
-  common::logger::get(mgmt::home_assistant::adapter::Logger)->trace("HatchEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
+  common::logger::get(Logger)->trace("HatchEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
 
   const auto device_id = event.device_id;
   auto hatch = std::ranges::find_if(hatches_, [device_id](auto& hatch) {

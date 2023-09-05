@@ -96,7 +96,7 @@ boost::asio::awaitable<void> HatchHandler::async_sync_state()
     co_return;
   }
 
-  auto error = co_await cover_.async_set_state(cover_state); //TODO(bielpa_: Add retain
+  auto error = co_await cover_.async_set_state(cover_state); //TODO(bielpa): Add retain
   if (error) {
       common::logger::get(mgmt::home_assistant::adapter::Logger)->error("Cannot sync state for a cover with unique id: '{}', error: '{}'", cover_.unique_id(), error.what());
   }
@@ -193,3 +193,5 @@ boost::asio::awaitable<bool> HatchHandler::async_handle_reconnected_error()
 
 
 }// namespace mgmt::home_assistant::device
+
+#include <home_assistant/adapter/indicator_handler.hpp>

@@ -80,6 +80,15 @@ public:
       co_return Error{};
   }
 
+    boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts = DefaultPubOpts)
+    {
+        co_return co_await BaseType::async_set_availability(
+                topics_.at(GenericEntityConfig::AvailabilityTopic),
+                availability,
+                pubopts
+        );
+    }
+
   boost::asio::awaitable<Error> async_set_state(const BinarySensorState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
 
