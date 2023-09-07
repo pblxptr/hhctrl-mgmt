@@ -6,7 +6,7 @@
 #include <home_assistant/mqtt/entity_config.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>
 #include <home_assistant/mqtt/cover.hpp>
-#include <home_assistant/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/device_identity.hpp>
 #include <home_assistant/unique_id.hpp>

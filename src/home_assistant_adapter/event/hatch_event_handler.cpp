@@ -22,14 +22,14 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
 {
   common::logger::get(Logger)->trace("HatchEventHandler::{}(DeviceCreated)", __FUNCTION__);
 
-  auto hatch_handler = co_await adapter::HatchHandler::async_create(event.device_id, device_identity_provider_, factory_);
-  if (!hatch_handler) {
-      common::logger::get(Logger)->error("HatchEventHandler, cannot create HatchHandler");
+  auto hatch = co_await home_assistant::device::Hatch::async_create(event.device_id, device_identity_provider_, factory_);
+  if (!hatch) {
+      common::logger::get(Logger)->error("HatchEventHandler, cannot create Hatc");
 
       co_return;
   }
 
-  hatches_.push_back(std::move(*hatch_handler));
+  hatches_.push_back(std::move(*hatch));
 
   auto executor = co_await boost::asio::this_coro::executor;
 

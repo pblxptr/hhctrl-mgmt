@@ -1,14 +1,15 @@
 #include <app/home_assistant.hpp>
-#include <home_assistant/device/hatch_event_handler.hpp>
-#include <home_assistant/device/main_board_event_handler.hpp>
-#include <home_assistant/device/temp_sensor_event_handler.hpp>
+//#include <home_assistant/device/hatch_event_handler.hpp>
+//#include <home_assistant/device/main_board_event_handler.hpp>
+//#include <home_assistant/device/temp_sensor_event_handler.hpp>
 #include <home_assistant/device_identity_provider.hpp>
-#include <home_assistant/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 
 #include <home_assistant/event/main_board_event_handler.hpp>
 #include <home_assistant/event/hatch_event_handler.hpp>
-#include <home_assistant/adapter/entity_factory.hpp>
-#include <home_assistant/adapter/client_factory.hpp>
+#include <home_assistant/event/temp_sensor_event_handler.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
+#include <home_assistant/client_factory.hpp>
 
 namespace mgmt::app {
   void home_assistant_init(const HomeAssistantServices& services)
@@ -55,13 +56,13 @@ namespace mgmt::app {
     services.bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
     services.bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>>(hatch_dev_event_handler);
 
-//    // Temp sensor dev handler
-//    static auto temp_sensor_dev_event_handler = mgmt::home_assistant::device::TempSensorEventHandler{
-//      entity_factory,
-//      device_identity_provider
-//    };
-//    services.bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
-//    services.bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
-//    services.bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
+    // Temp sensor dev handler
+    static auto temp_sensor_dev_event_handler = mgmt::home_assistant::event::TempSensorEventHandler{
+      entity_factory_v2,
+      device_identity_provider
+    };
+    services.bus.subscribe<mgmt::event::DeviceCreated<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
+    services.bus.subscribe<mgmt::event::DeviceRemoved<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
+    services.bus.subscribe<mgmt::event::DeviceStateChanged<mgmt::device::TempSensor_t>>(temp_sensor_dev_event_handler);
   }
 } // namespace mgmt::app

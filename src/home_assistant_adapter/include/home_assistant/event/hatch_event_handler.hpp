@@ -7,10 +7,10 @@
 #include <event/device_created.hpp>
 #include <event/device_removed.hpp>
 #include <event/device_state_changed.hpp>
-#include <home_assistant/adapter/hatch_handler.hpp>
+#include <home_assistant/device/hatch.hpp>
 //#include <home_assistant/adapter/device_identity_provider.hpp>
 #include <home_assistant/device_identity_provider.hpp>
-#include <home_assistant/adapter/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 
 namespace mgmt::home_assistant::event {
 class HatchEventHandler
@@ -20,9 +20,7 @@ class HatchEventHandler
   using DeviceStateChanged_t = mgmt::event::DeviceStateChanged<mgmt::device::Hatch_t>;
 
 public:
-  HatchEventHandler(
-    const adapter::EntityFactory& factory,
-    const DeviceIdentityProvider& device_identity_provider);
+  HatchEventHandler(const adapter::EntityFactory& factory, const DeviceIdentityProvider& device_identity_provider);
   boost::asio::awaitable<void> operator()(const DeviceCreated_t& event);
   boost::asio::awaitable<void> operator()(const DeviceRemoved_t& event);
   boost::asio::awaitable<void> operator()(const DeviceStateChanged_t& event);
@@ -30,6 +28,6 @@ public:
 private:
   const adapter::EntityFactory& factory_;
   const DeviceIdentityProvider& device_identity_provider_;
-  std::list<adapter::HatchHandler> hatches_;
+  std::list<home_assistant::device::Hatch> hatches_;
 };
 }// namespace mgmt::home_assistant::device

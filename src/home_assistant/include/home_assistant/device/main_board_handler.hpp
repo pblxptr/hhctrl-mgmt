@@ -4,7 +4,7 @@
 #include <device/device_id.hpp>
 #include <device/indicator.hpp>
 #include <home_assistant/mqtt/entity_def.hpp>
-#include <home_assistant/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/logger.hpp>
 #include <home_assistant/mqtt/entity_error.hpp>

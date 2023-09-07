@@ -1,7 +1,7 @@
 #pragma once
 
 #include <home_assistant/adapter/indicator_handler.hpp>
-#include <home_assistant/adapter/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/adapter/unique_id.hpp>
 #include <device/indicator.hpp>

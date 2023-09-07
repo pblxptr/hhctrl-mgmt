@@ -6,7 +6,7 @@
 #include <home_assistant/mqtt/binary_sensor2.hpp>
 #include <home_assistant/mqtt/button2.hpp>
 #include <home_assistant/mqtt/sensor2.hpp>
-#include <home_assistant/adapter/client_factory.hpp>
+#include <home_assistant/client_factory.hpp>
 
 namespace mgmt::home_assistant::adapter {
 class EntityFactory

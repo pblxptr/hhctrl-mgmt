@@ -15,6 +15,7 @@
 #include <tl/expected.hpp>
 #include <system_error>
 #include <fmt/format.h>
+#include <async_mqtt/exception.hpp>
 
 namespace mgmt::home_assistant::v2 {
   using Error = async_mqtt::system_error;

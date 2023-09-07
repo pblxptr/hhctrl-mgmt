@@ -9,7 +9,7 @@
 #include <event/device_state_changed.hpp>
 #include <home_assistant/device/temp_sensor_handler.hpp>
 #include <home_assistant/device_identity_provider.hpp>
-#include <home_assistant/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 
 
 namespace mgmt::home_assistant::device {

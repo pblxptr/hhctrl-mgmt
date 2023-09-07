@@ -26,6 +26,8 @@ struct SensorConfig
   };
 };
 
+using SensorState = std::string;
+
 template<class EntityClient>
 class Sensor : public Entity<EntityClient>
 {
@@ -69,12 +71,31 @@ public:
       co_return Error{};
   }
 
-  boost::asio::awaitable<Error> async_set_state(const std::string& state, Pubopts_t pubopts = DefaultPubOpts)
+  boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts = DefaultPubOpts)
+  {
+      co_return co_await BaseType::async_set_availability(
+              topics_.at(GenericEntityConfig::AvailabilityTopic),
+              availability,
+              pubopts
+      );
+  }
+
+  boost::asio::awaitable<Error> async_set_state(const SensorState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
     logger::debug(logger::Entity, "SensorState::{}, state: {}", __FUNCTION__, state);
 
     co_return co_await BaseType::async_publish(topics_.at(SensorConfig::Property::StateTopic), state, pubopts);
   }
+
+  boost::asio::awaitable<Error> async_receive()
+  {
+    const auto& packet = co_await BaseType::async_receive();
+
+    if (!packet) {
+        co_return packet.error();
+    }
+  }
+
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{

@@ -5,7 +5,7 @@
 #include <event/device_state_changed.hpp>
 
 #include <main_board/device/main_board.hpp>
-#include <home_assistant/adapter/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/device/main_board.hpp>
 

@@ -4,7 +4,7 @@
 #include <event/device_removed.hpp>
 #include <event/device_state_changed.hpp>
 
-#include <home_assistant/entity_factory.hpp>
+#include <home_assistant/entity_factory_legacy.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/device/main_board_handler.hpp>
 #include <main_board/device/main_board.hpp>

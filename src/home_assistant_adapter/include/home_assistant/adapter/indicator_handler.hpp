@@ -2,7 +2,7 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <home_assistant/device_identity_provider.hpp>
-#include <home_assistant/adapter/entity_factory.hpp>
+#include <home_assistant/entity_factory.hpp>
 #include <home_assistant/adapter/logger.hpp>
 #include <coro/async_wait.hpp>
 
