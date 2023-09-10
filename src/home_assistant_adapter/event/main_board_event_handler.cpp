@@ -4,6 +4,7 @@
 //
 #include <home_assistant/event/main_board_event_handler.hpp>
 #include <home_assistant/event/logger.hpp>
+#include <coro/co_spawn.hpp>
 
 namespace {
 using mgmt::home_assistant::device::MainBoard;
@@ -34,28 +35,27 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceCreat
     throw std::runtime_error("Unexpected value in std::optional<MainBoardHandler>");
   }
 
-  {
-    auto device = co_await device::MainBoard::async_create(
+  auto device = co_await device::MainBoard::async_create(
             event.device_id,
-            factory_,
-            device_identity_provider_
-    );
+            device_identity_provider_,
+            factory_
+  );
 
-    if (!device) {
+   if (!device) {
         throw std::runtime_error{"Cannot create MainBoard device"};
-    }
+   }
 
-    device_ = std::move(device);
-  }
+    device_.emplace(std::move(*device));
 
-  co_await device_->async_run();
+  auto executor = co_await boost::asio::this_coro::executor;
+  boost::asio::co_spawn(executor, device_->async_run(), common::coro::rethrow);
 }
 
 boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceRemoved_t& /* event */)
 {
   common::logger::get(Logger)->trace("MainBoardEventHandler::{}", __FUNCTION__);
 
-//  assert_has_value(main_board_);
+//  assert_has_value(device_);
 
   co_return;
 }
@@ -64,9 +64,12 @@ boost::asio::awaitable<void> MainBoardEventHandler::operator()(const DeviceState
 {
   common::logger::get(Logger)->trace("MainBoardEventHandler::{}", __FUNCTION__);
 
-//  assert_has_value(main_board_);
-//
-//  co_await main_board_->async_sync_state();// NOLINT(bugprone-unchecked-optional-access)
-    co_return; //TODO(bielpa): Remove once implemented
+//  assert_has_value(device_);
+
+  if (!device_) {
+      co_return;
+  }
+
+  co_await device_->async_sync_state();// NOLINT(bugprone-unchecked-optional-access)
 }
 } // namespace mgmt::home_assistant::event

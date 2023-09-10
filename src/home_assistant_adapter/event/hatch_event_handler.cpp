@@ -62,7 +62,8 @@ boost::asio::awaitable<void> HatchEventHandler::operator()([[maybe_unused]] cons
   });
 
   if (hatch == hatches_.end()) {
-    throw std::runtime_error(fmt::format("Hatch device with id: {} was not found", device_id));
+    common::logger::get(Logger)->trace(fmt::format("Hatch device with id: {} was not found, no syncing will be performed", device_id));
+    co_return;
   }
 
   co_await hatch->async_sync_state();

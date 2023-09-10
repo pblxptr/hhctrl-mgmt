@@ -17,7 +17,7 @@ TempSensorEventHandler::TempSensorEventHandler(
   common::logger::get(Logger)->trace("TempSensorEventHandler::{}", __FUNCTION__);
 }
 
-boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceCreated_t& event)
+boost::asio::awaitable<void> TempSensorEventHandler::operator()(const DeviceCreated_t& event)
 {
   common::logger::get(Logger)->trace("TempSensorEventHandler::{}(DeviceCreated)", __FUNCTION__);
 
@@ -35,7 +35,7 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
   boost::asio::co_spawn(executor, sensors_.back().async_run(), common::coro::rethrow);
 }
 
-boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceRemoved_t& event)
+boost::asio::awaitable<void> TempSensorEventHandler::operator()(const DeviceRemoved_t& event)
 {
   common::logger::get(Logger)->trace("TempSensorEventHandler::{}(DeviceRemoved)", __FUNCTION__);
 
@@ -51,7 +51,7 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
   co_return;
 }
 
-boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]] const DeviceStateChanged_t& event)
+boost::asio::awaitable<void> TempSensorEventHandler::operator()(const DeviceStateChanged_t& event)
 {
   common::logger::get(Logger)->trace("TempSensorEventHandler::{}(DeviceStateChanged)", __FUNCTION__);
 
@@ -61,7 +61,8 @@ boost::asio::awaitable<void> TempSensorEventHandler::operator()([[maybe_unused]]
   });
 
   if (sensor == sensors_.end()) {
-    common::logger::get(Logger)->error(fmt::format("TempSensor device with id: {} was not found", device_id));
+    common::logger::get(Logger)->trace(fmt::format("TempSensor device with id: {} was not found, no syncing will be performed", device_id));
+    co_return;
   }
 
   co_await sensor->async_sync_state();

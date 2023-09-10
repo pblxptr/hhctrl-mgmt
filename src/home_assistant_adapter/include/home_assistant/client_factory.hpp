@@ -18,7 +18,7 @@ namespace mgmt::home_assistant::adapter
         {
             auto executor = ioc_.get_executor();
 
-            return v2::AsyncMqttClient<decltype(executor), v2::ProtocolVersion_t::v3_1_1> {
+            return v2::AsyncMqttClient<v2::ProtocolVersion_t::v3_1_1> {
                 std::move(executor),
                 v2::ClientConfig {
                     .unique_id = unique_id,
@@ -27,7 +27,7 @@ namespace mgmt::home_assistant::adapter
                     .host = config_.host,
                     .port = config_.port,
                     .clean_session = true,
-                    .keep_alive = 0x1234
+                    .keep_alive = 15
                 }
             };
         }

@@ -4,8 +4,8 @@ add_library(home-assistant-adapter STATIC
     event/hatch_event_handler.cpp
     event/temp_sensor_event_handler.cpp
     device/main_board.cpp
-
-    hatch_handler.cpp
+    device/hatch.cpp
+#    hatch_handler.cpp
 #    main_board_event_handler.cpp
 #    main_board_handler.cpp
 #    temp_sensor_event_handler.cpp

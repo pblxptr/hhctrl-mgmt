@@ -36,7 +36,7 @@ class Sensor : public Entity<EntityClient>
     using BaseType::async_publish;
 public:
     using BaseType::unique_id;
-
+    using BaseType::async_set_availability;
 
   Sensor() = delete;
   Sensor(std::string uid, EntityClient client)
@@ -59,7 +59,7 @@ public:
 
     config.set_override(SensorConfig::Property::StateTopic, topics_.at(SensorConfig::Property::StateTopic));
 
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
@@ -69,15 +69,6 @@ public:
       }
 
       co_return Error{};
-  }
-
-  boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts = DefaultPubOpts)
-  {
-      co_return co_await BaseType::async_set_availability(
-              topics_.at(GenericEntityConfig::AvailabilityTopic),
-              availability,
-              pubopts
-      );
   }
 
   boost::asio::awaitable<Error> async_set_state(const SensorState& state, Pubopts_t pubopts = DefaultPubOpts)
@@ -96,11 +87,9 @@ public:
     }
   }
 
-
 private:
-  common::utils::StaticMap<std::string_view, std::string, 3> topics_{
+  common::utils::StaticMap<std::string_view, std::string, 2> topics_{
     std::pair{ SensorConfig::Property::StateTopic, topic(SensorConfig::Default::StateTopic) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 };

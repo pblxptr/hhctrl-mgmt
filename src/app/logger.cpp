@@ -46,12 +46,13 @@ namespace mgmt::app
     setup_logger("mgmt", spdlog::level::debug, log_dir);
     setup_logger(mgmt::app::Logger, spdlog::level::debug, log_dir);
     setup_logger(mgmt::home_assistant::Logger, spdlog::level::debug, log_dir);
-    setup_logger(mgmt::home_assistant::adapter::Logger, spdlog::level::debug, log_dir);
+    setup_logger(mgmt::home_assistant::adapter::Logger, spdlog::level::trace, log_dir);
     setup_logger(mgmt::poller::Logger, spdlog::level::debug, log_dir);
     setup_logger(mgmt::device::Logger, spdlog::level::debug, log_dir);
 
     setup_logger("async_mqtt_client", spdlog::level::debug, log_dir);
     setup_logger("entity", spdlog::level::debug, log_dir);
+
 
     // Override with env variables
     spdlog::cfg::load_env_levels();

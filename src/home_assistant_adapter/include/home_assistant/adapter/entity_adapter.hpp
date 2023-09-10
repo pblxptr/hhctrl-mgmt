@@ -5,7 +5,18 @@
 #include <home_assistant/mqtt/availability2.hpp>
 #include <home_assistant/mqtt/error.hpp>
 #include <home_assistant/mqtt/expected.hpp>
+#include <home_assistant/mqtt/opts.hpp>
 #include <coro/async_wait.hpp>
+
+namespace detail {
+    template <typename T>
+    concept Synchronizable = requires(T obj)
+    {
+        { obj.state() };
+    };
+
+    inline auto AdapterDefaultPubopts = mgmt::home_assistant::v2::Retain_t::yes | mgmt::home_assistant::v2::Qos_t::at_least_once;
+}
 
 namespace mgmt::home_assistant::adapter
 {
@@ -14,7 +25,7 @@ namespace mgmt::home_assistant::adapter
     {
     public:
         EntityAdapter(Entity entity)
-                : entity_{std::move(entity)}
+            : entity_{std::move(entity)}
         {}
 
         const std::string& unique_id() const
@@ -39,17 +50,24 @@ namespace mgmt::home_assistant::adapter
             co_return true;
         }
 
-        boost::asio::awaitable<void> async_sync_state()
+        boost::asio::awaitable<void> async_sync_state() requires detail::Synchronizable<Impl>
         {
             common::logger::get(Logger)->trace("EntityAdapter::{}", __FUNCTION__);
 
             auto state = impl().state();
 
-            const auto error = co_await entity_.async_set_state(std::move(state));
+            const auto error = co_await entity_.async_set_state(std::move(state), detail::AdapterDefaultPubopts);
 
             if (error) {
                 common::logger::get(Logger)->error("Error while syncing state: {}", error.what());
             }
+        }
+
+        boost::asio::awaitable<void> async_sync_state() requires (!detail::Synchronizable<Impl>)
+        {
+            common::logger::get(Logger)->trace("EntityAdapter::{}, empty impl", __FUNCTION__);
+
+            co_return;
         }
 
         boost::asio::awaitable<void> async_run()
@@ -99,7 +117,7 @@ namespace mgmt::home_assistant::adapter
             {
                 auto config = impl().config();
 
-                const auto error = co_await entity_.async_configure(std::move(config));
+                const auto error = co_await entity_.async_configure(std::move(config), detail::AdapterDefaultPubopts);
 
                 if (error) {
                     common::logger::get(Logger)->error("Cannot configure cover entity with unique id: '{}'", entity_.unique_id());
@@ -110,7 +128,7 @@ namespace mgmt::home_assistant::adapter
             // Wait until entity is configured on remote
             co_await common::coro::async_wait(std::chrono::seconds(1));
 
-            co_await entity_.async_set_availability(v2::Availability::Online);
+            co_await entity_.async_set_availability(v2::Availability::Online, detail::AdapterDefaultPubopts);
             co_await async_sync_state();
 
             co_return true;
@@ -163,5 +181,4 @@ namespace mgmt::home_assistant::adapter
     private:
         Entity entity_;
     };
-
 }

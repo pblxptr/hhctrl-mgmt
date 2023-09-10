@@ -57,7 +57,11 @@
 
     {
       "name": "linux_gcc_debug",
-      "inherits": ["Linux_GCC", "Debug"]
+      "inherits": ["Linux_GCC", "Debug"],
+      "cacheVariables": {
+        "USE_ASAN" : "ON",
+        "USE_UBSAN" : "ON"
+      }
     },
     {
       "name": "linux_gcc_release",

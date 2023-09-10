@@ -37,10 +37,9 @@ class Button : public Entity<EntityClient>
     using BaseType = Entity<EntityClient>;
     using BaseType::topic;
     using BaseType::async_publish;
-
 public:
     using BaseType::unique_id;
-    using BaseType::async_receive;
+    using BaseType::async_set_availability;
 
   Button() = delete;
   Button(std::string uid, EntityClient client)
@@ -64,7 +63,7 @@ public:
 
     config.set_override(ButtonConfig::Property::CommandTopic, topics_.at(ButtonConfig::Property::CommandTopic));
     config.set_override(ButtonConfig::Property::PayloadPress, ButtonConfig::Default::PayloadPress);
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
       // Set config
@@ -102,9 +101,8 @@ public:
     }
 
 private:
-  common::utils::StaticMap<std::string_view, std::string, 4> topics_{
+  common::utils::StaticMap<std::string_view, std::string, 1> topics_{
     std::pair{ ButtonConfig::Property::CommandTopic, topic(ButtonConfig::Default::CommandTopic) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) }
   };
 };
 }// namespace mgmt::home_assistant::v2

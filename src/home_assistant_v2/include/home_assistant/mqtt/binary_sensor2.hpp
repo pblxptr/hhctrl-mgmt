@@ -44,6 +44,7 @@ class BinarySensor : public Entity<EntityClient>
     using BaseType::async_publish;
 public:
     using BaseType::unique_id;
+    using BaseType::async_set_availability;
 
   BinarySensor() = delete;
   BinarySensor(std::string uid, EntityClient client)
@@ -68,7 +69,7 @@ public:
     config.set_override(BinarySensorConfig::Property::StateOff, std::string{ BinarySensorStateMapper.map(BinarySensorState::Off) });
     config.set_override(BinarySensorConfig::Property::StateOn, std::string{ BinarySensorStateMapper.map(BinarySensorState::On) });
 
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
@@ -80,27 +81,25 @@ public:
       co_return Error{};
   }
 
-    boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts = DefaultPubOpts)
-    {
-        co_return co_await BaseType::async_set_availability(
-                topics_.at(GenericEntityConfig::AvailabilityTopic),
-                availability,
-                pubopts
-        );
-    }
-
   boost::asio::awaitable<Error> async_set_state(const BinarySensorState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
-
     logger::debug(logger::Entity, "BinarySensorState::{}, state: {}", __FUNCTION__, BinarySensorStateMapper.map(state));
 
     co_return co_await BaseType::async_publish(topics_.at(BinarySensorConfig::Property::StateTopic), std::string{ BinarySensorStateMapper.map(state) }, pubopts);
   }
 
+  boost::asio::awaitable<Error> async_receive()
+  {
+    const auto& packet = co_await BaseType::async_receive();
+
+    if (!packet) {
+        co_return packet.error();
+    }
+  }
+
 private:
-  common::utils::StaticMap<std::string_view, std::string, 3> topics_{
+  common::utils::StaticMap<std::string_view, std::string, 2> topics_{
     std::pair{ BinarySensorConfig::Property::StateTopic, topic(BinarySensorConfig::Default::StateTopic) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 };

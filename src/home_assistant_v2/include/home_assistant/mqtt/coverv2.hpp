@@ -100,7 +100,7 @@ class Cover : public Entity<EntityClient>
 
 public:
   using BaseType::unique_id;
-//  using BaseType::on_reconnected;
+  using BaseType::async_set_availability;
 
   Cover() = delete;
   Cover(std::string uid, EntityClient client)
@@ -132,7 +132,7 @@ public:
     config.set_override_if_not_null(CoverConfig::Property::PayloadClose, std::string{ CoverSwitchCommandMapper.map(CoverSwitchCommand::Close) });
     config.set_override_if_not_null(CoverConfig::Property::PayloadStop, std::string{ CoverSwitchCommandMapper.map(CoverSwitchCommand::Stop) });
 
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topics_.at(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
@@ -153,17 +153,10 @@ public:
     co_return Error{};
   }
 
-  boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts = DefaultPubOpts)
-  {
-      co_return co_await BaseType::async_set_availability(
-              topics_.at(GenericEntityConfig::AvailabilityTopic),
-              availability,
-              pubopts
-      );
-  }
-
   boost::asio::awaitable<Error> async_set_state(const CoverState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
+      logger::trace(logger::Entity, "Cover::{}", __FUNCTION__);
+
       co_return co_await BaseType::async_publish(topics_.at(CoverConfig::Property::StateTopic),
                                        std::string{ CoverStateMapper.map(state) }, pubopts
       );
@@ -185,10 +178,9 @@ public:
 
 private:
   std::string unique_id_;
-  common::utils::StaticMap<std::string_view, std::string, 4> topics_{
+  common::utils::StaticMap<std::string_view, std::string, 3> topics_{
     std::pair{ CoverConfig::Property::SwitchCommandTopic, topic(CoverConfig::Default::SwitchCommandTopic) },
     std::pair{ CoverConfig::Property::StateTopic, topic(CoverConfig::Default::StateTopic) },
-    std::pair{ GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic) },
     std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 

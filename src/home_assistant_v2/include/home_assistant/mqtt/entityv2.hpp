@@ -19,8 +19,6 @@
 #include <utils/mapper.hpp>
 #include <home_assistant/mqtt/logger.hpp>
 
-//TODO(bielpa) Use global qos per client.
-
 namespace mgmt::home_assistant::v2 {
 
 namespace detail {
@@ -73,16 +71,11 @@ protected:
   {
     client_.set_will(WillConfig {
       .topic = topic(GenericEntityConfig::AvailabilityTopic),
-      .message = std::string{detail::AvailabilityStateMapper.map(Availability::Offline)}
+      .message = std::string{detail::AvailabilityStateMapper.map(Availability::Offline)},
+      .pubopts = Retain_t::yes //TODO(bielpa): Consider removing will default configuration from
     }
     );
   }
-
-//  template <typename Handler>
-//  void on_reconnected(Handler handler)
-//  {
-//      client_.on_reconnected(std::move(handler));
-//  }
 
   void set_will(const WillConfig& will)
   {
@@ -129,7 +122,7 @@ protected:
     config.set_override("unique_id", unique_id_);
 
     {
-      const auto error = co_await async_publish(fmt::format("homeassistant/{}/{}/config", entity_name_, unique_id()), config.parse());
+      const auto error = co_await async_publish(fmt::format("homeassistant/{}/{}/config", entity_name_, unique_id()), config.parse(), pubopts);
 
       if (error) {
         logger::err(logger::Entity, "Entity {}, error: {}", full_id(), error.what());
@@ -159,14 +152,15 @@ protected:
     co_return std::error_code{};
   }
 
-  template <typename Topic>
-  boost::asio::awaitable<Error> async_set_availability(Topic&& topic, Availability availability, Pubopts_t pubopts = DefaultPubOpts)
+  boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts)
   {
-      co_return co_await async_publish(std::forward<Topic>(topic), detail::AvailabilityStateMapper.map(availability), pubopts);
+      logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
+
+      co_return co_await async_publish(topic(GenericEntityConfig::AvailabilityTopic), detail::AvailabilityStateMapper.map(availability), pubopts);
   }
 
   template<typename Topic, class Payload>
-  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, Pubopts_t pubopts = DefaultPubOpts)
+  boost::asio::awaitable<Error> async_publish(Topic&& topic, Payload&& payload, Pubopts_t pubopts)
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 

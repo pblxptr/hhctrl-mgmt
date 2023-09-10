@@ -19,6 +19,7 @@ using WorkGuard_t =
 
 int main(int argc, char** argv)
 {
+
   try {
     if (argc != 2) {
       common::logger::get(mgmt::app::Logger)->error("Too few arguments");

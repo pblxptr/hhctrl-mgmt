@@ -13,24 +13,24 @@
 #include <boost/asio/connect.hpp>
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
 #include <home_assistant/mqtt/error.hpp>
+#include <home_assistant/mqtt/opts.hpp>
 #include <home_assistant/mqtt/expected.hpp>
-#include <tl/expected.hpp>
 #include <home_assistant/mqtt/logger.hpp>
 
 namespace mgmt::home_assistant::v2
 {
   using ProtocolVersion_t = async_mqtt::protocol_version;
-  using Qos_t = async_mqtt::qos;
   using PacketId_t = std::uint32_t;
-  using Pubopts_t = async_mqtt::pub::opts;
   using ConnectPacket_t = async_mqtt::v3_1_1::connect_packet;
   using ConnectAckPacket_t = async_mqtt::v3_1_1::connack_packet;
   using PublishPacket_t = async_mqtt::v3_1_1::publish_packet;
   using PublishAckPacket_t = async_mqtt::v3_1_1::puback_packet;
   using SubscriptionPacket_t = async_mqtt::v3_1_1::subscribe_packet;
   using SubscriptionAckPacket_t = async_mqtt::v3_1_1::suback_packet;
+  using PingResponsePacket = async_mqtt::v3_1_1::pingresp_packet;
   using ReceiveResult_t = std::variant<PublishPacket_t, PublishAckPacket_t, SubscriptionAckPacket_t>;
   using Will_t = async_mqtt::will;
+
 
   struct WillConfig
   {
@@ -135,7 +135,7 @@ namespace mgmt::home_assistant::v2
     std::chrono::seconds reconnect_delay = { std::chrono::seconds(5) };
   };
 
-  template <typename Executor, ProtocolVersion_t protocolVersion = DefaultProtocolVersion>
+  template <ProtocolVersion_t protocolVersion = DefaultProtocolVersion>
   class AsyncMqttClient
   {
       using EndpointType = async_mqtt::endpoint<async_mqtt::role::client, async_mqtt::protocol::mqtt>;
@@ -145,21 +145,17 @@ namespace mgmt::home_assistant::v2
           int max_attempts{ 5 };
           std::chrono::seconds reconnect_delay = { std::chrono::seconds(10) };
           boost::asio::steady_timer timer;
-//          std::function<boost::asio::awaitable<void>()> on_reconnected;
       };
 
   public:
+    template <typename Executor>
     AsyncMqttClient(Executor executor, const ClientConfig& config)
-      : executor_{executor}
-      , config_{config}
+      : config_{config}
       , ep_{protocolVersion, executor}
       , reconnect_ {
         .max_attempts = config.max_attempts,
         .reconnect_delay = config.reconnect_delay,
         .timer = boost::asio::steady_timer{ executor }
-//        .on_reconnected = []() -> boost::asio::awaitable<void> {
-//            co_return;
-//        }
       }
     {
     }
@@ -172,12 +168,6 @@ namespace mgmt::home_assistant::v2
         will.pubopts
       };
     }
-
-//    template <typename Handler>
-//    void on_reconnected(Handler handler)
-//    {
-//        reconnect_.on_reconnected = std::move(handler);
-//    }
 
     bool connected() const
     {
@@ -194,34 +184,70 @@ namespace mgmt::home_assistant::v2
 
             while (true) {
                 if (auto packet = co_await ep_.recv(boost::asio::use_awaitable)) {
-                    co_return packet.visit(
-                            async_mqtt::overload{
-                                    [&](PublishPacket_t pub_packet) -> Expected<ReceiveResult_t> {
-                                        logger::debug(logger::AsyncMqttClient, "Received Publish packet: '{}'",
-                                                      detail::to_string(pub_packet));
-                                        return Expected<ReceiveResult_t>{std::move(pub_packet)};
-                                    },
-                                    [&](PublishAckPacket_t puback_packet) -> Expected<ReceiveResult_t> {
-                                        logger::debug(logger::AsyncMqttClient, "Received PublishAck packet: '{}'",
-                                                      detail::to_string(puback_packet));
-                                        return Expected<ReceiveResult_t>{std::move(puback_packet)};
-                                    },
-                                    [&](SubscriptionAckPacket_t subback_packet) -> Expected<ReceiveResult_t> {
-                                        logger::debug(logger::AsyncMqttClient, "Received SubscribeAck packet: '{}'",
-                                                      detail::to_string(subback_packet));
-                                        return Expected<ReceiveResult_t>{std::move(subback_packet)};
-                                    },
-                                    [](auto const &) -> Expected<ReceiveResult_t> {
-                                        logger::warn(logger::AsyncMqttClient, "Unknown packet has been received");
-                                        return Unexpected{ErrorCode::UnknownPacket, "Unknown packet has been received"};
-                                    }
-                            }
-                    );
-                } else {
-//                    auto error = co_await handle_recv_error(packet.template get<async_mqtt::system_error>());
-//                    if (error) {
-//                        co_return Unexpected{std::move(error)};
+                    auto type = packet.type();
+                    if (!type) {
+                        co_return Unexpected {ErrorCode::UnknownPacket, "Chuj"};
+                    }
+
+                    switch (type.value()) {
+                        case async_mqtt::control_packet_type::publish:
+                            co_return Expected<ReceiveResult_t>{packet.template get<PublishPacket_t>()};
+                        case async_mqtt::control_packet_type::puback:
+                            co_return Expected<ReceiveResult_t>{packet.template get<PublishAckPacket_t>()};
+                        case async_mqtt::control_packet_type::suback:
+                            co_return Expected<ReceiveResult_t>{packet.template get<SubscriptionAckPacket_t>()};
+                        default:
+                            logger::debug(logger::AsyncMqttClient, "Packet received: {}", async_mqtt::control_packet_type_to_str(type.value()));
+                    }
+                    logger::debug(logger::AsyncMqttClient, "Packet received: {}", async_mqtt::control_packet_type_to_str(type.value()));
+
+
+
+//                    if (std::holds_alternative<PublishPacket_t>(packet.get())) {
+//                        auto& pub_packet = std::get<PublishPacket_t>(std::move(packet));
+//                            logger::debug(logger::AsyncMqttClient, "Received Publish packet: '{}'",
+//                                          detail::to_string(pub_packet));
+//                            co_return Expected<ReceiveResult_t>{std::move(pub_packet)};
 //                    }
+//                    else if (std::holds_alternative<PublishAckPacket_t>(packet.get())) {
+//                        auto& puback_packet = std::get<PublishAckPacket_t>(std::move(packet));
+//                        logger::debug(logger::AsyncMqttClient, "Received PublishAckPacket_t packet: '{}'",
+//                                      detail::to_string(puback_packet));
+//                        co_return Expected<ReceiveResult_t>{std::move(puback_packet)};
+//                    }
+//                    else if (std::holds_alternative<SubscriptionAckPacket_t>(packet.get())) {
+//                        auto& subback_packet = std::get<SubscriptionAckPacket_t>(std::move(packet));
+//                        logger::debug(logger::AsyncMqttClient, "Received SubscriptionAckPacket_t packet: '{}'",
+//                                      detail::to_string(subback_packet));
+//                        co_return Expected<ReceiveResult_t>{std::move(subback_packet)};
+//                    }
+
+
+
+//                    co_return packet.visit(
+//                            async_mqtt::overload{
+//                                    [&](PublishPacket_t pub_packet) -> Expected<ReceiveResult_t> {
+//                                        logger::debug(logger::AsyncMqttClient, "Received Publish packet: '{}'",
+//                                                      detail::to_string(pub_packet));
+//                                        return Expected<ReceiveResult_t>{std::move(pub_packet)};
+//                                    },
+//                                    [&](PublishAckPacket_t puback_packet) -> Expected<ReceiveResult_t> {
+//                                        logger::debug(logger::AsyncMqttClient, "Received PublishAck packet: '{}'",
+//                                                      detail::to_string(puback_packet));
+//                                        return Expected<ReceiveResult_t>{std::move(puback_packet)};
+//                                    },
+//                                    [&](SubscriptionAckPacket_t subback_packet) -> Expected<ReceiveResult_t> {
+//                                        logger::debug(logger::AsyncMqttClient, "Received SubscribeAck packet: '{}'",
+//                                                      detail::to_string(subback_packet));
+//                                        return Expected<ReceiveResult_t>{std::move(subback_packet)};
+//                                    },
+//                                    []([[maybe_unused]] auto const& x) -> Expected<ReceiveResult_t> {
+//                                        logger::warn(logger::AsyncMqttClient, "Unknown packet has been received");
+//                                        return Unexpected{ErrorCode::UnknownPacket, "Unknown packet has been received"};
+//                                    }
+//                            }
+//                    );
+                } else {
                     co_return Unexpected{co_await handle_recv_error(packet.template get<async_mqtt::system_error>())};
                 }
             }
@@ -237,7 +263,7 @@ namespace mgmt::home_assistant::v2
 
       {
         // Resolve name
-        auto resolver = tcp::resolver{executor_};
+        auto resolver = tcp::resolver{ep_.next_layer().get_executor()};
         auto res_ec = boost::system::error_code{};
         auto eps = co_await resolver.async_resolve(config_.host, config_.port, redirect_error(use_awaitable, res_ec));
 
@@ -420,7 +446,7 @@ namespace mgmt::home_assistant::v2
             }
             else {
                 co_return Error { ErrorCode::Disconnected, fmt::format("Client got disconnected {}",
-                                  reconnect_.attempt == reconnect_.max_attempts ? "after auto-reconnect failure" : "")};
+                              reconnect_.attempt == reconnect_.max_attempts ? "after auto-reconnect failure" : "")};
             }
         }
 
@@ -431,7 +457,7 @@ namespace mgmt::home_assistant::v2
 
     boost::asio::awaitable<bool> try_reconnect()
     {
-        logger::trace(logger::AsyncMqttClient, "Expected ConnectAckPacket packet, got some other packet");
+        logger::trace(logger::AsyncMqttClient, "AsyncMqttEntityClient::{}", __FUNCTION__);
 
         if (reconnect_.max_attempts == 0) {
             co_return false;
@@ -463,7 +489,7 @@ namespace mgmt::home_assistant::v2
     }
 
   private:
-    Executor executor_; // TODO(bielpa): Possibly can be removed
+//    Executor executor_; // TODO(bielpa): Possibly can be removed
     ClientConfig config_;
     EndpointType ep_;
     std::optional<Will_t> will_ {std::nullopt};
