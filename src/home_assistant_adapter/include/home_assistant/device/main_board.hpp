@@ -63,8 +63,7 @@ namespace detail {
     {
         using IndicatorMap_t = std::unordered_map<mgmt::device::IndicatorType, detail::Indicator>;
 
-        MainBoard(IndicatorMap_t indicators);
-//        MainBoard(IndicatorMap_t indicators, detail::RestartButton restart_button);
+        MainBoard(IndicatorMap_t indicators, detail::RestartButton restart_button);
     public:
         static boost::asio::awaitable<std::optional<MainBoard>> async_create(
             mgmt::device::DeviceId_t device_id,
@@ -75,6 +74,6 @@ namespace detail {
         boost::asio::awaitable<void> async_sync_state();
     private:
         IndicatorMap_t indicators_;
-//        detail::RestartButton restart_button_;
+        detail::RestartButton restart_button_;
     };
 }

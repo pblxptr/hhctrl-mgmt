@@ -30,7 +30,7 @@ namespace mgmt::home_assistant::device {
             auto unique_id = fmt::format("{}_i_{}", adapter::get_unique_id(device_id, identity),
                                          static_cast<std::underlying_type_t<mgmt::device::IndicatorType>>(indicator_type));
 
-            auto binary_sensor = factory.create_binary_sensor(std::move(unique_id));
+            auto binary_sensor = factory.create_binary_sensor(unique_id);
             auto self = Indicator{device_id, indicator_type, identity, std::move(binary_sensor)};
 
             if (!(co_await self.async_init())) {
@@ -76,7 +76,7 @@ namespace mgmt::home_assistant::device {
             const v2::DeviceIdentity& identity
         )
         {
-            auto button = factory.create_button(adapter::get_unique_id(device_id, identity));
+            auto button = factory.create_button(fmt::format("{}_restart_btn", adapter::get_unique_id(device_id, identity)));
             auto self = RestartButton{device_id, identity, std::move(button)};
 
             const auto initialized = co_await self.async_init();
@@ -101,8 +101,8 @@ namespace mgmt::home_assistant::device {
         {
             common::logger::get(adapter::Logger)->trace("RestartButton::{}", __FUNCTION__);
 
-            [[maybe_unused]] const mgmt::device::Device auto& device = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
-//            device.restart();
+            mgmt::device::Device auto& device = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
+            device.restart();
 
             co_return;
         }
@@ -116,26 +116,26 @@ namespace mgmt::home_assistant::device {
     {
         [[maybe_unused]] auto identity = identity_provider.identity(device_id);
 
-//        // Indicators
-        [[maybe_unused]] auto fault_indicator = co_await detail::Indicator::async_create(
+        // Indicators
+        auto fault_indicator = co_await detail::Indicator::async_create(
                 device_id,
                 mgmt::device::IndicatorType::Fault,
                 factory,
                 identity
         );
-        [[maybe_unused]] auto status_indicator = co_await detail::Indicator::async_create(
+        auto status_indicator = co_await detail::Indicator::async_create(
                 device_id,
                 mgmt::device::IndicatorType::Status,
                 factory,
                 identity
         );
-        [[maybe_unused]] auto warning_indicator = co_await detail::Indicator::async_create(
+        auto warning_indicator = co_await detail::Indicator::async_create(
                 device_id,
                 mgmt::device::IndicatorType::Warning,
                 factory,
                 identity
         );
-        [[maybe_unused]] auto maintenance_indicator = co_await detail::Indicator::async_create(
+        auto maintenance_indicator = co_await detail::Indicator::async_create(
                 device_id,
                 mgmt::device::IndicatorType::Maintenance,
                 factory,
@@ -162,24 +162,25 @@ namespace mgmt::home_assistant::device {
             co_return std::nullopt;
         }
 
-        co_return MainBoard{std::move(indicators)};
+        co_return MainBoard{std::move(indicators), std::move(*restart_button)};
     }
 
-    MainBoard::MainBoard(IndicatorMap_t indicators)
+    MainBoard::MainBoard(IndicatorMap_t indicators, detail::RestartButton restart_button)
         : indicators_{std::move(indicators)}
+        , restart_button_{std::move(restart_button)}
     {}
 
     boost::asio::awaitable<void> MainBoard::async_run()
     {
         auto executor = co_await boost::asio::this_coro::executor;
-//
-//        // Spawn coroutines for indicators
+
+        // Spawn coroutines for indicators
         for (auto &&[type, indicator] : indicators_) {
             boost::asio::co_spawn(executor, indicator.async_run(), common::coro::rethrow);
         }
-//
-////        // Spawn coroutines for buttons
-//        boost::asio::co_spawn(executor, restart_button_.async_run(), common::coro::rethrow);
+
+        // Spawn coroutines for buttons
+        boost::asio::co_spawn(executor, restart_button_.async_run(), common::coro::rethrow);
 
         co_return;
     }
