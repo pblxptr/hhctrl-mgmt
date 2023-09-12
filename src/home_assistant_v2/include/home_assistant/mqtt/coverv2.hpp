@@ -77,16 +77,19 @@ using CoverCommand = std::variant<CoverSwitchCommand, CoverTiltCommand>;
 namespace detail {
   std::optional<CoverCommand> map_command(const auto& topics, const PublishPacket_t& pub_packet)
   {
-    const auto topic = static_cast<std::string_view>(pub_packet.topic());
+        const auto topic = static_cast<std::string_view>(pub_packet.topic());
 
-    auto payload = to_string(pub_packet.payload());
+        auto payload = to_string(pub_packet.payload());
 
-    if (topic == topics.at(CoverConfig::Property::SwitchCommandTopic)) {
-      return CoverSwitchCommandMapper.map(payload);
-    }
+        if (topic == topics.at(CoverConfig::Property::SwitchCommandTopic)) {
+        return CoverSwitchCommandMapper.map(payload);
+        }
 
-    //TODO(bielpa) Implement tilt here
-    assert(0 && "Not implemented");
+        //TODO(bielpa) Implement tilt here
+        assert(0 && "Not implemented");
+
+        return std::nullopt;
+
     }
   } // namespace detail
 
