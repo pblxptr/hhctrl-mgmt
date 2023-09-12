@@ -8,10 +8,10 @@
 #include <string>
 
 #include <device/device_id.hpp>
-#include <home_assistant/device_identity.hpp>
+#include <home_assistant/mqtt/device_identity.hpp>
 
 namespace mgmt::home_assistant::adapter {
-inline std::string get_unique_id(const mgmt::device::DeviceId_t& device_id, const DeviceIdentity& identity)
+inline std::string get_unique_id(const mgmt::device::DeviceId_t& device_id, const v2::DeviceIdentity& identity)
 {
   return fmt::format("{}_{}", identity.serial_number, device_id);
 };

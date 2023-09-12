@@ -42,7 +42,7 @@ public:
     using BaseType::async_set_availability;
 
   Button() = delete;
-  Button(std::string uid, EntityClient client)
+  Button(std::string uid, std::unique_ptr<EntityClient> client)
     : BaseType(ButtonConfig::EntityName, std::move(uid), std::move(client))
   {
     logger::trace(logger::Entity, "Button::{}, unique_id: {}", __FUNCTION__, unique_id());

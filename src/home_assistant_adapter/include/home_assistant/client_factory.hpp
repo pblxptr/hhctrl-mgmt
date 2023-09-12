@@ -18,18 +18,18 @@ namespace mgmt::home_assistant::adapter
         {
             auto executor = ioc_.get_executor();
 
-            return v2::AsyncMqttClient<v2::ProtocolVersion_t::v3_1_1> {
+            return std::make_unique<v2::AsyncMqttClient<v2::ProtocolVersion_t::v3_1_1>>(
                 std::move(executor),
                 v2::ClientConfig {
-                    .unique_id = unique_id,
-                    .username = config_.username,
-                    .password = config_.password,
-                    .host = config_.host,
-                    .port = config_.port,
-                    .clean_session = true,
-                    .keep_alive = 15
+                        .unique_id = unique_id,
+                        .username = config_.username,
+                        .password = config_.password,
+                        .host = config_.host,
+                        .port = config_.port,
+                        .clean_session = true,
+                        .keep_alive = config_.keep_alive_interval
                 }
-            };
+            );
         }
 
     private:

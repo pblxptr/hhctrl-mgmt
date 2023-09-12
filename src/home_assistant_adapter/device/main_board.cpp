@@ -8,7 +8,7 @@ namespace mgmt::home_assistant::device {
         Indicator::Indicator(
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator_type,
-            DeviceIdentity device_identity,
+            v2::DeviceIdentity device_identity,
             adapter::BinarySensor_t binary_sensor
         ) : EntityAdapter<adapter::BinarySensor_t, Indicator>{std::move(binary_sensor)}
           , device_id_{std::move(device_id)}
@@ -20,7 +20,7 @@ namespace mgmt::home_assistant::device {
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator_type,
             const adapter::EntityFactory &factory,
-            const DeviceIdentity &identity
+            const v2::DeviceIdentity &identity
         ) {
             const mgmt::device::Device auto &device = mgmt::device::get_device<mgmt::device::MainBoard>(device_id);
             if (device.indicator_state(indicator_type) == mgmt::device::IndicatorState::NotAvailable) {
@@ -64,7 +64,7 @@ namespace mgmt::home_assistant::device {
 
         RestartButton::RestartButton(
             mgmt::device::DeviceId_t device_id,
-            DeviceIdentity device_identity,
+            v2::DeviceIdentity device_identity,
             adapter::Button_t button
         ) : EntityAdapter<adapter::Button_t, RestartButton>{std::move(button)}
           , device_id_{std::move(device_id)}
@@ -73,7 +73,7 @@ namespace mgmt::home_assistant::device {
         boost::asio::awaitable<std::optional<RestartButton>> RestartButton::async_create(
             mgmt::device::DeviceId_t device_id,
             adapter::EntityFactory& factory,
-            const DeviceIdentity& identity
+            const v2::DeviceIdentity& identity
         )
         {
             auto button = factory.create_button(adapter::get_unique_id(device_id, identity));
@@ -110,7 +110,7 @@ namespace mgmt::home_assistant::device {
 
     boost::asio::awaitable<std::optional<MainBoard>> MainBoard::async_create(
             mgmt::device::DeviceId_t device_id,
-            const DeviceIdentityProvider& identity_provider,
+            const adapter::DeviceIdentityProvider& identity_provider,
             adapter::EntityFactory&  factory
     )
     {

@@ -85,6 +85,13 @@
       "inherits": ["Linux_GCC", "Debug", "Tests"]
     },
     {
+      "name": "linux_gcc_debug_integration_tests_sanitizers",
+      "inherits": ["Linux_GCC", "Debug", "Tests"],
+      "cacheVariables": {
+        "USE_ASAN" : "ON"
+      }
+    },
+    {
       "name": "yocto_sdk_gcc_debug",
       "inherits": ["Yocto_SDK", "Debug"]
     },
@@ -92,7 +99,6 @@
       "name": "yocto_sdk_gcc_release",
       "inherits": ["Yocto_SDK", "Release"]
     }
-
   ]
 }
 

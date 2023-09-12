@@ -19,7 +19,7 @@ namespace detail {
         Indicator(
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator,
-            DeviceIdentity device_identity,
+            v2::DeviceIdentity device_identity,
             adapter::BinarySensor_t binary_sensor
         );
     public:
@@ -27,36 +27,35 @@ namespace detail {
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator_type,
             const adapter::EntityFactory& factory,
-            const DeviceIdentity& identity
+            const v2::DeviceIdentity& identity
         );
         v2::EntityConfig config() const;
         v2::BinarySensorState state() const;
     private:
         mgmt::device::DeviceId_t device_id_;
         mgmt::device::IndicatorType indicator_type_;
-        DeviceIdentity identity_;
+        v2::DeviceIdentity identity_;
     };
 
     class RestartButton : public adapter::EntityAdapter<adapter::Button_t, RestartButton>
     {
-    public: //TODO(bielpa): Make private
         RestartButton(
             mgmt::device::DeviceId_t device_id,
-            DeviceIdentity device_identity,
+            v2::DeviceIdentity device_identity,
             adapter::Button_t button
         );
         public:
             static boost::asio::awaitable<std::optional<RestartButton>> async_create(
                 mgmt::device::DeviceId_t device_id,
                 adapter::EntityFactory& factory,
-                const DeviceIdentity& identity
+                const v2::DeviceIdentity& identity
             );
 
             v2::EntityConfig config() const;
             boost::asio::awaitable<void> async_handle_recv_value(const v2::ButtonCommand& command);
         private:
             mgmt::device::DeviceId_t device_id_;
-            DeviceIdentity identity_;
+            v2::DeviceIdentity identity_;
         };
 } // namespace detail
 
@@ -69,7 +68,7 @@ namespace detail {
     public:
         static boost::asio::awaitable<std::optional<MainBoard>> async_create(
             mgmt::device::DeviceId_t device_id,
-            const DeviceIdentityProvider& identity_provider,
+            const adapter::DeviceIdentityProvider& identity_provider,
             adapter::EntityFactory& factory
         );
         boost::asio::awaitable<void> async_run();

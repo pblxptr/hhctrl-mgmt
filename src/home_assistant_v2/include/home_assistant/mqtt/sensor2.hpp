@@ -39,7 +39,7 @@ public:
     using BaseType::async_set_availability;
 
   Sensor() = delete;
-  Sensor(std::string uid, EntityClient client)
+  Sensor(std::string uid, std::unique_ptr<EntityClient> client)
     : BaseType(SensorConfig::EntityName, std::move(uid), std::move(client))
   {
     logger::trace(logger::Entity, "Sensor::{}, unique_id: {}", __FUNCTION__, unique_id());

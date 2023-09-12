@@ -2,7 +2,6 @@
 #include <app/logger.hpp>
 #include <device/logger.hpp>
 #include <poller/logger.hpp>
-#include <home_assistant/logger.hpp>
 #include <home_assistant/adapter/logger.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/cfg/env.h>
@@ -45,7 +44,6 @@ namespace mgmt::app
   {
     setup_logger("mgmt", spdlog::level::debug, log_dir);
     setup_logger(mgmt::app::Logger, spdlog::level::debug, log_dir);
-    setup_logger(mgmt::home_assistant::Logger, spdlog::level::debug, log_dir);
     setup_logger(mgmt::home_assistant::adapter::Logger, spdlog::level::trace, log_dir);
     setup_logger(mgmt::poller::Logger, spdlog::level::debug, log_dir);
     setup_logger(mgmt::device::Logger, spdlog::level::debug, log_dir);

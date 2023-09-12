@@ -17,14 +17,14 @@ class MainBoardEventHandler
 public:
   MainBoardEventHandler(
     const adapter::EntityFactory& factory,
-    const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider);
+    const adapter::DeviceIdentityProvider& device_identity_provider);
   boost::asio::awaitable<void> operator()(const DeviceCreated_t& event);
   boost::asio::awaitable<void> operator()(const DeviceRemoved_t& event);
   boost::asio::awaitable<void> operator()(const DeviceStateChanged_t& event);
 
 private:
   adapter::EntityFactory factory_;
-  const mgmt::home_assistant::DeviceIdentityProvider& device_identity_provider_;
+  const adapter::DeviceIdentityProvider& device_identity_provider_;
   std::optional<device::MainBoard> device_;
 };
 

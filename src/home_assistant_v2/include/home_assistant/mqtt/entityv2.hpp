@@ -60,16 +60,16 @@ public:
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
-    co_return co_await client_.async_connect();
+    co_return co_await client_->async_connect();
   }
 
 protected:
-  Entity(std::string_view entity_name, std::string unique_id, EntityClient client)
+  Entity(std::string_view entity_name, std::string unique_id, std::unique_ptr<EntityClient> client)
     : entity_name_{ entity_name }
     , unique_id_{ std::move(unique_id) }
     , client_{ std::move(client) }
   {
-    client_.set_will(WillConfig {
+    client_->set_will(WillConfig {
       .topic = topic(GenericEntityConfig::AvailabilityTopic),
       .message = std::string{detail::AvailabilityStateMapper.map(Availability::Offline)},
       .pubopts = Retain_t::yes //TODO(bielpa): Consider removing will default configuration from
@@ -79,7 +79,7 @@ protected:
 
   void set_will(const WillConfig& will)
   {
-    client_.set_will(will);
+    client_->set_will(will);
   }
 
   boost::asio::awaitable<Expected<PublishPacket_t>> async_receive()
@@ -87,7 +87,7 @@ protected:
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     while (true) {
-      const auto& packet = co_await client_.async_receive();
+      const auto& packet = co_await client_->async_receive();
 
       if (!packet) {
         logger::debug(logger::Entity, "Entity: {}, error: {}", full_id(), packet.error().what());
@@ -133,7 +133,7 @@ protected:
 
     {
       if (pubopts.get_qos() > Qos_t::at_most_once) {
-        auto packet = co_await client_.async_receive();
+        auto packet = co_await client_->async_receive();
         if (!packet) {
           logger::err(logger::Entity, "Entity {}, error: {}", full_id(), packet.error().what());
 
@@ -164,7 +164,7 @@ protected:
   {
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
-    const auto result = co_await client_.async_publish(std::forward<Topic>(topic), std::forward<Payload>(payload), pubopts);
+    const auto result = co_await client_->async_publish(std::forward<Topic>(topic), std::forward<Payload>(payload), pubopts);
 
     if (!result) {
       co_return result.error();
@@ -182,7 +182,7 @@ protected:
     logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
     {
-      const auto result = co_await client_.async_subscribe(sub_topics);
+      const auto result = co_await client_->async_subscribe(sub_topics);
 
       if (!result) {
         logger::err(logger::Entity, "Entity {}, error: {}", full_id(), result.error().what());
@@ -192,7 +192,7 @@ protected:
     }
 
     {
-      auto packet = co_await client_.async_receive();
+      auto packet = co_await client_->async_receive();
       if (!packet) {
         logger::err(logger::Entity, "Entity {}, error: {}", full_id(), packet.error().what());
 
@@ -237,7 +237,7 @@ private:
 private:
   std::string_view entity_name_;
   std::string unique_id_;
-  EntityClient client_;
+  std::unique_ptr<EntityClient> client_;
   std::unordered_set<PacketId_t> pending_puback_;
 };
 }// namespace mgmt::home_assistant::v2

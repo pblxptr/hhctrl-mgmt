@@ -3,7 +3,7 @@
 
 namespace mgmt::home_assistant::device
 {
-    Hatch::Hatch(mgmt::device::DeviceId_t device_id, DeviceIdentity device_identity, adapter::Cover_t cover)
+    Hatch::Hatch(mgmt::device::DeviceId_t device_id, v2::DeviceIdentity device_identity, adapter::Cover_t cover)
         : EntityAdapter<adapter::Cover_t, Hatch>{std::move(cover)}
         , device_id_{std::move(device_id)}
         , device_identity_{std::move(device_identity)}
@@ -11,7 +11,7 @@ namespace mgmt::home_assistant::device
 
     boost::asio::awaitable<std::optional<Hatch>> Hatch::async_create(
             mgmt::device::DeviceId_t device_id,
-            const DeviceIdentityProvider& identity_provider,
+            const adapter::DeviceIdentityProvider& identity_provider,
             const adapter::EntityFactory& factory
     )
     {

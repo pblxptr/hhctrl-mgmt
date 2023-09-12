@@ -11,7 +11,7 @@
 namespace mgmt::home_assistant::event {
 HatchEventHandler::HatchEventHandler(
   const adapter::EntityFactory& factory,
-  const DeviceIdentityProvider& device_identity_provider)
+  const adapter::DeviceIdentityProvider& device_identity_provider)
   : factory_{ factory }
   , device_identity_provider_{ device_identity_provider }
 {

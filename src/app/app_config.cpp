@@ -16,7 +16,7 @@ static mgmt::app::AppConfig tag_invoke(json::value_to_tag<mgmt::app::AppConfig> 
   return mgmt::app::AppConfig{
     .log_dir = json::value_to<std::string>(obj.at("log_dir")),
     .dtree_file = json::value_to<std::string>(obj.at("dtree_file")),
-    .entity_client_config = json::value_to<mgmt::home_assistant::mqttc::EntityClientConfig>(obj.at("entity_client_config"))
+    .entity_client_config = json::value_to<mgmt::home_assistant::adapter::EntityClientConfig>(obj.at("entity_client_config"))
   };
 }
 

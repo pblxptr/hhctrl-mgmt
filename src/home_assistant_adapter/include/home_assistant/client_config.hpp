@@ -9,7 +9,7 @@
 #include <boost/json.hpp>
 #include <fmt/format.h>
 
-namespace mgmt::home_assistant::mqttc {
+namespace mgmt::home_assistant::adapter {
 struct EntityClientConfig
 {
   std::string username { "user" };
@@ -38,17 +38,17 @@ inline std::string to_string(const EntityClientConfig& config)
     config.reconnect_delay.count());
 }
 
-inline mgmt::home_assistant::mqttc::EntityClientConfig tag_invoke(
-  boost::json::value_to_tag<mgmt::home_assistant::mqttc::EntityClientConfig> /* unused */,
+inline mgmt::home_assistant::adapter::EntityClientConfig tag_invoke(
+  boost::json::value_to_tag<mgmt::home_assistant::adapter::EntityClientConfig> /* unused */,
   const boost::json::value& jvalue)
 {
   const auto& obj = jvalue.as_object();
-  return mgmt::home_assistant::mqttc::EntityClientConfig{
+  return mgmt::home_assistant::adapter::EntityClientConfig{
     .username = boost::json::value_to<std::string>(obj.at("username")),
     .password = boost::json::value_to<std::string>(obj.at("password")),
     .server_address = boost::json::value_to<std::string>(obj.at("server_address")),
     .server_port = boost::json::value_to<int>(obj.at("server_port")),
-    .keep_alive_interval = boost::json::value_to<int>(obj.at("keep_alive_interval")),
+    .keep_alive_interval = boost::json::value_to<std::uint16_t>(obj.at("keep_alive_interval")),
     .max_reconnect_attempts = boost::json::value_to<int>(obj.at("max_reconnect_attempts")),
     .reconnect_delay = std::chrono::seconds{ boost::json::value_to<int>(obj.at("reconnect_delay_seconds")) }
   };

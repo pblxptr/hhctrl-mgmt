@@ -24,7 +24,7 @@ namespace mgmt::home_assistant::device
 
         static boost::asio::awaitable<std::optional<Hatch>> async_create(
                 mgmt::device::DeviceId_t device_id,
-                const DeviceIdentityProvider& identity_provider,
+                const adapter::DeviceIdentityProvider& identity_provider,
                 const adapter::EntityFactory& factory
         );
 
@@ -33,9 +33,9 @@ namespace mgmt::home_assistant::device
         v2::CoverState state() const;
         boost::asio::awaitable<void> async_handle_recv_value(const v2::CoverCommand& command);
     private:
-        Hatch(mgmt::device::DeviceId_t device_id, DeviceIdentity device_identity, adapter::Cover_t cover);
+        Hatch(mgmt::device::DeviceId_t device_id, v2::DeviceIdentity device_identity, adapter::Cover_t cover);
     private:
         mgmt::device::DeviceId_t device_id_;
-        DeviceIdentity device_identity_;
+        v2::DeviceIdentity device_identity_;
     };
 }

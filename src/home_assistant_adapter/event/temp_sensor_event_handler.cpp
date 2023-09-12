@@ -6,11 +6,12 @@
 
 #include <home_assistant/event/temp_sensor_event_handler.hpp>
 #include <home_assistant/event/logger.hpp>
+#include <coro/co_spawn.hpp>
 
 namespace mgmt::home_assistant::event {
 TempSensorEventHandler::TempSensorEventHandler(
   const adapter::EntityFactory& factory,
-  const DeviceIdentityProvider& device_identity_provider)
+  const adapter::DeviceIdentityProvider& device_identity_provider)
   : factory_{ factory }
   , device_identity_provider_{ device_identity_provider }
 {

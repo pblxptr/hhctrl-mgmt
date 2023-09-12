@@ -103,7 +103,7 @@ public:
   using BaseType::async_set_availability;
 
   Cover() = delete;
-  Cover(std::string uid, EntityClient client)
+  Cover(std::string uid, std::unique_ptr<EntityClient> client)
     : Entity<EntityClient>(CoverConfig::EntityName, std::move(uid), std::move(client))
   {
     logger::debug(logger::Entity, "Cover::{}, unique_id: {}", __FUNCTION__, unique_id());

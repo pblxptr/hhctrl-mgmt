@@ -47,7 +47,7 @@ public:
     using BaseType::async_set_availability;
 
   BinarySensor() = delete;
-  BinarySensor(std::string uid, EntityClient client)
+  BinarySensor(std::string uid, std::unique_ptr<EntityClient> client)
     : BaseType(BinarySensorConfig::EntityName, std::move(uid), std::move(client))
   {
     logger::trace(logger::Entity, "BinarySensor::{}, unique_id: {}", __FUNCTION__, unique_id());

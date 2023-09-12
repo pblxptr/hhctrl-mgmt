@@ -1,13 +1,9 @@
 #include <app/home_assistant.hpp>
-//#include <home_assistant/device/hatch_event_handler.hpp>
-//#include <home_assistant/device/main_board_event_handler.hpp>
-//#include <home_assistant/device/temp_sensor_event_handler.hpp>
-#include <home_assistant/device_identity_provider.hpp>
-
 #include <home_assistant/event/main_board_event_handler.hpp>
 #include <home_assistant/event/hatch_event_handler.hpp>
 #include <home_assistant/event/temp_sensor_event_handler.hpp>
-#include <home_assistant/entity_factory_legacy.hpp>
+#include <home_assistant/device_identity_provider.hpp>
+#include <home_assistant/entity_factory.hpp>
 #include <home_assistant/client_factory.hpp>
 
 #include <home_assistant/device/main_board.hpp>
@@ -15,12 +11,10 @@
 namespace mgmt::app {
   void home_assistant_init(const HomeAssistantServices& services)
   {
-    static auto device_identity_provider = mgmt::home_assistant::DeviceIdentityProvider{
-      services.hw_identity_store,
-      services.dtree
-    };
-    [[maybe_unused]] static auto client_factory = mgmt::home_assistant::mqttc::EntityClientFactory{ services.context, services.config.entity_client_config };
-    [[maybe_unused]] static auto entity_factory = mgmt::home_assistant::EntityFactory{ client_factory };
+      static auto device_identity_provider = mgmt::home_assistant::adapter::DeviceIdentityProvider{
+        services.hw_identity_store,
+        services.dtree
+      };
 
       const auto& config = services.config.entity_client_config;
       auto client_factory_v2 = mgmt::home_assistant::adapter::MqttClientFactory{

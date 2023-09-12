@@ -24,7 +24,7 @@ namespace mgmt::home_assistant::device
 
         static boost::asio::awaitable<std::optional<TempSensor>> async_create(
                 mgmt::device::DeviceId_t device_id,
-                const DeviceIdentityProvider& identity_provider,
+                const adapter::DeviceIdentityProvider& identity_provider,
                 const adapter::EntityFactory& factory
         )
         {
@@ -63,7 +63,7 @@ namespace mgmt::home_assistant::device
         }
 
     private:
-        TempSensor(mgmt::device::DeviceId_t device_id, adapter::Sensor_t sensor, DeviceIdentity device_identity)
+        TempSensor(mgmt::device::DeviceId_t device_id, adapter::Sensor_t sensor, v2::DeviceIdentity device_identity)
             : EntityAdapter<adapter::Sensor_t, TempSensor>{std::move(sensor)}
             , device_id_{std::move(device_id)}
             , device_identity_{std::move(device_identity)}
@@ -71,6 +71,6 @@ namespace mgmt::home_assistant::device
 
     private:
         mgmt::device::DeviceId_t device_id_;
-        DeviceIdentity device_identity_;
+        v2::DeviceIdentity device_identity_;
     };
 }
