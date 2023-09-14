@@ -32,8 +32,8 @@ namespace {
 TEST_CASE("Button entity can connect to a broker")
 {
     auto ioc = IoContext();
-    auto button = Button{ButtonUniqueId, AsyncMqttClient{
-        ioc.handle().get_executor(), button_client_config()}
+    auto button = Button{ButtonUniqueId, std::make_unique<AsyncMqttClient<>>(
+        ioc.handle().get_executor(), button_client_config())
     };
 
     // NOLINTBEGIN
@@ -57,7 +57,7 @@ TEST_CASE("Button is configured properly")
     boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
 
         // Arrange
-        auto button = Button{ButtonUniqueId, AsyncMqttClient{ioc.handle().get_executor(), button_client_config()}};
+        auto button = Button{ButtonUniqueId, std::make_unique<AsyncMqttClient<>>(ioc.handle().get_executor(), button_client_config())};
         co_await async_connect(button);
 
         auto helper_client = AsyncMqttClient(ioc.handle().get_executor(), get_config());

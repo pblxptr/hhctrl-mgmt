@@ -2,7 +2,7 @@
 
 #include <array>
 #include <algorithm>
-#include "logger/logger.hpp"
+#include <logger/logger.hpp>
 
 namespace common::utils {
 

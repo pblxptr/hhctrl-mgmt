@@ -1,6 +1,5 @@
 #include <catch2/catch_all.hpp>
 
-#include <home_assistant/mqtt/async_mqtt_client.hpp>
 #include <home_assistant/mqtt/sensor2.hpp>
 
 #include <boost/asio/co_spawn.hpp>
@@ -30,8 +29,8 @@ namespace {
 TEST_CASE("Sensor entity can connect to a broker")
 {
     auto ioc = IoContext();
-    auto sensor = Sensor{SensorUniqueId, AsyncMqttClient{
-            ioc.handle().get_executor(), sensor_client_config()}
+    auto sensor = Sensor{SensorUniqueId, std::make_unique<AsyncMqttClient<>>(
+            ioc.handle().get_executor(), sensor_client_config())
     };
 
     // NOLINTBEGIN
@@ -55,7 +54,7 @@ TEST_CASE("Sensor is configured properly")
     boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
 
         // Arrange
-        auto sensor = Sensor{SensorUniqueId, AsyncMqttClient{ioc.handle().get_executor(), sensor_client_config()}};
+        auto sensor = Sensor{SensorUniqueId, std::make_unique<AsyncMqttClient<>>(ioc.handle().get_executor(), sensor_client_config())};
         co_await async_connect(sensor);
 
         auto helper_client = AsyncMqttClient(ioc.handle().get_executor(), get_config());

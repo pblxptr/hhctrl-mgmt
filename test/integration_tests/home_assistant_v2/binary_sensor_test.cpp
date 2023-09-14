@@ -32,8 +32,8 @@ namespace {
 TEST_CASE("Binary sensor entity can connect to a broker")
 {
     auto ioc = IoContext();
-    auto binary_sensor = BinarySensor{BinarySensorUniqueId, AsyncMqttClient{
-            ioc.handle().get_executor(), binary_sensor_client_config()}
+    auto binary_sensor = BinarySensor{BinarySensorUniqueId, std::make_unique<AsyncMqttClient<>>(
+            ioc.handle().get_executor(), binary_sensor_client_config())
     };
 
     // NOLINTBEGIN
@@ -57,7 +57,7 @@ TEST_CASE("BinarySensor is configured properly")
     boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
 
         // Arrange
-        auto binary_sensor = BinarySensor{BinarySensorUniqueId, AsyncMqttClient{ioc.handle().get_executor(), binary_sensor_client_config()}};
+        auto binary_sensor = BinarySensor{BinarySensorUniqueId, std::make_unique<AsyncMqttClient<>>(ioc.handle().get_executor(), binary_sensor_client_config())};
         co_await async_connect(binary_sensor);
 
         auto helper_client = AsyncMqttClient(ioc.handle().get_executor(), get_config());

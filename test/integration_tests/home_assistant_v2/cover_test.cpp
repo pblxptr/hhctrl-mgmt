@@ -33,8 +33,8 @@ namespace {
 TEST_CASE("Cover entity can connect to a broker")
 {
     auto ioc = IoContext();
-    auto cover = Cover{CoverUniqueId, AsyncMqttClient{
-        ioc.handle().get_executor(), cover_client_config()}
+    auto cover = Cover{CoverUniqueId, std::make_unique<AsyncMqttClient<>>(
+        ioc.handle().get_executor(), cover_client_config())
     };
 
     // NOLINTBEGIN
@@ -58,7 +58,7 @@ TEST_CASE("Cover is configured properly")
     boost::asio::co_spawn(ioc.handle(), [&ioc]() -> boost::asio::awaitable<void> {
 
         // Arrange
-        auto cover = Cover{CoverUniqueId, AsyncMqttClient{ioc.handle().get_executor(), cover_client_config()}};
+        auto cover = Cover{CoverUniqueId, std::make_unique<AsyncMqttClient<>>(ioc.handle().get_executor(), cover_client_config())};
         co_await async_connect(cover);
 
         auto helper_client = AsyncMqttClient(ioc.handle().get_executor(), get_config());
