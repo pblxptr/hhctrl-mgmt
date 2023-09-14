@@ -65,6 +65,7 @@ namespace mgmt::home_assistant::v2
       switch (error_code.value()) {
       case boost::system::errc::timed_out:
         return ErrorCode::Timeout;
+      case boost::system::errc::network_unreachable:
       case boost::system::errc::no_such_file_or_directory:
         return ErrorCode::NoService;
       case boost::system::errc::connection_refused:

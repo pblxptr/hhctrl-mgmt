@@ -95,6 +95,8 @@ public:
     if (!packet) {
         co_return packet.error();
     }
+
+    co_return Error {};
   }
 
 private:

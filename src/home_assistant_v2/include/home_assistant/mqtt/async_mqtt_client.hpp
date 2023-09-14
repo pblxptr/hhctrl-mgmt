@@ -305,7 +305,7 @@ namespace mgmt::home_assistant::v2
       }
 
       auto packet_id = co_await acquire_packet_id(pubopts.get_qos());
-      PublishPacket_t packet = PublishPacket_t {
+      auto packet = PublishPacket_t {
         packet_id,
         async_mqtt::allocate_buffer(std::forward<Topic>(topic)),
         async_mqtt::allocate_buffer(std::forward<Payload>(payload)),
@@ -335,7 +335,7 @@ namespace mgmt::home_assistant::v2
         return std::optional{async_mqtt::allocate_buffer(credential)};
       };
 
-      ConnectPacket_t packet = ConnectPacket_t {
+      auto packet = ConnectPacket_t {
         config_.clean_session,
         config_.keep_alive,
         async_mqtt::allocate_buffer(config_.unique_id),
@@ -402,7 +402,6 @@ namespace mgmt::home_assistant::v2
                               reconnect_.attempt == reconnect_.max_attempts ? "after auto-reconnect failure" : "")};
             }
         }
-
         else {
             co_return Error {detail::map_error_code(error.code())};
         }
@@ -442,7 +441,6 @@ namespace mgmt::home_assistant::v2
     }
 
   private:
-//    Executor executor_; // TODO(bielpa): Possibly can be removed
     ClientConfig config_;
     EndpointType ep_;
     std::optional<Will_t> will_ {std::nullopt};

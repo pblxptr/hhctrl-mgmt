@@ -149,7 +149,7 @@ protected:
       }
     }
 
-    co_return std::error_code{};
+    co_return Error{};
   }
 
   boost::asio::awaitable<Error> async_set_availability(Availability availability, Pubopts_t pubopts)
@@ -174,7 +174,7 @@ protected:
       pending_puback_.insert(result.value());
     }
 
-    co_return std::error_code{};
+    co_return Error{};
   }
 
   boost::asio::awaitable<Error> async_subscribe(std::vector<std::string> sub_topics)
