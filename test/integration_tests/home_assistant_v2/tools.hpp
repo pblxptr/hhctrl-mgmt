@@ -95,7 +95,8 @@ inline auto local_config()
     .password = LocalPassword,
     .host = LocalMqttServerAddress,
     .port = LocalMqttServerPort,
-    .keep_alive = 0x1234
+    .keep_alive = 0x1234,
+    .max_attempts = 0
   };
 }
 
@@ -119,7 +120,8 @@ inline auto config_from_options()
     .host = server_address,
     .port = server_port,
     .clean_session = true,
-    .keep_alive = DefaultKeepAlive
+    .keep_alive = DefaultKeepAlive,
+    .max_attempts = 0
   };
 }
 

@@ -186,7 +186,7 @@ namespace mgmt::home_assistant::v2
             if (auto packet = co_await ep_.recv(boost::asio::use_awaitable)) {
                 auto type = packet.type();
                 if (!type) {
-                    co_return Unexpected {ErrorCode::UnknownPacket, "Chuj"};
+                    co_return Unexpected {ErrorCode::UnknownPacket, "Unknown packet type has been received."};
                 }
 
                 switch (type.value()) {
@@ -394,7 +394,7 @@ namespace mgmt::home_assistant::v2
     {
         if (connected_)
         {
-            if (co_await try_reconnect()) {
+            if (const auto reconnected = co_await try_reconnect(); reconnected) {
                 co_return Error{ErrorCode::Reconnected, "Client got reconnected"};
             }
             else {
