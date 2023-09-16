@@ -10,12 +10,12 @@
 #include <thread>
 #include "tools.hpp"
 
-using mgmt::home_assistant::v2::AsyncMqttClient;
-using mgmt::home_assistant::v2::Qos_t;
-using mgmt::home_assistant::v2::PublishPacket_t;
-using mgmt::home_assistant::v2::PublishAckPacket_t;
-using mgmt::home_assistant::v2::SubscriptionAckPacket_t;
-using mgmt::home_assistant::v2::ErrorCode;
+using mgmt::home_assistant::mqtt::AsyncMqttClient;
+using mgmt::home_assistant::mqtt::Qos_t;
+using mgmt::home_assistant::mqtt::PublishPacket_t;
+using mgmt::home_assistant::mqtt::PublishAckPacket_t;
+using mgmt::home_assistant::mqtt::SubscriptionAckPacket_t;
+using mgmt::home_assistant::mqtt::ErrorCode;
 
 constexpr auto LongIoContextRunningTimeout = std::chrono::seconds { 60 } * 30;
 

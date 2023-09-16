@@ -38,5 +38,5 @@ void test_spec_setup()
     .description = "MQTT client unique_id" }
   );
 
-    setup_logger(mgmt::home_assistant::v2::logger::AsyncMqttClient, spdlog::level::debug);
+    setup_logger(mgmt::home_assistant::mqtt::logger::AsyncMqttClient, spdlog::level::debug);
 }

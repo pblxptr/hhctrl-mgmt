@@ -6,14 +6,14 @@
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"
 
-using mgmt::home_assistant::v2::AsyncMqttClient;
-using mgmt::home_assistant::v2::BinarySensor;
-using mgmt::home_assistant::v2::BinarySensorConfig;
-using mgmt::home_assistant::v2::Qos_t;
-using mgmt::home_assistant::v2::PublishPacket_t;
-using mgmt::home_assistant::v2::PublishAckPacket_t;
-using mgmt::home_assistant::v2::EntityConfig;
-using mgmt::home_assistant::v2::BinarySensorState;
+using mgmt::home_assistant::mqtt::AsyncMqttClient;
+using mgmt::home_assistant::mqtt::BinarySensor;
+using mgmt::home_assistant::mqtt::BinarySensorConfig;
+using mgmt::home_assistant::mqtt::Qos_t;
+using mgmt::home_assistant::mqtt::PublishPacket_t;
+using mgmt::home_assistant::mqtt::PublishAckPacket_t;
+using mgmt::home_assistant::mqtt::EntityConfig;
+using mgmt::home_assistant::mqtt::BinarySensorState;
 
 
 namespace {

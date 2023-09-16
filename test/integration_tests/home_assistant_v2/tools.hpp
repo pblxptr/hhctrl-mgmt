@@ -78,7 +78,7 @@ struct IoContext
 
 inline auto default_config()
 {
-  return mgmt::home_assistant::v2::ClientConfig{
+  return mgmt::home_assistant::mqtt::ClientConfig{
     .unique_id = DefaultUniqueId,
     .username = DefaultUsername,
     .password = DefaultPassword,
@@ -89,7 +89,7 @@ inline auto default_config()
 
 inline auto local_config()
 {
-  return mgmt::home_assistant::v2::ClientConfig{
+  return mgmt::home_assistant::mqtt::ClientConfig{
     .unique_id = DefaultUniqueId,
     .username = LocalUsername,
     .password = LocalPassword,
@@ -113,7 +113,7 @@ inline auto config_from_options()
   auto server_port = TestConfig::get()
     .option_value(DefaultMqttServerPort).value_or(DefaultMqttServerPort);
 
-  return mgmt::home_assistant::v2::ClientConfig {
+  return mgmt::home_assistant::mqtt::ClientConfig {
     .unique_id = unique_id,
     .username = username,
     .password = password,
@@ -145,14 +145,14 @@ inline auto setup_logger(const std::string& logger_name, spdlog::level::level_en
 
 
 template <typename T>
-boost::asio::awaitable<mgmt::home_assistant::v2::PublishPacket_t> async_get_publish_packet(T& client)
+boost::asio::awaitable<mgmt::home_assistant::mqtt::PublishPacket_t> async_get_publish_packet(T& client)
 {
     const auto& result = co_await client.async_receive();
     REQUIRE(result);
     const auto& value = result.value();
-    REQUIRE(std::holds_alternative<mgmt::home_assistant::v2::PublishPacket_t>(value));
+    REQUIRE(std::holds_alternative<mgmt::home_assistant::mqtt::PublishPacket_t>(value));
 
-    co_return std::get<mgmt::home_assistant::v2::PublishPacket_t>(value);
+    co_return std::get<mgmt::home_assistant::mqtt::PublishPacket_t>(value);
 }
 
 template <typename T>
@@ -167,7 +167,7 @@ boost::asio::awaitable<void> async_subscribe(T& client, const std::string& topic
     {
         const auto result = co_await client.async_receive();
         REQUIRE(result);
-        REQUIRE(std::holds_alternative<mgmt::home_assistant::v2::SubscriptionAckPacket_t>(result.value()));
+        REQUIRE(std::holds_alternative<mgmt::home_assistant::mqtt::SubscriptionAckPacket_t>(result.value()));
     }
 }
 

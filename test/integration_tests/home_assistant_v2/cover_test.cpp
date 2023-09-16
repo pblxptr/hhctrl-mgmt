@@ -6,16 +6,16 @@
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"
 
-using mgmt::home_assistant::v2::AsyncMqttClient;
-using mgmt::home_assistant::v2::Cover;
-using mgmt::home_assistant::v2::CoverConfig;
-using mgmt::home_assistant::v2::Qos_t;
-using mgmt::home_assistant::v2::PublishPacket_t;
-using mgmt::home_assistant::v2::PublishAckPacket_t;
-using mgmt::home_assistant::v2::SubscriptionAckPacket_t;
-using mgmt::home_assistant::v2::EntityConfig;
-using mgmt::home_assistant::v2::ProtocolVersion_t;
-using mgmt::home_assistant::v2::CoverState;
+using mgmt::home_assistant::mqtt::AsyncMqttClient;
+using mgmt::home_assistant::mqtt::Cover;
+using mgmt::home_assistant::mqtt::CoverConfig;
+using mgmt::home_assistant::mqtt::Qos_t;
+using mgmt::home_assistant::mqtt::PublishPacket_t;
+using mgmt::home_assistant::mqtt::PublishAckPacket_t;
+using mgmt::home_assistant::mqtt::SubscriptionAckPacket_t;
+using mgmt::home_assistant::mqtt::EntityConfig;
+using mgmt::home_assistant::mqtt::ProtocolVersion_t;
+using mgmt::home_assistant::mqtt::CoverState;
 
 namespace {
     constexpr auto CoverUniqueId = "cover_unique_id";
@@ -86,7 +86,7 @@ TEST_CASE("Cover is configured properly")
                 SECTION("Cover receives a valid switch open command")
                 {
                     // Arrange
-                    using mgmt::home_assistant::v2::CoverSwitchCommand;
+                    using mgmt::home_assistant::mqtt::CoverSwitchCommand;
 
                     const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
                     const auto switch_command_value = config->get(CoverConfig::Property::PayloadOpen);
@@ -109,7 +109,7 @@ TEST_CASE("Cover is configured properly")
                 SECTION("Cover receives a valid switch close command")
                 {
                     // Arrange
-                    using mgmt::home_assistant::v2::CoverSwitchCommand;
+                    using mgmt::home_assistant::mqtt::CoverSwitchCommand;
 
                     const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
                     const auto switch_command_value = config->get(CoverConfig::Property::PayloadClose);
@@ -132,7 +132,7 @@ TEST_CASE("Cover is configured properly")
                 SECTION("Cover receives a valid switch stop command")
                 {
                     // Arrange
-                    using mgmt::home_assistant::v2::CoverSwitchCommand;
+                    using mgmt::home_assistant::mqtt::CoverSwitchCommand;
 
                     const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
                     const auto switch_command_value = config->get(CoverConfig::Property::PayloadStop);
@@ -156,8 +156,8 @@ TEST_CASE("Cover is configured properly")
                 SECTION("Cover throws and exception  when an invalid packet with invalid payload is submitted to a command topic")
                 {
                     // Arrange
-                    using mgmt::home_assistant::v2::CoverSwitchCommand;
-                    using mgmt::home_assistant::v2::ErrorCode;
+                    using mgmt::home_assistant::mqtt::CoverSwitchCommand;
+                    using mgmt::home_assistant::mqtt::ErrorCode;
 
                     const auto switch_command_topic = config->get(CoverConfig::Property::SwitchCommandTopic);
                     const auto switch_command_value = config->get(CoverConfig::Property::PayloadOpen);

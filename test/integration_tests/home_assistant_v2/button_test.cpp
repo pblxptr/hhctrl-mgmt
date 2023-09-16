@@ -6,15 +6,15 @@
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"
 
-using mgmt::home_assistant::v2::AsyncMqttClient;
-using mgmt::home_assistant::v2::Button;
-using mgmt::home_assistant::v2::ButtonConfig;
-using mgmt::home_assistant::v2::Qos_t;
-using mgmt::home_assistant::v2::PublishPacket_t;
-using mgmt::home_assistant::v2::PublishAckPacket_t;
-using mgmt::home_assistant::v2::SubscriptionAckPacket_t;
-using mgmt::home_assistant::v2::EntityConfig;
-using mgmt::home_assistant::v2::ProtocolVersion_t;
+using mgmt::home_assistant::mqtt::AsyncMqttClient;
+using mgmt::home_assistant::mqtt::Button;
+using mgmt::home_assistant::mqtt::ButtonConfig;
+using mgmt::home_assistant::mqtt::Qos_t;
+using mgmt::home_assistant::mqtt::PublishPacket_t;
+using mgmt::home_assistant::mqtt::PublishAckPacket_t;
+using mgmt::home_assistant::mqtt::SubscriptionAckPacket_t;
+using mgmt::home_assistant::mqtt::EntityConfig;
+using mgmt::home_assistant::mqtt::ProtocolVersion_t;
 
 namespace {
     constexpr auto ButtonUniqueId = "button_unique_id";
@@ -102,7 +102,7 @@ TEST_CASE("Button is configured properly")
 
                 SECTION("When button receives invalid payload for a command topic it returns appropriate error code")
                 {
-                    using mgmt::home_assistant::v2::ErrorCode;
+                    using mgmt::home_assistant::mqtt::ErrorCode;
 
                     // Arrange
                     const auto press_command_topic = config->get(ButtonConfig::Property::CommandTopic);
