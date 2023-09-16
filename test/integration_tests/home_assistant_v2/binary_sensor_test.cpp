@@ -1,7 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
-#include <home_assistant/mqtt/binary_sensor2.hpp>
+#include <home_assistant/mqtt/binary_sensor.hpp>
 
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"

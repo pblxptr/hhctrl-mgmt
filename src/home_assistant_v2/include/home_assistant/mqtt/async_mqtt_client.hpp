@@ -16,8 +16,9 @@
 #include <home_assistant/mqtt/opts.hpp>
 #include <home_assistant/mqtt/expected.hpp>
 #include <home_assistant/mqtt/logger.hpp>
+#include <home_assistant/mqtt/will.hpp>
 
-namespace mgmt::home_assistant::v2
+namespace mgmt::home_assistant::mqtt
 {
   using ProtocolVersion_t = async_mqtt::protocol_version;
   using PacketId_t = std::uint32_t;
@@ -30,14 +31,6 @@ namespace mgmt::home_assistant::v2
   using PingResponsePacket = async_mqtt::v3_1_1::pingresp_packet;
   using ReceiveResult_t = std::variant<PublishPacket_t, PublishAckPacket_t, SubscriptionAckPacket_t>;
   using Will_t = async_mqtt::will;
-
-
-  struct WillConfig
-  {
-    std::string topic {};
-    std::string message {};
-    Pubopts_t pubopts {};
-  };
 
   constexpr inline auto DefaultQoS = Qos_t::at_least_once;
   constexpr inline auto DefaultPubOpts = Qos_t::at_least_once;
@@ -447,4 +440,4 @@ namespace mgmt::home_assistant::v2
     bool connected_ { false };
     Reconnect reconnect_ {};
   };
-} // namespace mgmt::home_assistant::v2
+} // namespace mgmt::home_assistant::mqtt

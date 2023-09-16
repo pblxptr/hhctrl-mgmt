@@ -17,7 +17,7 @@
 #include <fmt/format.h>
 #include <async_mqtt/exception.hpp>
 
-namespace mgmt::home_assistant::v2 {
+namespace mgmt::home_assistant::mqtt {
   using Error = async_mqtt::system_error;
 
   template <typename T>

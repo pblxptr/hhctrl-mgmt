@@ -8,7 +8,7 @@ namespace mgmt::home_assistant::device {
         Indicator::Indicator(
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator_type,
-            v2::DeviceIdentity device_identity,
+            mqtt::DeviceIdentity device_identity,
             adapter::BinarySensor_t binary_sensor
         ) : EntityAdapter<adapter::BinarySensor_t, Indicator>{std::move(binary_sensor)}
           , device_id_{std::move(device_id)}
@@ -20,7 +20,7 @@ namespace mgmt::home_assistant::device {
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator_type,
             const adapter::EntityFactory &factory,
-            const v2::DeviceIdentity &identity
+            const mqtt::DeviceIdentity &identity
         ) {
             const mgmt::device::Device auto &device = mgmt::device::get_device<mgmt::device::MainBoard>(device_id);
             if (device.indicator_state(indicator_type) == mgmt::device::IndicatorState::NotAvailable) {
@@ -40,31 +40,31 @@ namespace mgmt::home_assistant::device {
             co_return self;
         }
 
-        v2::EntityConfig Indicator::config() const
+        mqtt::EntityConfig Indicator::config() const
         {
-            auto config = v2::EntityConfig{};
+            auto config = mqtt::EntityConfig{};
             config.set("name", fmt::format("{} Indicator", to_string(indicator_type_)));
-            config.set("device", v2::helper::entity_config_basic_device(identity_));
+            config.set("device", mqtt::helper::entity_config_basic_device(identity_));
 
             return config;
         }
 
-        v2::BinarySensorState Indicator::state() const
+        mqtt::BinarySensorState Indicator::state() const
         {
             const mgmt::device::Device auto &device = mgmt::device::get_device<mgmt::device::MainBoard>(device_id_);
             const auto state = device.indicator_state(indicator_type_);
 
             switch (state) {
                 case mgmt::device::IndicatorState::On:
-                    return v2::BinarySensorState::On;
+                    return mqtt::BinarySensorState::On;
                 default:
-                    return v2::BinarySensorState::Off;
+                    return mqtt::BinarySensorState::Off;
             }
         }
 
         RestartButton::RestartButton(
             mgmt::device::DeviceId_t device_id,
-            v2::DeviceIdentity device_identity,
+            mqtt::DeviceIdentity device_identity,
             adapter::Button_t button
         ) : EntityAdapter<adapter::Button_t, RestartButton>{std::move(button)}
           , device_id_{std::move(device_id)}
@@ -73,7 +73,7 @@ namespace mgmt::home_assistant::device {
         boost::asio::awaitable<std::optional<RestartButton>> RestartButton::async_create(
             mgmt::device::DeviceId_t device_id,
             adapter::EntityFactory& factory,
-            const v2::DeviceIdentity& identity
+            const mqtt::DeviceIdentity& identity
         )
         {
             auto button = factory.create_button(fmt::format("{}_restart_btn", adapter::get_unique_id(device_id, identity)));
@@ -87,17 +87,17 @@ namespace mgmt::home_assistant::device {
             co_return self;
         }
 
-        v2::EntityConfig RestartButton::config() const
+        mqtt::EntityConfig RestartButton::config() const
         {
-            auto config = v2::EntityConfig{};
+            auto config = mqtt::EntityConfig{};
             config.set("name", "Restart board");
             config.set("device_class", "restart");
-            config.set("device", v2::helper::entity_config_basic_device(identity_));
+            config.set("device", mqtt::helper::entity_config_basic_device(identity_));
 
             return config;
         }
 
-        boost::asio::awaitable<void> RestartButton::async_handle_recv_value(const v2::ButtonCommand& /* command */)
+        boost::asio::awaitable<void> RestartButton::async_handle_recv_value(const mqtt::ButtonCommand& /* command */)
         {
             common::logger::get(adapter::Logger)->trace("RestartButton::{}", __FUNCTION__);
 

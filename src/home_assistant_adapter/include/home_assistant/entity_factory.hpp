@@ -2,10 +2,10 @@
 
 #include <spdlog/spdlog.h>
 
-#include <home_assistant/mqtt/coverv2.hpp>
-#include <home_assistant/mqtt/binary_sensor2.hpp>
-#include <home_assistant/mqtt/button2.hpp>
-#include <home_assistant/mqtt/sensor2.hpp>
+#include <home_assistant/mqtt/cover.hpp>
+#include <home_assistant/mqtt/binary_sensor.hpp>
+#include <home_assistant/mqtt/button.hpp>
+#include <home_assistant/mqtt/sensor.hpp>
 #include <home_assistant/client_factory.hpp>
 
 namespace mgmt::home_assistant::adapter {
@@ -18,22 +18,22 @@ public:
 
   [[nodiscard]] auto create_cover(const std::string& unique_id) const
   {
-    return mgmt::home_assistant::v2::Cover{unique_id, client_factory_.create_client(unique_id)};
+    return mgmt::home_assistant::mqtt::Cover{unique_id, client_factory_.create_client(unique_id)};
   }
 
   [[nodiscard]] auto create_binary_sensor(const std::string& unique_id) const
   {
-    return mgmt::home_assistant::v2::BinarySensor{unique_id, client_factory_.create_client(unique_id)};
+    return mgmt::home_assistant::mqtt::BinarySensor{unique_id, client_factory_.create_client(unique_id)};
   }
 
   [[nodiscard]] auto create_button(const std::string& unique_id) const
   {
-    return mgmt::home_assistant::v2::Button(unique_id, client_factory_.create_client(unique_id));
+    return mgmt::home_assistant::mqtt::Button(unique_id, client_factory_.create_client(unique_id));
   }
 
   [[nodiscard]] auto create_sensor(const std::string& unique_id) const
   {
-    return mgmt::home_assistant::v2::Sensor(unique_id, client_factory_.create_client(unique_id));
+    return mgmt::home_assistant::mqtt::Sensor(unique_id, client_factory_.create_client(unique_id));
   }
 
 private:

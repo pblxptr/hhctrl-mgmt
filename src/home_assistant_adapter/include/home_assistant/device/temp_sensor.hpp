@@ -5,7 +5,7 @@
 #include <home_assistant/adapter/logger.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/entity_factory.hpp>
-#include <home_assistant/mqtt/sensor2.hpp>
+#include <home_assistant/mqtt/sensor.hpp>
 #include <device/device_register.hpp>
 
 namespace mgmt::home_assistant::device
@@ -44,18 +44,18 @@ namespace mgmt::home_assistant::device
             return device_id_;
         }
 
-        v2::EntityConfig config() const
+        mqtt::EntityConfig config() const
         {
-              auto config = v2::EntityConfig{};
+              auto config = mqtt::EntityConfig{};
               config.set("name", "Temp sensor");
               config.set("device_class", "temperature");
               config.set("unit_of_measurement", "°C");
-              config.set("device", v2::helper::entity_config_basic_device(device_identity_));
+              config.set("device", mqtt::helper::entity_config_basic_device(device_identity_));
 
             return config;
         }
 
-        v2::SensorState state() const
+        mqtt::SensorState state() const
         {
             const auto& temp_sensor = mgmt::device::get_device<mgmt::device::TempSensor_t>(device_id_);
 
@@ -63,7 +63,7 @@ namespace mgmt::home_assistant::device
         }
 
     private:
-        TempSensor(mgmt::device::DeviceId_t device_id, adapter::Sensor_t sensor, v2::DeviceIdentity device_identity)
+        TempSensor(mgmt::device::DeviceId_t device_id, adapter::Sensor_t sensor, mqtt::DeviceIdentity device_identity)
             : EntityAdapter<adapter::Sensor_t, TempSensor>{std::move(sensor)}
             , device_id_{std::move(device_id)}
             , device_identity_{std::move(device_identity)}
@@ -71,6 +71,6 @@ namespace mgmt::home_assistant::device
 
     private:
         mgmt::device::DeviceId_t device_id_;
-        v2::DeviceIdentity device_identity_;
+        mqtt::DeviceIdentity device_identity_;
     };
 }

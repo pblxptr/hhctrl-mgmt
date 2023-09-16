@@ -1,7 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
-#include <home_assistant/mqtt/button2.hpp>
+#include <home_assistant/mqtt/button.hpp>
 
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"

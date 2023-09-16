@@ -2,10 +2,12 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <home_assistant/adapter/logger.hpp>
-#include <home_assistant/mqtt/availability2.hpp>
+#include <home_assistant/mqtt/availability.hpp>
 #include <home_assistant/mqtt/error.hpp>
 #include <home_assistant/mqtt/expected.hpp>
 #include <home_assistant/mqtt/opts.hpp>
+#include <home_assistant/mqtt/will.hpp>
+#include <home_assistant/mqtt/entity.hpp>
 #include <coro/async_wait.hpp>
 
 namespace detail {
@@ -15,8 +17,8 @@ namespace detail {
         { obj.state() };
     };
 
-    inline auto AdapterDefaultPubopts = mgmt::home_assistant::v2::Retain_t::yes | mgmt::home_assistant::v2::Qos_t::at_least_once;
-}
+    inline auto AdapterDefaultPubopts = mgmt::home_assistant::mqtt::Retain_t::yes | mgmt::home_assistant::mqtt::Qos_t::at_least_once;
+} // namespace detail
 
 namespace mgmt::home_assistant::adapter
 {
@@ -26,7 +28,14 @@ namespace mgmt::home_assistant::adapter
     public:
         EntityAdapter(Entity entity)
             : entity_{std::move(entity)}
-        {}
+        {
+            entity_.set_will(mqtt::WillConfig{
+                .topic = entity_.topic(mqtt::GenericEntityConfig::AvailabilityTopic),
+                .message = std::string{mqtt::AvailabilityStateMapper.map(mqtt::Availability::Offline)},
+                .pubopts = mqtt::Retain_t::yes
+                }
+            );
+        }
 
         const std::string& unique_id() const
         {
@@ -77,7 +86,7 @@ namespace mgmt::home_assistant::adapter
 
                 using ValueType = decltype(value);
 
-                if constexpr (std::is_same_v<v2::Error, ValueType>) {
+                if constexpr (std::is_same_v<mqtt::Error, ValueType>) {
                     co_await async_handle_error(value);
                 }
                 else {
@@ -128,22 +137,22 @@ namespace mgmt::home_assistant::adapter
             // Wait until entity is configured on remote
             co_await common::coro::async_wait(std::chrono::seconds(1));
 
-            co_await entity_.async_set_availability(v2::Availability::Online, detail::AdapterDefaultPubopts);
+            co_await entity_.async_set_availability(mqtt::Availability::Online, detail::AdapterDefaultPubopts);
             co_await async_sync_state();
 
             co_return true;
         }
 
-        boost::asio::awaitable<void> async_handle_error(const v2::Error& error)
+        boost::asio::awaitable<void> async_handle_error(const mqtt::Error& error)
         {
             bool recovered = false;
 
             const auto& error_code = error.code();
 
-            if (error_code == v2::ErrorCode::Disconnected) {
+            if (error_code == mqtt::ErrorCode::Disconnected) {
                 recovered = co_await async_handle_disconnected_error();
             }
-            else if (error_code == v2::ErrorCode::Reconnected) {
+            else if (error_code == mqtt::ErrorCode::Reconnected) {
                 recovered = co_await async_handle_reconnected_error();
             }
 

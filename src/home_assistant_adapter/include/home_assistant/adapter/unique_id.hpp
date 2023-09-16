@@ -11,7 +11,7 @@
 #include <home_assistant/mqtt/device_identity.hpp>
 
 namespace mgmt::home_assistant::adapter {
-inline std::string get_unique_id(const mgmt::device::DeviceId_t& device_id, const v2::DeviceIdentity& identity)
+inline std::string get_unique_id(const mgmt::device::DeviceId_t& device_id, const mqtt::DeviceIdentity& identity)
 {
   return fmt::format("{}_{}", identity.serial_number, device_id);
 };

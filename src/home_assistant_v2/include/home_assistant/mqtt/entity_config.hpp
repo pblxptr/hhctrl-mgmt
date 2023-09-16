@@ -4,15 +4,13 @@
 #include <string_view>
 #include <boost/json.hpp>
 
-#include <home_assistant/device_identity.hpp>
+#include <home_assistant/mqtt/device_identity.hpp>
 
-namespace mgmt::home_assistant::mqttc {
+namespace mgmt::home_assistant::mqtt {
 class EntityConfig
 {
 public:
-  explicit EntityConfig(std::string unique_id) //TODO(bielpa): Consider removing unique_id from ctorr, and set in in Entity while sending a config
-    : unique_id_{ std::move(unique_id) }
-  {}
+  EntityConfig() = default;
 
   template<class Value>
   void set(std::string_view key, const Value& value)
@@ -39,16 +37,45 @@ public:
     set_override(key, value);
   }
 
+  bool contains(std::string_view key) const
+  {
+      return object_.contains(key.data());
+  }
+
+  std::optional<std::string> get(std::string_view key) const
+  {
+      if (!contains(key)) {
+          return std::nullopt;
+      }
+
+      return boost::json::value_to<std::string>(object_.at(key.data()));
+  }
 
   auto parse()
   {
-    object_["unique_id"] = unique_id_;
-
     return boost::json::serialize(object_);
   }
 
+  static std::optional<EntityConfig> from_json(const std::string& json)
+  {
+    unsigned char buf[ 4096 ];
+    auto mem_resource = boost::json::static_resource { buf };
+
+    auto value = boost::json::parse(json);
+
+    if (!value.is_object()) {
+        return std::nullopt;
+    }
+
+    return EntityConfig{std::move(value).as_object()};
+  }
+
 private:
-  std::string unique_id_;
+    explicit EntityConfig(boost::json::object object)
+      : object_{std::move(object)}
+    {}
+
+private:
   boost::json::object object_;
 };
 

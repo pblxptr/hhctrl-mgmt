@@ -8,10 +8,10 @@
 
 #include <utils/mapper.hpp>
 #include <utils/static_map.hpp>
-#include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/entity.hpp>
 #include <home_assistant/mqtt/logger.hpp>
 
-namespace mgmt::home_assistant::v2 {
+namespace mgmt::home_assistant::mqtt {
 enum class BinarySensorState { Off,
   On
 };
@@ -40,7 +40,6 @@ template<class EntityClient>
 class BinarySensor : public Entity<EntityClient>
 {
     using BaseType = Entity<EntityClient>;
-    using BaseType::topic;
     using BaseType::async_publish;
 public:
     using BaseType::unique_id;
@@ -69,7 +68,7 @@ public:
     config.set_override(BinarySensorConfig::Property::StateOff, std::string{ BinarySensorStateMapper.map(BinarySensorState::Off) });
     config.set_override(BinarySensorConfig::Property::StateOn, std::string{ BinarySensorStateMapper.map(BinarySensorState::On) });
 
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, BaseType::topic(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
@@ -101,8 +100,8 @@ public:
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 2> topics_{
-    std::pair{ BinarySensorConfig::Property::StateTopic, topic(BinarySensorConfig::Default::StateTopic) },
-    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
+    std::pair{ BinarySensorConfig::Property::StateTopic, BaseType::topic(BinarySensorConfig::Default::StateTopic) },
+    std::pair{ GenericEntityConfig::JsonAttributesTopic, BaseType::topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 };
 }// namespace mgmt::home_assistant::mqttc

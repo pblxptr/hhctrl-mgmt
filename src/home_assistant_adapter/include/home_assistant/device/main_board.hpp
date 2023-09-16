@@ -2,7 +2,7 @@
 
 #include <home_assistant/adapter/entity_adapter.hpp>
 //#include <home_assistant/adapter/indicator_handler.hpp>
-#include <home_assistant/mqtt/binary_sensor2.hpp>
+#include <home_assistant/mqtt/binary_sensor.hpp>
 #include <home_assistant/entity_factory.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/adapter/unique_id.hpp>
@@ -19,7 +19,7 @@ namespace detail {
         Indicator(
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator,
-            v2::DeviceIdentity device_identity,
+            mqtt::DeviceIdentity device_identity,
             adapter::BinarySensor_t binary_sensor
         );
     public:
@@ -27,35 +27,35 @@ namespace detail {
             mgmt::device::DeviceId_t device_id,
             mgmt::device::IndicatorType indicator_type,
             const adapter::EntityFactory& factory,
-            const v2::DeviceIdentity& identity
+            const mqtt::DeviceIdentity& identity
         );
-        v2::EntityConfig config() const;
-        v2::BinarySensorState state() const;
+        mqtt::EntityConfig config() const;
+        mqtt::BinarySensorState state() const;
     private:
         mgmt::device::DeviceId_t device_id_;
         mgmt::device::IndicatorType indicator_type_;
-        v2::DeviceIdentity identity_;
+        mqtt::DeviceIdentity identity_;
     };
 
     class RestartButton : public adapter::EntityAdapter<adapter::Button_t, RestartButton>
     {
         RestartButton(
             mgmt::device::DeviceId_t device_id,
-            v2::DeviceIdentity device_identity,
+            mqtt::DeviceIdentity device_identity,
             adapter::Button_t button
         );
         public:
             static boost::asio::awaitable<std::optional<RestartButton>> async_create(
                 mgmt::device::DeviceId_t device_id,
                 adapter::EntityFactory& factory,
-                const v2::DeviceIdentity& identity
+                const mqtt::DeviceIdentity& identity
             );
 
-            v2::EntityConfig config() const;
-            boost::asio::awaitable<void> async_handle_recv_value(const v2::ButtonCommand& command);
+            mqtt::EntityConfig config() const;
+            boost::asio::awaitable<void> async_handle_recv_value(const mqtt::ButtonCommand& command);
         private:
             mgmt::device::DeviceId_t device_id_;
-            v2::DeviceIdentity identity_;
+            mqtt::DeviceIdentity identity_;
         };
 } // namespace detail
 

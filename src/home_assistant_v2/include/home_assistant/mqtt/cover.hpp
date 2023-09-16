@@ -12,10 +12,10 @@
 #include <utils/mapper.hpp>
 #include <utils/static_map.hpp>
 
-#include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/entity.hpp>
 #include <home_assistant/mqtt/logger.hpp>
 
-namespace mgmt::home_assistant::v2
+namespace mgmt::home_assistant::mqtt
 {
 
 enum class CoverState { Open,
@@ -98,7 +98,6 @@ template<class EntityClient>
 class Cover : public Entity<EntityClient>
 {
   using BaseType = Entity<EntityClient>;
-  using BaseType::topic;
   using BaseType::async_publish;
 
 public:
@@ -135,7 +134,7 @@ public:
     config.set_override_if_not_null(CoverConfig::Property::PayloadClose, std::string{ CoverSwitchCommandMapper.map(CoverSwitchCommand::Close) });
     config.set_override_if_not_null(CoverConfig::Property::PayloadStop, std::string{ CoverSwitchCommandMapper.map(CoverSwitchCommand::Stop) });
 
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, BaseType::topic(GenericEntityConfig::AvailabilityTopic));
     config.set_override(GenericEntityConfig::JsonAttributesTopic, topics_.at(GenericEntityConfig::JsonAttributesTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
@@ -182,9 +181,9 @@ public:
 private:
   std::string unique_id_;
   common::utils::StaticMap<std::string_view, std::string, 3> topics_{
-    std::pair{ CoverConfig::Property::SwitchCommandTopic, topic(CoverConfig::Default::SwitchCommandTopic) },
-    std::pair{ CoverConfig::Property::StateTopic, topic(CoverConfig::Default::StateTopic) },
-    std::pair{ GenericEntityConfig::JsonAttributesTopic, topic(GenericEntityConfig::JsonAttributesTopic) },
+    std::pair{ CoverConfig::Property::SwitchCommandTopic, BaseType::topic(CoverConfig::Default::SwitchCommandTopic) },
+    std::pair{ CoverConfig::Property::StateTopic, BaseType::topic(CoverConfig::Default::StateTopic) },
+    std::pair{ GenericEntityConfig::JsonAttributesTopic, BaseType::topic(GenericEntityConfig::JsonAttributesTopic) },
   };
 
 };

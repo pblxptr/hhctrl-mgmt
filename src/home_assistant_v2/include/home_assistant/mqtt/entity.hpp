@@ -13,21 +13,18 @@
 #include <string>
 #include <unordered_set>
 
-#include <home_assistant/mqtt/availability2.hpp>
+#include <home_assistant/mqtt/availability.hpp>
 #include <home_assistant/mqtt/async_mqtt_client.hpp>
-#include <home_assistant/mqtt/entity_configv2.hpp>
+#include <home_assistant/mqtt/entity_config.hpp>
 #include <utils/mapper.hpp>
 #include <home_assistant/mqtt/logger.hpp>
 
-namespace mgmt::home_assistant::v2 {
+namespace mgmt::home_assistant::mqtt {
 
-namespace detail {
-  constexpr static auto AvailabilityStateMapper = common::utils::Mapper{
-    std::pair{ Availability::Offline, "offline" },
-    std::pair{ Availability::Online, "online" }
-  };
-
-} // namespace detail
+constexpr static auto AvailabilityStateMapper = common::utils::Mapper{
+  std::pair{Availability::Offline, "offline"},
+  std::pair{Availability::Online, "online"}
+};
 
 struct GenericEntityConfig
 {
@@ -63,23 +60,23 @@ public:
     co_return co_await client_->async_connect();
   }
 
+  template<class T>
+  std::string topic(const T& topic) const
+  {
+      return fmt::format("{}_{}/{}", entity_name_, unique_id_, topic);
+  }
+
+  void set_will(const WillConfig& will)
+  {
+    client_->set_will(will);
+  }
+
 protected:
   Entity(std::string_view entity_name, std::string unique_id, std::unique_ptr<EntityClient> client)
     : entity_name_{ entity_name }
     , unique_id_{ std::move(unique_id) }
     , client_{ std::move(client) }
   {
-    client_->set_will(WillConfig {
-      .topic = topic(GenericEntityConfig::AvailabilityTopic),
-      .message = std::string{detail::AvailabilityStateMapper.map(Availability::Offline)},
-      .pubopts = Retain_t::yes //TODO(bielpa): Consider removing will default configuration from
-    }
-    );
-  }
-
-  void set_will(const WillConfig& will)
-  {
-    client_->set_will(will);
   }
 
   boost::asio::awaitable<Expected<PublishPacket_t>> async_receive()
@@ -156,7 +153,7 @@ protected:
   {
       logger::trace(logger::Entity, "Entity::{}, {}", __FUNCTION__, full_id());
 
-      co_return co_await async_publish(topic(GenericEntityConfig::AvailabilityTopic), detail::AvailabilityStateMapper.map(availability), pubopts);
+      co_return co_await async_publish(topic(GenericEntityConfig::AvailabilityTopic), AvailabilityStateMapper.map(availability), pubopts);
   }
 
   template<typename Topic, class Payload>
@@ -217,12 +214,6 @@ protected:
     co_return Error{};
   }
 
-  template<class T1>
-  std::string topic(const T1& topic) const
-  {
-    return fmt::format("{}_{}/{}", entity_name_, unique_id_, topic);
-  }
-
 private:
   std::string id() const
   {
@@ -240,4 +231,4 @@ private:
   std::unique_ptr<EntityClient> client_;
   std::unordered_set<PacketId_t> pending_puback_;
 };
-}// namespace mgmt::home_assistant::v2
+}// namespace mgmt::home_assistant::mqtt

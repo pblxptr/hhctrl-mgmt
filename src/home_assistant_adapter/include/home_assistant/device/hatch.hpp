@@ -5,7 +5,7 @@
 #include <home_assistant/adapter/logger.hpp>
 #include <home_assistant/device_identity_provider.hpp>
 #include <home_assistant/entity_factory.hpp>
-#include <home_assistant/mqtt/coverv2.hpp>
+#include <home_assistant/mqtt/cover.hpp>
 #include <device/device_register.hpp>
 
 namespace mgmt::home_assistant::device
@@ -29,13 +29,13 @@ namespace mgmt::home_assistant::device
         );
 
         const mgmt::device::DeviceId_t& hardware_id() const;
-        v2::EntityConfig config() const;
-        v2::CoverState state() const;
-        boost::asio::awaitable<void> async_handle_recv_value(const v2::CoverCommand& command);
+        mqtt::EntityConfig config() const;
+        mqtt::CoverState state() const;
+        boost::asio::awaitable<void> async_handle_recv_value(const mqtt::CoverCommand& command);
     private:
-        Hatch(mgmt::device::DeviceId_t device_id, v2::DeviceIdentity device_identity, adapter::Cover_t cover);
+        Hatch(mgmt::device::DeviceId_t device_id, mqtt::DeviceIdentity device_identity, adapter::Cover_t cover);
     private:
         mgmt::device::DeviceId_t device_id_;
-        v2::DeviceIdentity device_identity_;
+        mqtt::DeviceIdentity device_identity_;
     };
 }

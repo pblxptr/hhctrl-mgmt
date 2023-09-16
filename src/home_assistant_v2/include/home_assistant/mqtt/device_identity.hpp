@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace mgmt::home_assistant::v2 {
+namespace mgmt::home_assistant::mqtt {
 struct DeviceIdentity
 {
   std::string manufacturer;

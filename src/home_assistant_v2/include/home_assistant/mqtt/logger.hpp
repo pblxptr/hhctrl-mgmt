@@ -6,7 +6,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace mgmt::home_assistant::v2::logger
+namespace mgmt::home_assistant::mqtt::logger
 {
   template <typename... Args>
   void log(std::string_view logger_name, spdlog::level::level_enum level, fmt::format_string<Args...> format, Args&&... args)

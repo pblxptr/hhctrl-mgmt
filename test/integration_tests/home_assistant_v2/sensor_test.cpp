@@ -1,6 +1,6 @@
 #include <catch2/catch_all.hpp>
 
-#include <home_assistant/mqtt/sensor2.hpp>
+#include <home_assistant/mqtt/sensor.hpp>
 
 #include <boost/asio/co_spawn.hpp>
 #include "tools.hpp"

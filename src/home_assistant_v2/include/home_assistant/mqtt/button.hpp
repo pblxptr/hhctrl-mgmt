@@ -8,10 +8,10 @@
 
 #include <utils/mapper.hpp>
 #include <utils/static_map.hpp>
-#include <home_assistant/mqtt/entityv2.hpp>
+#include <home_assistant/mqtt/entity.hpp>
 #include <home_assistant/mqtt/logger.hpp>
 
-namespace mgmt::home_assistant::v2 {
+namespace mgmt::home_assistant::mqtt {
 struct ButtonConfig
 {
   static constexpr inline auto EntityName = std::string_view{"button"};
@@ -35,7 +35,6 @@ template<class EntityClient>
 class Button : public Entity<EntityClient>
 {
     using BaseType = Entity<EntityClient>;
-    using BaseType::topic;
     using BaseType::async_publish;
 public:
     using BaseType::unique_id;
@@ -63,7 +62,7 @@ public:
 
     config.set_override(ButtonConfig::Property::CommandTopic, topics_.at(ButtonConfig::Property::CommandTopic));
     config.set_override(ButtonConfig::Property::PayloadPress, ButtonConfig::Default::PayloadPress);
-    config.set_override(GenericEntityConfig::AvailabilityTopic, topic(GenericEntityConfig::AvailabilityTopic));
+    config.set_override(GenericEntityConfig::AvailabilityTopic, BaseType::topic(GenericEntityConfig::AvailabilityTopic));
     config.set(GenericEntityConfig::JsonAttributesTemplate, "{{ value_json | tojson }}");
 
       // Set config
@@ -102,7 +101,7 @@ public:
 
 private:
   common::utils::StaticMap<std::string_view, std::string, 1> topics_{
-    std::pair{ ButtonConfig::Property::CommandTopic, topic(ButtonConfig::Default::CommandTopic) },
+    std::pair{ ButtonConfig::Property::CommandTopic, BaseType::topic(ButtonConfig::Default::CommandTopic) },
   };
 };
-}// namespace mgmt::home_assistant::v2
+}// namespace mgmt::home_assistant::mqtt

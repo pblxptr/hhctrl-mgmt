@@ -23,11 +23,11 @@ public:
     , dtree_{ dtree }
   {}
 
-  [[nodiscard]] v2::DeviceIdentity identity(const mgmt::device::DeviceId_t& device_id) const
+  [[nodiscard]] mqtt::DeviceIdentity identity(const mgmt::device::DeviceId_t& device_id) const
   {
     auto hw_identity = get_hardware_identity(device_id);
 
-    return v2::DeviceIdentity{
+    return mqtt::DeviceIdentity{
       .manufacturer = std::move(hw_identity.manufacturer),
       .model = std::move(hw_identity.model),
       .serial_number = std::move(hw_identity.serial_number),
@@ -41,7 +41,7 @@ private:
   {
     auto do_get_hardware_identity = [this](const auto& dev_id) {
       if (not hw_identity_.contains(dev_id)) {
-        throw std::runtime_error("Cannot get HardwreIdentity for requested device id");
+        throw std::runtime_error("Cannot get HardwareIdentity for requested device id");
       }
       return hw_identity_.at(dev_id);
     };

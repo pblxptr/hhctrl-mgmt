@@ -18,9 +18,9 @@ namespace mgmt::home_assistant::adapter
         {
             auto executor = ioc_.get_executor();
 
-            return std::make_unique<v2::AsyncMqttClient<v2::ProtocolVersion_t::v3_1_1>>(
+            return std::make_unique<mqtt::AsyncMqttClient<mqtt::ProtocolVersion_t::v3_1_1>>(
                 std::move(executor),
-                v2::ClientConfig {
+                mqtt::ClientConfig {
                         .unique_id = unique_id,
                         .username = config_.username,
                         .password = config_.password,

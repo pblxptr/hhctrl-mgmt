@@ -8,7 +8,7 @@
 #include <boost/system/errc.hpp>
 #include <fmt/format.h>
 
-namespace mgmt::home_assistant::v2
+namespace mgmt::home_assistant::mqtt
 {
   enum class ErrorCode {
     Timeout = 1 ,
@@ -82,13 +82,13 @@ namespace mgmt::home_assistant::v2
   {
     return {static_cast<int>(error), detail::ErrorCategoryInstance};
   }
-} // namespace mgmt::home_assistant::v2
+} // namespace mgmt::home_assistant::mqtt
 
 
 namespace std
 {
   template <>
-  struct is_error_code_enum<mgmt::home_assistant::v2::ErrorCode> : true_type {};
+  struct is_error_code_enum<mgmt::home_assistant::mqtt::ErrorCode> : true_type {};
 } // namespace std
 
 
