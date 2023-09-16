@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-add_compile_options(-Werror -Wextra -Wall -save-temps -Wno-unused-variable) #TODO(bielpa) Remove this unused once the async_mqtt has fixed unused variable
+add_compile_options(-Werror -Wextra -Wall -save-temps -Wno-unused-parameter) #TODO(bielpa) Remove this unused once the async_mqtt has fixed unused variable
 
 add_subdirectory(common)
 add_subdirectory(event)
