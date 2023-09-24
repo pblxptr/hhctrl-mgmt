@@ -114,7 +114,7 @@ namespace mgmt::home_assistant::device {
             adapter::EntityFactory&  factory
     )
     {
-        [[maybe_unused]] auto identity = identity_provider.identity(device_id);
+        auto identity = identity_provider.identity(device_id);
 
         // Indicators
         auto fault_indicator = co_await detail::Indicator::async_create(

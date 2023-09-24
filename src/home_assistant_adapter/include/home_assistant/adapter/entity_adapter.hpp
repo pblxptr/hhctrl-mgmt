@@ -17,7 +17,9 @@ namespace detail {
         { obj.state() };
     };
 
-    inline auto AdapterDefaultPubopts = mgmt::home_assistant::mqtt::Retain_t::yes | mgmt::home_assistant::mqtt::Qos_t::at_least_once;
+    constexpr inline auto AdapterDefaultPubopts = mgmt::home_assistant::mqtt::Retain_t::yes | mgmt::home_assistant::mqtt::Qos_t::at_least_once;
+    constexpr inline auto InitRetryAttempts = 10;
+    constexpr inline auto InitRetryDelay = std::chrono::seconds{60};
 } // namespace detail
 
 namespace mgmt::home_assistant::adapter
@@ -46,8 +48,21 @@ namespace mgmt::home_assistant::adapter
         {
             common::logger::get(Logger)->trace("EntityAdapter::{}", __FUNCTION__);
 
-            const auto connected = co_await async_connect();
-            if (!connected) {
+            int attempt = 0;
+            auto error = mqtt::Error{};
+
+            while (attempt++ < detail::InitRetryAttempts) {
+                error = co_await async_connect();
+                if (!error) {
+                    break;
+                }
+                common::logger::get(Logger)->warn("EntityAdapter init error: {}, retry: {}/{}, delay: {}s",
+                    error.what(), attempt, detail::InitRetryAttempts, detail::InitRetryDelay.count()
+                );
+                co_await common::coro::async_wait(detail::InitRetryDelay);
+            }
+
+            if (error) {
                 co_return false;
             }
 
@@ -106,17 +121,16 @@ namespace mgmt::home_assistant::adapter
             return static_cast<Impl&>(*this);
         }
 
-        boost::asio::awaitable<bool> async_connect()
+        boost::asio::awaitable<mqtt::Error> async_connect()
         {
             common::logger::get(Logger)->trace("EntityAdapter::{}", __FUNCTION__);
 
             const auto error = co_await entity_.async_connect();
             if (error) {
                 common::logger::get(adapter::Logger)->error("Cannot establish connection for cover entity with unique id: '{}'", entity_.unique_id());
-                co_return false;
             }
 
-            co_return true;
+            co_return error;
         }
 
         boost::asio::awaitable<bool> async_configure()
