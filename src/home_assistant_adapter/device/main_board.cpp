@@ -70,6 +70,7 @@ namespace mgmt::home_assistant::device {
           , device_id_{std::move(device_id)}
           , identity_{std::move(device_identity)}
         {}
+
         boost::asio::awaitable<std::optional<RestartButton>> RestartButton::async_create(
             mgmt::device::DeviceId_t device_id,
             adapter::EntityFactory& factory,

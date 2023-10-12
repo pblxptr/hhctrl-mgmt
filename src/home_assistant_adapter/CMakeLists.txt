@@ -5,6 +5,7 @@ add_library(home-assistant-adapter STATIC
     event/temp_sensor_event_handler.cpp
     device/main_board.cpp
     device/hatch.cpp
+    device/temp_sensor.cpp
 )
 target_include_directories(home-assistant-adapter PUBLIC include)
 

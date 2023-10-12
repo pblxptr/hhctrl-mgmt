@@ -18,11 +18,7 @@
 namespace mgmt::home_assistant::mqtt
 {
 
-enum class CoverState { Open,
-  Opening,
-  Closing,
-  Closed
-};
+enum class CoverState{ Undefined, Open, Opening, Closing, Closed };
 
 enum class CoverSwitchCommand { Open,
   Close,
@@ -158,6 +154,10 @@ public:
   boost::asio::awaitable<Error> async_set_state(const CoverState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
       logger::trace(logger::Entity, "Cover::{}", __FUNCTION__);
+
+      if (state == CoverState::Undefined) {
+          co_return Error{};
+      }
 
       co_return co_await BaseType::async_publish(topics_.at(CoverConfig::Property::StateTopic),
                                        std::string{ CoverStateMapper.map(state) }, pubopts
