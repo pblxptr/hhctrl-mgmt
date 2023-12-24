@@ -161,13 +161,14 @@ namespace mgmt::home_assistant::adapter
         {
             bool recovered = false;
 
-            const auto& error_code = error.code();
-
-            if (error_code == mqtt::ErrorCode::Disconnected) {
+            if (error.code() == mqtt::ErrorCode::Disconnected) {
                 recovered = co_await async_handle_disconnected_error();
             }
-            else if (error_code == mqtt::ErrorCode::Reconnected) {
+            else if (error.code() == mqtt::ErrorCode::Reconnected) {
                 recovered = co_await async_handle_reconnected_error();
+            }
+            else {
+                common::logger::get(Logger)->debug("EntityAdapter could not recognize error - num: {}, what: ", error.code().value(), error.what());
             }
 
             if (!recovered) {

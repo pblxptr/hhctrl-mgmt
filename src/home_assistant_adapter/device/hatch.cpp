@@ -54,7 +54,7 @@ namespace mgmt::home_assistant::device
                 return mqtt::CoverState::Closed;
             default:
                 common::logger::get(adapter::Logger)->error("Unsupported state change for cover entity with unique id: '{}'", unique_id());
-                return mqtt::CoverState::Closed;
+                return mqtt::CoverState::Undefined;
         }
     }
 

@@ -27,7 +27,9 @@ namespace mgmt::home_assistant::adapter
                         .host = config_.host,
                         .port = config_.port,
                         .clean_session = true,
-                        .keep_alive = config_.keep_alive_interval
+                        .keep_alive = config_.keep_alive_interval,
+                        .max_attempts = config_.max_reconnect_attempts,
+                        .reconnect_delay = config_.reconnect_delay
                 }
             );
         }
