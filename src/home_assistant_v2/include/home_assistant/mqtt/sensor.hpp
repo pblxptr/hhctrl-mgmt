@@ -72,7 +72,7 @@ public:
 
   boost::asio::awaitable<Error> async_set_state(const SensorState& state, Pubopts_t pubopts = DefaultPubOpts)
   {
-    logger::debug(logger::Entity, "SensorState::{}, state: {}", __FUNCTION__, state);
+    logger::debug(logger::Entity, "Sensor::{}, state: {}", __FUNCTION__, state);
 
     co_return co_await BaseType::async_publish(topics_.at(SensorConfig::Property::StateTopic), state, pubopts);
   }
@@ -82,8 +82,10 @@ public:
     const auto& packet = co_await BaseType::async_receive();
 
     if (!packet) {
-        co_return packet.error();
+        co_return Error{packet.error()};
     }
+
+    co_return Error{};
   }
 
 private:

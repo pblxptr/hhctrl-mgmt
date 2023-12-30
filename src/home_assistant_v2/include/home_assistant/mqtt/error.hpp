@@ -74,14 +74,10 @@ namespace mgmt::home_assistant::mqtt
         throw std::runtime_error{ fmt::format("Error does not have appropriate mapping: {}, errc: {}", error_code.what(), error_code.value())};
       }
     }
-
-    static const inline auto ErrorCategoryInstance = ErrorCategory{};
   } // namespace detail
 
-  inline std::error_code make_error_code(ErrorCode error)
-  {
-    return {static_cast<int>(error), detail::ErrorCategoryInstance};
-  }
+  std::error_code make_error_code(ErrorCode error);
+
 } // namespace mgmt::home_assistant::mqtt
 
 

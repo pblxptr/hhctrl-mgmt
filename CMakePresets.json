@@ -88,7 +88,16 @@
       "name": "linux_gcc_debug_integration_tests_sanitizers",
       "inherits": ["Linux_GCC", "Debug", "Tests"],
       "cacheVariables": {
-        "USE_ASAN" : "ON"
+        "USE_ASAN" : "ON",
+        "USE_UBSAN" : "ON"
+      }
+    },
+    {
+      "name": "linux_gcc_release_integration_tests_sanitizers",
+      "inherits": ["Linux_GCC", "Release", "Tests"],
+      "cacheVariables": {
+        "USE_ASAN" : "ON",
+        "USE_UBSAN" : "ON"
       }
     },
     {
@@ -98,6 +107,14 @@
     {
       "name": "yocto_sdk_gcc_release",
       "inherits": ["Yocto_SDK", "Release"]
+    },
+    {
+      "name": "yocto_sdk_gcc_debug_asan",
+      "inherits": ["Yocto_SDK", "Debug"],
+      "cacheVariables": {
+        "USE_ASAN" : "ON",
+        "USE_UBSAN" : "ON"
+      }
     }
   ]
 }

@@ -89,7 +89,7 @@ namespace mgmt::home_assistant::adapter
 
         boost::asio::awaitable<void> async_sync_state() requires (!detail::Synchronizable<Impl>)
         {
-            common::logger::get(Logger)->trace("EntityAdapter::{}, empty impl", __FUNCTION__);
+            common::logger::get(Logger)->debug("EntityAdapter::{}, empty impl", __FUNCTION__);
 
             co_return;
         }
@@ -154,12 +154,17 @@ namespace mgmt::home_assistant::adapter
             co_await entity_.async_set_availability(mqtt::Availability::Online, detail::AdapterDefaultPubopts);
             co_await async_sync_state();
 
+            common::logger::get(Logger)->debug("Entity with unique id: '{}' configured properly.", entity_.unique_id());
+
             co_return true;
         }
 
         boost::asio::awaitable<void> async_handle_error(const mqtt::Error& error)
         {
             bool recovered = false;
+
+            common::logger::get(Logger)->error("Handling error for: {}", entity_.unique_id());
+            auto err = mqtt::Error{mqtt::ErrorCode::Reconnected, "Client got reconnected"};
 
             if (error.code() == mqtt::ErrorCode::Disconnected) {
                 recovered = co_await async_handle_disconnected_error();
@@ -168,11 +173,14 @@ namespace mgmt::home_assistant::adapter
                 recovered = co_await async_handle_reconnected_error();
             }
             else {
-                common::logger::get(Logger)->debug("EntityAdapter could not recognize error - num: {}, what: ", error.code().value(), error.what());
+                common::logger::get(Logger)->error("EntityAdapter could not recognize error - num: {}, what: ", error.code().value(), error.what());
             }
 
             if (!recovered) {
-                common::logger::get(Logger)->trace("EntityAdapter could not recover from error: '{}'", error.what());
+                common::logger::get(Logger)->error("EntityAdapter could not recover from error: '{}', for entity with unique id: '{}'", error.what(), entity_.unique_id());
+            }
+            else {
+                common::logger::get(Logger)->error("EntityAdapter has recovered from error: '{}', for entity with unique id: '{}'", error.what(), entity_.unique_id());
             }
         }
 
