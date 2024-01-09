@@ -69,7 +69,7 @@ echo "
   \"entity_client_config\" : {
     \"username\" : \"test_user\",
     \"password\" : \"test\",
-    \"server_address\" : \"192.168.0.115\",
+    \"server_address\" : \"127.0.0.1\",
     \"server_port\" : 1883,
     \"keep_alive_interval\" : 30,
     \"max_reconnect_attempts\" : 10,

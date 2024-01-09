@@ -2,7 +2,7 @@
 
 #include <array>
 #include <algorithm>
-#include "logger/logger.hpp"
+#include <logger/logger.hpp>
 
 namespace common::utils {
 
@@ -11,6 +11,16 @@ class StaticMap
 {
 public:
   using ValueType_t = std::array<std::pair<TKey, TValue>, size>;
+
+
+  constexpr decltype(auto) at(std::size_t index) const
+  {
+    if (index > size - 1) {
+      throw std::out_of_range{"Index is out of range"};
+    }
+
+    return data[index].second;
+  }
 
   // Find element by key
   // Throws if not found
@@ -36,6 +46,13 @@ public:
     }
 
     return elem->first;
+  }
+
+  constexpr bool contains(const TKey& key) const
+  {
+    auto elem = std::find_if(std::begin(data), std::end(data), [&key](const auto& xelem) { return key == xelem.first; });
+
+    return elem != data.end();
   }
 
   ValueType_t data;

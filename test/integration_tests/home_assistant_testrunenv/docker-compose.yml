@@ -1,0 +1,11 @@
+version: "3"
+services:
+  mqtt_broker:
+    build:
+      dockerfile: mqtt_broker.dockerfile
+      context: .
+    network_mode: host
+  test:
+    depends_on: [ mqtt_broker ]
+    image: ubuntu:22.04
+    network_mode: host

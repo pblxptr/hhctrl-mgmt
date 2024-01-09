@@ -1,0 +1,17 @@
+version: "3"
+services:
+  mqtt_broker:
+    build:
+      dockerfile: mqtt_broker.dockerfile
+      context: .
+    network_mode: host
+  test:
+    depends_on: [ mqtt_broker ]
+    image: ubuntu:22.04
+    command: >
+        bash -c "chmod +x /home/bin/home_assistant_it_v2 &&
+        /home/bin/home_assistant_it_v2 ${CMD_OPTIONS}
+        "
+    volumes:
+      - ${ARTIFACTS_DIR}:/home/bin
+    network_mode: host

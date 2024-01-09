@@ -7,7 +7,7 @@
 
 __attribute__((weak)) void test_spec_setup()
 {
-  throw std::runtime_error{ "dupa" };
+//  throw std::runtime_error{ "dupa" };
 }
 
 int main(int argc, char* argv[])

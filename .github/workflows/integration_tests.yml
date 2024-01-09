@@ -13,12 +13,19 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
 
+#      - name: Build Debug
+#        uses: ./.github/workflows/action-cmake-build
+#        with:
+#          preset: linux_gcc_debug_integration_tests
+#          build_type: Debug
+#          target: home_assistant_itc1
+
       - name: Build Debug
         uses: ./.github/workflows/action-cmake-build
         with:
           preset: linux_gcc_debug_integration_tests
           build_type: Debug
-          target: home_assistant_itc1
+          target: home_assistant_it_v2
 
       - name: "Cache artifacts"
         uses: actions/upload-artifact@v3
@@ -39,13 +46,18 @@ jobs:
           name: integration_test_binaries
           path: ${{ env.cache_artifacts_dir }}
 
-      - name: "home_assistant_itc1"
+#      - name: "home_assistant_itc1"
+#        uses: ./.github/workflows/action-test-docker-compose
+#        with:
+#          docker_compose_path: test/integration_tests/home_assistant_itc1/env/docker-compose.yml
+#          cmd_options: "--tp_mqtt_server_port 1883"
+
+
+      - name: "Home Assistant Integration Tests V2"
         uses: ./.github/workflows/action-test-docker-compose
         with:
-          docker_compose_path: test/integration_tests/home_assistant_itc1/env/docker-compose.yml
+          docker_compose_path: test/integration_tests/home_assistant_v2/env/docker-compose.yml
           cmd_options: "--tp_mqtt_server_port 1883"
-
-
 
 
 

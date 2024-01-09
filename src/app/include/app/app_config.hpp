@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <home_assistant/mqtt/client_config.hpp>
+#include <home_assistant/client_config.hpp>
 
 #include <fmt/format.h>
 
@@ -13,7 +13,7 @@ struct AppConfig
 {
   std::string log_dir;
   std::string dtree_file;
-  mgmt::home_assistant::mqttc::EntityClientConfig entity_client_config;
+  mgmt::home_assistant::adapter::EntityClientConfig entity_client_config;
 };
 
 inline std::string to_string(const AppConfig& config)
